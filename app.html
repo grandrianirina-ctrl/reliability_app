@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>App — Reliability Suite Pro</title>
+</head>
+<body>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = 'https://kquwgqcxauymzkgfcxpm.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const { data: { session } } = await supabase.auth.getSession();
+
+if (!session) {
+  window.location.href = 'login.html';
+} else {
+  // Vérifier le statut de l'essai
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('trial_started_at, plan')
+    .eq('id', session.user.id)
+    .single();
+
+  if (profile) {
+    const plan = profile.plan;
+    if (plan !== 'pro' && plan !== 'enterprise') {
+      const hoursElapsed = (Date.now() - new Date(profile.trial_started_at)) / 3600000;
+      if (hoursElapsed > 24) {
+        // Essai expiré → rediriger vers dashboard (qui affiche le modal)
+        window.location.href = 'dashboard.html';
+      } else {
+        // ✅ Accès autorisé
+        window.location.href = 'ReliaCal.html';
+      }
+    } else {
+      // Plan payant → accès direct
+      window.location.href = 'ReliaCal.html';
+    }
+  } else {
+    // Pas de profil → dashboard
+    window.location.href = 'dashboard.html';
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reliability Suite Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0e1a;
+  --accent: #0ea5e9;
+  --accent2: #10b981;
+  --text: #f0f4ff;
+  --muted: #64748b;
+  --card: #131c2e;
+  --border: #1e2d45;
+}
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── TOPBAR ─────────────────────────────────────────── */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 40px;
+  background: rgba(10,14,26,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(30,45,69,0.6);
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.topbar-brand .dot {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+
+.topbar-brand span { color: var(--accent); }
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lang-btn {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.06em;
+}
+
+.lang-btn:hover, .lang-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.login-btn {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, var(--accent), #0284c7);
+  border: none;
+  border-radius: 7px;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: opacity 0.2s;
+}
+
+.login-btn:hover { opacity: 0.85; }
+
+.dashboard-btn {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, var(--accent2), #059669);
+  border: none;
+  border-radius: 7px;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: opacity 0.2s;
+  display: none;
+}
+
+.dashboard-btn:hover { opacity: 0.85; }
+
+/* ── HERO ────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  padding: 100px 30px 60px;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 40%, rgba(14,165,233,0.1) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 20% 80%, rgba(16,185,129,0.07) 0%, transparent 60%),
+    var(--bg);
+}
+
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(14,165,233,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14,165,233,0.04) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 780px;
+}
+
+.hero-label {
+  display: inline-block;
+  padding: 5px 14px;
+  background: rgba(14,165,233,0.1);
+  border: 1px solid rgba(14,165,233,0.25);
+  border-radius: 20px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+
+.hero h1 {
+  font-size: clamp(38px, 7vw, 80px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin-bottom: 24px;
+}
+
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  font-size: 17px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1.7;
+  margin-bottom: 40px;
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-btns {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  padding: 14px 32px;
+  background: linear-gradient(135deg, var(--accent), #0284c7);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.btn-secondary {
+  padding: 14px 32px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent2);
+  color: var(--accent2);
+}
+
+/* ── FEATURES ────────────────────────────────────────── */
+.section {
+  padding: 80px 30px;
+  max-width: 1100px;
+  margin: auto;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.section-header h2 {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+
+.section-header p {
+  color: var(--muted);
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.feat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.feat-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+}
+
+.feat-icon { font-size: 32px; margin-bottom: 16px; }
+
+.feat-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.feat-desc {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1.7;
+}
+
+/* ── PRICING ──────────────────────────────────────────── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.price-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 32px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.price-card.featured {
+  border-color: var(--accent);
+  position: relative;
+  overflow: hidden;
+}
+
+.price-card.featured::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+
+.price-name {
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+
+.price-amount {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+
+.price-amount span {
+  font-size: 16px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.price-desc {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 24px;
+  line-height: 1.7;
+}
+
+.price-btn {
+  width: 100%;
+  padding: 11px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  letter-spacing: 0.03em;
+  border: none;
+}
+
+.price-btn.outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.price-btn.fill {
+  background: linear-gradient(135deg, var(--accent), #0284c7);
+  color: white;
+}
+
+.price-btn:hover { opacity: 0.85; }
+
+/* ── FOOTER ───────────────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 30px;
+  color: var(--muted);
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 600px) {
+  .topbar { padding: 14px 20px; }
+  .topbar-brand .dot { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="dot">⚙️</div>
+    Reliability <span>&nbsp;Suite Pro</span>
+  </div>
+  <div class="topbar-right">
+    <button class="lang-btn active" onclick="setLang('fr');this.classList.add('active');document.querySelectorAll('.lang-btn')[1].classList.remove('active')">FR</button>
+    <button class="lang-btn" onclick="setLang('en');this.classList.add('active');document.querySelectorAll('.lang-btn')[0].classList.remove('active')">EN</button>
+    <button class="nav-link" onclick="window.location.href='pricing.html'" style="padding:8px 14px;background:transparent;border:none;color:#94a3b8;font-size:13px;font-family:'Syne',sans-serif;font-weight:600;cursor:pointer;border-radius:6px;transition:color 0.2s;letter-spacing:0.02em" onmouseover="this.style.color='#f0f4ff'" onmouseout="this.style.color='#94a3b8'">Tarifs</button>
+    <button class="login-btn" id="loginBtn" onclick="window.location.href='login.html'">Connexion</button>
+    <button class="dashboard-btn" id="dashBtn" onclick="window.location.href='dashboard.html'">Dashboard →</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="grid-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-label" id="heroLabel">✦ Analyse industrielle avancée</div>
+    <h1 id="heroTitle">Reliability<br><em>Suite Pro</em></h1>
+    <p id="heroSub">Analyse de fiabilité · Maintenance préventive<br>Optimisation des stocks de pièces de rechange</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="window.location.href='login.html'" id="tryBtn">🚀 Essayer gratuitement</button>
+      <button class="btn-secondary" onclick="scrollTo({top:document.querySelector('.section').offsetTop,behavior:'smooth'})" id="learnBtn">En savoir plus</button>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section">
+  <div class="section-header">
+    <h2 id="featTitle">Fonctionnalités</h2>
+    <p id="featSub">Tout ce dont vous avez besoin pour analyser et optimiser</p>
+  </div>
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon">📊</div>
+      <div class="feat-title" id="f1">Analyse Weibull</div>
+      <div class="feat-desc" id="f1d">Modélisation statistique des défaillances avec paramètres β et η.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⏱️</div>
+      <div class="feat-title" id="f2">MTBF / MTTR</div>
+      <div class="feat-desc" id="f2d">Calcul automatique des indicateurs de fiabilité et maintenabilité.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔧</div>
+      <div class="feat-title" id="f3">Maintenance préventive</div>
+      <div class="feat-desc" id="f3d">Optimisation des intervalles de maintenance pour minimiser les coûts.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📦</div>
+      <div class="feat-title" id="f4">Gestion des stocks</div>
+      <div class="feat-desc" id="f4d">EOQ, point de commande et stock de sécurité pour pièces critiques.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="section" id="upgrade">
+  <div class="section-header">
+    <h2 id="pricTitle">Tarifs</h2>
+    <p id="pricSub">Commencez gratuitement, évoluez selon vos besoins</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-name">Free Trial</div>
+      <div class="price-amount">0€ <span>/24h</span></div>
+      <div class="price-desc" id="pd1">Accès complet pendant 24h.<br>1 essai par appareil.</div>
+      <button class="price-btn outline" onclick="window.location.href='login.html'">Essayer</button>
+    </div>
+    <div class="price-card featured">
+      <div class="price-name">Pro</div>
+      <div class="price-amount">29€ <span>/mois</span></div>
+      <div class="price-desc" id="pd2">Accès illimité à tous les outils.<br>Support prioritaire. Export PDF/Excel.</div>
+      <button class="price-btn fill" onclick="window.location.href='login.html'">Démarrer</button>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Entreprise</div>
+      <div class="price-amount" style="font-size:28px">Sur devis</div>
+      <div class="price-desc" id="pd3">Multi-sites · Intégrations sur mesure.<br>Formation & accompagnement.</div>
+      <button class="price-btn outline">Contacter</button>
+    </div>
+  </div>
+</div>
+
+<footer>© 2026 Reliability Suite Pro — Tous droits réservés</footer>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = 'https://kquwgqcxauymzkgfcxpm.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Vérifier si déjà connecté → afficher Dashboard btn
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    document.getElementById('loginBtn').style.display = 'none';
+    document.getElementById('dashBtn').style.display = 'block';
+    document.getElementById('tryBtn').textContent = '→ Dashboard';
+    document.getElementById('tryBtn').onclick = () => window.location.href = 'dashboard.html';
+  }
+});
+
+// ── i18n ─────────────────────────────────────────────────────
+const t = {
+  fr: {
+    login:'Connexion', dash:'Dashboard →',
+    label:'✦ Analyse industrielle avancée',
+    sub:'Analyse de fiabilité · Maintenance préventive\nOptimisation des stocks de pièces de rechange',
+    try:'🚀 Essayer gratuitement', learn:'En savoir plus',
+    featTitle:'Fonctionnalités', featSub:'Tout ce dont vous avez besoin pour analyser et optimiser',
+    f1:'Analyse Weibull', f1d:'Modélisation statistique des défaillances avec paramètres β et η.',
+    f2:'MTBF / MTTR', f2d:'Calcul automatique des indicateurs de fiabilité et maintenabilité.',
+    f3:'Maintenance préventive', f3d:"Optimisation des intervalles de maintenance pour minimiser les coûts.",
+    f4:'Gestion des stocks', f4d:'EOQ, point de commande et stock de sécurité pour pièces critiques.',
+    pricTitle:'Tarifs', pricSub:'Commencez gratuitement, évoluez selon vos besoins',
+    pd1:'Accès complet pendant 24h.\n1 essai par appareil.',
+    pd2:'Accès illimité à tous les outils.\nSupport prioritaire. Export PDF/Excel.',
+    pd3:'Multi-sites · Intégrations sur mesure.\nFormation & accompagnement.'
+  },
+  en: {
+    login:'Login', dash:'Dashboard →',
+    label:'✦ Advanced industrial analysis',
+    sub:'Reliability Analysis · Preventive Maintenance\nSpare Parts Inventory Optimization',
+    try:'🚀 Try for free', learn:'Learn more',
+    featTitle:'Features', featSub:'Everything you need to analyze and optimize',
+    f1:'Weibull Analysis', f1d:'Statistical failure modeling with β and η parameters.',
+    f2:'MTBF / MTTR', f2d:'Automatic calculation of reliability and maintainability metrics.',
+    f3:'Preventive Maintenance', f3d:'Optimize maintenance intervals to minimize costs.',
+    f4:'Inventory Management', f4d:'EOQ, reorder point and safety stock for critical parts.',
+    pricTitle:'Pricing', pricSub:'Start free, scale as you grow',
+    pd1:'Full access for 24 hours.\n1 trial per device.',
+    pd2:'Unlimited access to all tools.\nPriority support. PDF/Excel export.',
+    pd3:'Multi-site · Custom integrations.\nTraining & onboarding.'
+  }
+};
+
+window.setLang = function(lang) {
+  const l = t[lang];
+  document.getElementById('loginBtn').textContent = l.login;
+  document.getElementById('dashBtn').textContent = l.dash;
+  document.getElementById('heroLabel').textContent = l.label;
+  document.getElementById('heroSub').textContent = l.sub;
+  document.getElementById('tryBtn').textContent = l.try;
+  document.getElementById('learnBtn').textContent = l.learn;
+  document.getElementById('featTitle').textContent = l.featTitle;
+  document.getElementById('featSub').textContent = l.featSub;
+  ['f1','f2','f3','f4'].forEach(k => {
+    document.getElementById(k).textContent = l[k];
+    document.getElementById(k+'d').textContent = l[k+'d'];
+  });
+  document.getElementById('pricTitle').textContent = l.pricTitle;
+  document.getElementById('pricSub').textContent = l.pricSub;
+  document.getElementById('pd1').textContent = l.pd1;
+  document.getElementById('pd2').textContent = l.pd2;
+  document.getElementById('pd3').textContent = l.pd3;
+};
+</script>
+</body>
+</html>

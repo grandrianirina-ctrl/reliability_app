@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Reliability Suite Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --border: #1e2d45;
+  --accent: #0ea5e9;
+  --accent2: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --text: #f0f4ff;
+  --muted: #64748b;
+  --card: #131c2e;
+}
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── HEADER ───────────────────────────────────────────── */
+.header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 0 30px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+.brand-name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.brand-name span { color: var(--accent); }
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-info {
+  text-align: right;
+}
+
+.user-email {
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--muted);
+}
+
+.plan-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+.plan-badge.trial { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+.plan-badge.pro { background: rgba(14,165,233,0.15); color: var(--accent); border: 1px solid rgba(14,165,233,0.3); }
+.plan-badge.expired { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+
+.btn-logout {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.04em;
+}
+
+.btn-logout:hover {
+  border-color: var(--danger);
+  color: #fca5a5;
+}
+
+/* ── TRIAL BANNER ─────────────────────────────────────── */
+.trial-banner {
+  background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(14,165,233,0.06));
+  border-bottom: 1px solid rgba(245,158,11,0.2);
+  padding: 12px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.trial-banner.expired {
+  background: rgba(239,68,68,0.08);
+  border-color: rgba(239,68,68,0.2);
+}
+
+.trial-banner-text {
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #fbbf24;
+}
+
+.trial-banner.expired .trial-banner-text { color: #fca5a5; }
+
+.trial-progress {
+  flex: 1;
+  max-width: 300px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.trial-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent2), var(--warning));
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.btn-upgrade {
+  padding: 7px 16px;
+  background: linear-gradient(135deg, var(--accent2), #059669);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  transition: opacity 0.2s;
+}
+
+.btn-upgrade:hover { opacity: 0.85; }
+
+/* ── MAIN ─────────────────────────────────────────────── */
+.main {
+  padding: 40px 30px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.page-subtitle {
+  color: var(--muted);
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 36px;
+}
+
+/* ── STAT CARDS ───────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.stat-card:hover { border-color: var(--accent); }
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  opacity: 0.6;
+}
+
+.stat-label {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.stat-value span {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* ── TOOLS GRID ───────────────────────────────────────── */
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 16px;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.tool-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.tool-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(14,165,233,0.1);
+}
+
+.tool-card.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tool-card.locked:hover {
+  transform: none;
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+.tool-icon {
+  font-size: 28px;
+  margin-bottom: 14px;
+}
+
+.tool-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.tool-desc {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1.6;
+}
+
+.tool-tag {
+  position: absolute;
+  top: 14px; right: 14px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tool-tag.pro { background: rgba(14,165,233,0.15); color: var(--accent); }
+.tool-tag.free { background: rgba(16,185,129,0.15); color: var(--accent2); }
+.tool-tag.lock { background: rgba(100,116,139,0.15); color: var(--muted); }
+
+/* ── EXPIRED OVERLAY ──────────────────────────────────── */
+.expired-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10,14,26,0.92);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+
+.expired-overlay.show { display: flex; }
+
+.expired-modal {
+  background: var(--card);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 16px;
+  padding: 50px 40px;
+  max-width: 420px;
+  text-align: center;
+}
+
+.expired-icon { font-size: 48px; margin-bottom: 20px; }
+.expired-modal h2 { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+.expired-modal p { color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; line-height: 1.7; margin-bottom: 28px; }
+
+.btn-upgrade-big {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--accent), #0284c7);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  margin-bottom: 12px;
+  transition: opacity 0.2s;
+}
+
+.btn-upgrade-big:hover { opacity: 0.9; }
+
+.btn-logout-modal {
+  width: 100%;
+  padding: 11px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-logout-modal:hover { border-color: var(--danger); color: #fca5a5; }
+
+/* loading */
+.loading-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 300;
+  transition: opacity 0.4s;
+}
+
+.loading-screen.hide { opacity: 0; pointer-events: none; }
+
+.loading-spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 600px) {
+  .header { padding: 0 16px; }
+  .main { padding: 24px 16px; }
+  .trial-banner { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-spinner"></div>
+</div>
+
+<!-- Expired modal -->
+<div class="expired-overlay" id="expiredOverlay">
+  <div class="expired-modal">
+    <div class="expired-icon">⏱️</div>
+    <h2>Essai expiré</h2>
+    <p>Votre essai gratuit de 24h est terminé.<br>Passez à Pro pour continuer à utiliser toutes les fonctionnalités.</p>
+    <button class="btn-upgrade-big" onclick="window.location.href='#upgrade'">🚀 Passer à Pro</button>
+    <button class="btn-logout-modal" onclick="doLogout()">Se déconnecter</button>
+  </div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="brand">
+    <div class="brand-icon">⚙️</div>
+    <div class="brand-name">Reliability <span>Suite Pro</span></div>
+  </div>
+  <div class="header-right">
+    <div class="user-info">
+      <div class="user-email" id="userEmail">—</div>
+      <div class="plan-badge trial" id="planBadge">Trial</div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Déconnexion</button>
+  </div>
+</div>
+
+<!-- Trial banner -->
+<div class="trial-banner" id="trialBanner" style="display:none">
+  <span class="trial-banner-text" id="trialText">⏱ Essai en cours</span>
+  <div class="trial-progress">
+    <div class="trial-progress-bar" id="trialBar" style="width:100%"></div>
+  </div>
+  <button class="btn-upgrade" onclick="window.location.href='#upgrade'">Passer à Pro →</button>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="page-title">Dashboard</div>
+  <div class="page-subtitle" id="welcomeText">Chargement…</div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Analyses effectuées</div>
+      <div class="stat-value">0 <span>analyses</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Temps restant (essai)</div>
+      <div class="stat-value" id="timeLeftStat">— <span>h</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Statut du compte</div>
+      <div class="stat-value" id="planStat" style="font-size:20px">—</div>
+    </div>
+  </div>
+
+  <!-- Tools -->
+  <div class="section-title">Outils disponibles</div>
+  <div class="tools-grid">
+
+    <div class="tool-card" id="toolMain" onclick="openTool()">
+      <span class="tool-tag free">Inclus</span>
+      <div class="tool-icon">📊</div>
+      <div class="tool-name">Analyse de fiabilité</div>
+      <div class="tool-desc">MTBF · Weibull · Courbes de défaillance</div>
+    </div>
+
+    <div class="tool-card" id="toolMaint" onclick="openTool()">
+      <span class="tool-tag free">Inclus</span>
+      <div class="tool-icon">🔧</div>
+      <div class="tool-name">Maintenance préventive</div>
+      <div class="tool-desc">Optimisation des intervalles · Planning</div>
+    </div>
+
+    <div class="tool-card locked" id="toolStock">
+      <span class="tool-tag lock">🔒 Pro</span>
+      <div class="tool-icon">📦</div>
+      <div class="tool-name">Gestion des stocks</div>
+      <div class="tool-desc">Pièces de rechange · EOQ · Réapprovisionnement</div>
+    </div>
+
+    <div class="tool-card locked" id="toolKpi">
+      <span class="tool-tag lock">🔒 Pro</span>
+      <div class="tool-icon">📈</div>
+      <div class="tool-name">Dashboard KPI</div>
+      <div class="tool-desc">OEE · MTTR · Disponibilité · Rapports</div>
+    </div>
+
+    <div class="tool-card locked" id="toolExport">
+      <span class="tool-tag lock">🔒 Pro</span>
+      <div class="tool-icon">📤</div>
+      <div class="tool-name">Export & rapports</div>
+      <div class="tool-desc">PDF · Excel · Rapports automatisés</div>
+    </div>
+
+    <div class="tool-card" style="background:linear-gradient(135deg,rgba(14,165,233,0.06),rgba(16,185,129,0.04));border-color:rgba(14,165,233,0.2)" onclick="window.location.href='#upgrade'">
+      <div class="tool-icon">🚀</div>
+      <div class="tool-name">Passer à Pro</div>
+      <div class="tool-desc">Débloque tous les outils · Stockage illimité · Support prioritaire</div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = 'https://kquwgqcxauymzkgfcxpm.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const hide = () => {
+  const ls = document.getElementById('loadingScreen');
+  ls.classList.add('hide');
+  setTimeout(() => ls.remove(), 500);
+};
+
+// ── Auth guard ───────────────────────────────────────────────
+const { data: { session } } = await supabase.auth.getSession();
+if (!session) {
+  window.location.href = 'login.html';
+}
+
+const user = session.user;
+document.getElementById('userEmail').textContent = user.email;
+
+// ── Load profile + trial check ───────────────────────────────
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('trial_started_at, plan')
+  .eq('id', user.id)
+  .single();
+
+if (profile) {
+  const plan = profile.plan;
+  const badge = document.getElementById('planBadge');
+  const planStat = document.getElementById('planStat');
+
+  if (plan === 'pro' || plan === 'enterprise') {
+    badge.textContent = plan === 'pro' ? 'Pro' : 'Enterprise';
+    badge.className = 'plan-badge pro';
+    planStat.textContent = plan === 'pro' ? '⭐ Pro' : '🏢 Enterprise';
+    document.getElementById('timeLeftStat').innerHTML = '∞ <span>illimité</span>';
+    document.getElementById('welcomeText').textContent = `Bienvenue, ${user.email}`;
+    // Unlock all tools
+    document.querySelectorAll('.tool-card.locked').forEach(c => {
+      c.classList.remove('locked');
+      c.querySelector('.tool-tag').className = 'tool-tag pro';
+      c.querySelector('.tool-tag').textContent = 'Pro';
+      c.onclick = openTool;
+    });
+
+  } else {
+    // Trial
+    const started = new Date(profile.trial_started_at);
+    const hoursElapsed = (Date.now() - started) / 3600000;
+    const hoursLeft = Math.max(0, 24 - hoursElapsed);
+
+    if (hoursElapsed > 24) {
+      // Expired
+      badge.textContent = 'Expiré';
+      badge.className = 'plan-badge expired';
+      planStat.textContent = '❌ Expiré';
+      document.getElementById('timeLeftStat').innerHTML = '0 <span>h</span>';
+      document.getElementById('welcomeText').textContent = 'Votre essai est terminé.';
+      const banner = document.getElementById('trialBanner');
+      banner.style.display = 'flex';
+      banner.classList.add('expired');
+      document.getElementById('trialText').textContent = '⚠️ Essai expiré';
+      document.getElementById('trialBar').style.width = '0%';
+      document.getElementById('expiredOverlay').classList.add('show');
+    } else {
+      // Active trial
+      const pct = ((hoursLeft / 24) * 100).toFixed(1);
+      const hStr = hoursLeft.toFixed(1);
+      document.getElementById('timeLeftStat').innerHTML = `${hStr} <span>h restantes</span>`;
+      planStat.textContent = '🟡 Essai actif';
+      document.getElementById('welcomeText').textContent = `Essai actif — ${hStr}h restantes`;
+      const banner = document.getElementById('trialBanner');
+      banner.style.display = 'flex';
+      document.getElementById('trialText').textContent = `⏱ ${hStr}h restantes sur votre essai`;
+      document.getElementById('trialBar').style.width = pct + '%';
+    }
+  }
+} else {
+  document.getElementById('welcomeText').textContent = `Bienvenue, ${user.email}`;
+}
+
+hide();
+
+// ── Actions ──────────────────────────────────────────────────
+window.openTool = function() {
+  window.location.href = 'app.html';
+};
+
+window.doLogout = async function() {
+  await supabase.auth.signOut();
+  window.location.href = 'login.html';
+};
+</script>
+</body>
+</html>
