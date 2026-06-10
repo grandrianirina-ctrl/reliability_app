@@ -5,436 +5,142 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard — Reliability Suite Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg: #0a0e1a;
-  --surface: #111827;
-  --border: #1e2d45;
-  --accent: #0ea5e9;
-  --accent2: #10b981;
-  --danger: #ef4444;
-  --warning: #f59e0b;
-  --text: #f0f4ff;
-  --muted: #64748b;
-  --card: #131c2e;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a0e1a;--surface:#111827;--border:#1e2d45;
+  --accent:#0ea5e9;--accent2:#10b981;--warning:#f59e0b;--purple:#8b5cf6;--rose:#f43f5e;--danger:#ef4444;
+  --text:#f0f4ff;--muted:#64748b;--muted2:#94a3b8;--card:#131c2e;
 }
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-body {
-  font-family: 'Syne', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-}
+/* HEADER */
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:0 28px;height:62px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2),transparent);}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.brand-name{font-size:14px;font-weight:700;letter-spacing:.04em;}
+.brand-name em{font-style:normal;color:var(--accent);}
+.header-right{display:flex;align-items:center;gap:12px;}
+.user-info{text-align:right;}
+.user-email{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.plan-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.07em;margin-top:2px;}
+.pb-trial      {background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3);}
+.pb-essentiel  {background:rgba(14,165,233,.15);color:var(--accent);border:1px solid rgba(14,165,233,.3);}
+.pb-pro        {background:rgba(16,185,129,.15);color:var(--accent2);border:1px solid rgba(16,185,129,.3);}
+.pb-ent        {background:rgba(139,92,246,.15);color:var(--purple);border:1px solid rgba(139,92,246,.3);}
+.pb-ult        {background:rgba(244,63,94,.15);color:var(--rose);border:1px solid rgba(244,63,94,.3);}
+.pb-expired    {background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3);}
+.lang-btn{padding:4px 10px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;cursor:pointer;transition:all .2s;}
+.lang-btn.active,.lang-btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn-logout{padding:7px 14px;background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--muted);font-size:11px;font-family:'Syne',sans-serif;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-logout:hover{border-color:var(--danger);color:#fca5a5;}
 
-/* ── HEADER ───────────────────────────────────────────── */
-.header {
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  padding: 0 30px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
+/* TRIAL BANNER */
+.trial-banner{background:linear-gradient(135deg,rgba(245,158,11,.07),rgba(14,165,233,.05));border-bottom:1px solid rgba(245,158,11,.2);padding:11px 28px;display:none;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.trial-banner.show{display:flex;}
+.trial-banner.expired{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.2);}
+.trial-txt{font-size:12px;font-family:'JetBrains Mono',monospace;color:#fbbf24;}
+.trial-banner.expired .trial-txt{color:#fca5a5;}
+.trial-bar-wrap{flex:1;max-width:280px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.trial-bar{height:100%;background:linear-gradient(90deg,var(--accent2),var(--warning));border-radius:2px;transition:width .5s;}
+.btn-upgrade-banner{padding:6px 14px;background:linear-gradient(135deg,var(--accent2),#059669);border:none;border-radius:6px;color:white;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap;transition:opacity .2s;}
+.btn-upgrade-banner:hover{opacity:.85;}
 
-.header::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
-}
+/* MAIN */
+.main{padding:32px 28px;max-width:1200px;margin:auto;}
+.page-title{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px;}
+.page-sub{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;margin-bottom:28px;}
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:32px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;transition:border-color .2s;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:.5;}
+.stat-lbl{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.stat-val{font-size:26px;font-weight:800;letter-spacing:-.02em;}
+.stat-val span{font-size:12px;color:var(--muted);font-weight:400;}
 
-.brand-icon {
-  width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-}
+/* SECTION TITLE */
+.sec-title{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
 
-.brand-name {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
+/* TOOL GRID */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-bottom:32px;}
 
-.brand-name span { color: var(--accent); }
+/* TOOL CARD */
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative;transition:all .2s;cursor:pointer;}
+.tool-card:hover:not(.locked){border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 24px rgba(14,165,233,.1);}
+.tool-card.locked{cursor:not-allowed;opacity:.65;}
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
+/* Visual top image area */
+.tool-visual{height:110px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.tool-visual svg{width:100%;height:100%;position:absolute;top:0;left:0;}
+.tool-visual .tool-emoji{font-size:36px;position:relative;z-index:2;}
 
-.user-info {
-  text-align: right;
-}
+/* Color themes per tool */
+.tv-blue   {background:linear-gradient(135deg,rgba(14,165,233,.12),rgba(14,165,233,.04));}
+.tv-green  {background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(16,185,129,.04));}
+.tv-yellow {background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.04));}
+.tv-purple {background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(139,92,246,.04));}
+.tv-rose   {background:linear-gradient(135deg,rgba(244,63,94,.12),rgba(244,63,94,.04));}
+.tv-teal   {background:linear-gradient(135deg,rgba(20,184,166,.12),rgba(20,184,166,.04));}
+.tv-orange {background:linear-gradient(135deg,rgba(249,115,22,.12),rgba(249,115,22,.04));}
 
-.user-email {
-  font-size: 12px;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--muted);
-}
+/* Inline chart decorations */
+.mini-chart{position:absolute;bottom:10px;left:10px;right:10px;height:40px;opacity:.4;}
+.mini-bar{position:absolute;bottom:0;width:10%;border-radius:2px 2px 0 0;}
+.mini-line{position:absolute;bottom:0;left:0;right:0;height:100%;}
 
-.plan-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-top: 2px;
-}
+.tool-lock-badge{position:absolute;top:8px;right:8px;background:rgba(10,14,26,.8);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);display:flex;align-items:center;gap:4px;}
+.tool-access-dot{position:absolute;top:8px;left:8px;width:8px;height:8px;border-radius:50%;}
+.dot-active {background:var(--accent2);}
+.dot-locked {background:var(--muted);}
 
-.plan-badge.trial { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
-.plan-badge.pro { background: rgba(14,165,233,0.15); color: var(--accent); border: 1px solid rgba(14,165,233,0.3); }
-.plan-badge.expired { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+.tool-body{padding:14px 16px;}
+.tool-name{font-size:13px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px;}
+.tool-desc{font-size:11px;color:var(--muted2);font-family:'JetBrains Mono',monospace;line-height:1.55;}
+.tool-plan-tag{display:inline-block;margin-top:8px;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.07em;}
 
-.btn-logout {
-  padding: 8px 16px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  color: var(--muted);
-  font-size: 12px;
-  font-family: 'Syne', sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  letter-spacing: 0.04em;
-}
+/* UPGRADE CARD */
+.upgrade-card{background:linear-gradient(135deg,rgba(14,165,233,.07),rgba(16,185,129,.05));border:1px solid rgba(14,165,233,.2);border-radius:14px;padding:22px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.upgrade-card-text h3{font-size:15px;font-weight:700;margin-bottom:4px;}
+.upgrade-card-text p{font-size:12px;color:var(--muted2);font-family:'JetBrains Mono',monospace;}
+.btn-upgrade-card{padding:11px 22px;background:linear-gradient(135deg,var(--accent),#0284c7);border:none;border-radius:9px;color:white;font-size:13px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap;transition:opacity .2s;}
+.btn-upgrade-card:hover{opacity:.88;}
 
-.btn-logout:hover {
-  border-color: var(--danger);
-  color: #fca5a5;
-}
+/* EXPIRED OVERLAY */
+.exp-overlay{position:fixed;inset:0;background:rgba(10,14,26,.92);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.exp-overlay.show{display:flex;}
+.exp-modal{background:var(--card);border:1px solid rgba(239,68,68,.3);border-radius:16px;padding:44px 36px;max-width:400px;width:100%;text-align:center;}
+.exp-icon{font-size:48px;margin-bottom:16px;}
+.exp-modal h2{font-size:22px;font-weight:800;margin-bottom:10px;}
+.exp-modal p{color:var(--muted2);font-size:12px;font-family:'JetBrains Mono',monospace;line-height:1.7;margin-bottom:24px;}
+.btn-exp-upgrade{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),#0284c7);border:none;border-radius:10px;color:white;font-size:14px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;margin-bottom:10px;transition:opacity .2s;}
+.btn-exp-upgrade:hover{opacity:.88;}
+.btn-exp-logout{width:100%;padding:10px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px;font-family:'Syne',sans-serif;cursor:pointer;transition:all .2s;}
+.btn-exp-logout:hover{border-color:var(--danger);color:#fca5a5;}
 
-/* ── TRIAL BANNER ─────────────────────────────────────── */
-.trial-banner {
-  background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(14,165,233,0.06));
-  border-bottom: 1px solid rgba(245,158,11,0.2);
-  padding: 12px 30px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
+/* LOADING */
+.lscreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:300;transition:opacity .4s;}
+.lscreen.hide{opacity:0;pointer-events:none;}
+.lspin{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-.trial-banner.expired {
-  background: rgba(239,68,68,0.08);
-  border-color: rgba(239,68,68,0.2);
-}
-
-.trial-banner-text {
-  font-size: 13px;
-  font-family: 'JetBrains Mono', monospace;
-  color: #fbbf24;
-}
-
-.trial-banner.expired .trial-banner-text { color: #fca5a5; }
-
-.trial-progress {
-  flex: 1;
-  max-width: 300px;
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.trial-progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent2), var(--warning));
-  border-radius: 2px;
-  transition: width 0.5s ease;
-}
-
-.btn-upgrade {
-  padding: 7px 16px;
-  background: linear-gradient(135deg, var(--accent2), #059669);
-  border: none;
-  border-radius: 6px;
-  color: white;
-  font-size: 12px;
-  font-weight: 700;
-  font-family: 'Syne', sans-serif;
-  cursor: pointer;
-  white-space: nowrap;
-  letter-spacing: 0.04em;
-  transition: opacity 0.2s;
-}
-
-.btn-upgrade:hover { opacity: 0.85; }
-
-/* ── MAIN ─────────────────────────────────────────────── */
-.main {
-  padding: 40px 30px;
-  max-width: 1200px;
-  margin: auto;
-}
-
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  margin-bottom: 8px;
-}
-
-.page-subtitle {
-  color: var(--muted);
-  font-size: 13px;
-  font-family: 'JetBrains Mono', monospace;
-  margin-bottom: 36px;
-}
-
-/* ── STAT CARDS ───────────────────────────────────────── */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 36px;
-}
-
-.stat-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 22px;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.2s;
-}
-
-.stat-card:hover { border-color: var(--accent); }
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  opacity: 0.6;
-}
-
-.stat-label {
-  font-size: 10px;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 10px;
-}
-
-.stat-value {
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--text);
-}
-
-.stat-value span {
-  font-size: 14px;
-  color: var(--muted);
-  font-weight: 400;
-}
-
-/* ── TOOLS GRID ───────────────────────────────────────── */
-.section-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-family: 'JetBrains Mono', monospace;
-  margin-bottom: 16px;
-}
-
-.tools-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
-}
-
-.tool-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-  overflow: hidden;
-}
-
-.tool-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(14,165,233,0.1);
-}
-
-.tool-card.locked {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.tool-card.locked:hover {
-  transform: none;
-  border-color: var(--border);
-  box-shadow: none;
-}
-
-.tool-icon {
-  font-size: 28px;
-  margin-bottom: 14px;
-}
-
-.tool-name {
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  letter-spacing: -0.01em;
-}
-
-.tool-desc {
-  font-size: 12px;
-  color: var(--muted);
-  font-family: 'JetBrains Mono', monospace;
-  line-height: 1.6;
-}
-
-.tool-tag {
-  position: absolute;
-  top: 14px; right: 14px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.tool-tag.pro { background: rgba(14,165,233,0.15); color: var(--accent); }
-.tool-tag.free { background: rgba(16,185,129,0.15); color: var(--accent2); }
-.tool-tag.lock { background: rgba(100,116,139,0.15); color: var(--muted); }
-
-/* ── EXPIRED OVERLAY ──────────────────────────────────── */
-.expired-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(10,14,26,0.92);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
-}
-
-.expired-overlay.show { display: flex; }
-
-.expired-modal {
-  background: var(--card);
-  border: 1px solid rgba(239,68,68,0.3);
-  border-radius: 16px;
-  padding: 50px 40px;
-  max-width: 420px;
-  text-align: center;
-}
-
-.expired-icon { font-size: 48px; margin-bottom: 20px; }
-.expired-modal h2 { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
-.expired-modal p { color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; line-height: 1.7; margin-bottom: 28px; }
-
-.btn-upgrade-big {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, var(--accent), #0284c7);
-  border: none;
-  border-radius: 10px;
-  color: white;
-  font-size: 15px;
-  font-weight: 700;
-  font-family: 'Syne', sans-serif;
-  cursor: pointer;
-  letter-spacing: 0.03em;
-  margin-bottom: 12px;
-  transition: opacity 0.2s;
-}
-
-.btn-upgrade-big:hover { opacity: 0.9; }
-
-.btn-logout-modal {
-  width: 100%;
-  padding: 11px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--muted);
-  font-size: 13px;
-  font-family: 'Syne', sans-serif;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-logout-modal:hover { border-color: var(--danger); color: #fca5a5; }
-
-/* loading */
-.loading-screen {
-  position: fixed; inset: 0;
-  background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 300;
-  transition: opacity 0.4s;
-}
-
-.loading-screen.hide { opacity: 0; pointer-events: none; }
-
-.loading-spinner {
-  width: 40px; height: 40px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-@media (max-width: 600px) {
-  .header { padding: 0 16px; }
-  .main { padding: 24px 16px; }
-  .trial-banner { flex-wrap: wrap; }
-}
+@media(max-width:600px){.header{padding:0 14px;}.main{padding:20px 14px;}.header-right .lang-btn{display:none;}}
 </style>
 </head>
 <body>
 
-<!-- Loading -->
-<div class="loading-screen" id="loadingScreen">
-  <div class="loading-spinner"></div>
-</div>
+<div class="lscreen" id="ls"><div class="lspin"></div></div>
 
-<!-- Expired modal -->
-<div class="expired-overlay" id="expiredOverlay">
-  <div class="expired-modal">
-    <div class="expired-icon">⏱️</div>
-    <h2>Essai expiré</h2>
-    <p>Votre essai gratuit de 24h est terminé.<br>Passez à Pro pour continuer à utiliser toutes les fonctionnalités.</p>
-    <button class="btn-upgrade-big" onclick="window.location.href='#upgrade'">🚀 Passer à Pro</button>
-    <button class="btn-logout-modal" onclick="doLogout()">Se déconnecter</button>
+<!-- Expired overlay -->
+<div class="exp-overlay" id="expOverlay">
+  <div class="exp-modal">
+    <div class="exp-icon">⏱️</div>
+    <h2 id="expTitle">Essai expiré</h2>
+    <p id="expBody">Votre essai gratuit de 3h est terminé. Choisissez un plan pour continuer.</p>
+    <button class="btn-exp-upgrade" onclick="location.href='payment.html'" id="expUpgrade">Choisir un plan</button>
+    <button class="btn-exp-logout" onclick="doLogout()" id="expLogout">Se déconnecter</button>
   </div>
 </div>
 
@@ -442,90 +148,300 @@ body {
 <div class="header">
   <div class="brand">
     <div class="brand-icon">⚙️</div>
-    <div class="brand-name">Reliability <span>Suite Pro</span></div>
+    <div class="brand-name">Reliability <em>Suite Pro</em></div>
   </div>
   <div class="header-right">
+    <button class="lang-btn active" id="lFR" onclick="setLang('fr')">FR</button>
+    <button class="lang-btn" id="lEN" onclick="setLang('en')">EN</button>
     <div class="user-info">
       <div class="user-email" id="userEmail">—</div>
-      <div class="plan-badge trial" id="planBadge">Trial</div>
+      <div class="plan-badge pb-trial" id="planBadge">Trial</div>
     </div>
-    <button class="btn-logout" onclick="doLogout()">Déconnexion</button>
+    <button class="btn-logout" onclick="doLogout()" id="logoutBtn">Déconnexion</button>
   </div>
 </div>
 
 <!-- Trial banner -->
-<div class="trial-banner" id="trialBanner" style="display:none">
-  <span class="trial-banner-text" id="trialText">⏱ Essai en cours</span>
-  <div class="trial-progress">
-    <div class="trial-progress-bar" id="trialBar" style="width:100%"></div>
-  </div>
-  <button class="btn-upgrade" onclick="window.location.href='#upgrade'">Passer à Pro →</button>
+<div class="trial-banner" id="trialBanner">
+  <span class="trial-txt" id="trialTxt">⏱ Essai en cours</span>
+  <div class="trial-bar-wrap"><div class="trial-bar" id="trialBar" style="width:100%"></div></div>
+  <button class="btn-upgrade-banner" onclick="location.href='payment.html'" id="upgradeBtn">Upgrader →</button>
 </div>
 
 <!-- Main -->
 <div class="main">
-  <div class="page-title">Dashboard</div>
-  <div class="page-subtitle" id="welcomeText">Chargement…</div>
+  <div class="page-title" id="pageTitle">Dashboard</div>
+  <div class="page-sub" id="pageSub">Bienvenue</div>
 
   <!-- Stats -->
-  <div class="stats-grid">
+  <div class="stats-row">
     <div class="stat-card">
-      <div class="stat-label">Analyses effectuées</div>
-      <div class="stat-value">0 <span>analyses</span></div>
+      <div class="stat-lbl" id="stL1">Analyses effectuées</div>
+      <div class="stat-val" id="stV1" style="cursor:pointer" onclick="openApp()">0 <span id="stU1">analyses</span></div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Temps restant (essai)</div>
-      <div class="stat-value" id="timeLeftStat">— <span>h</span></div>
+      <div class="stat-lbl" id="stL2">Temps restant</div>
+      <div class="stat-val" id="stV2">— <span id="stU2">h</span></div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Statut du compte</div>
-      <div class="stat-value" id="planStat" style="font-size:20px">—</div>
+      <div class="stat-lbl" id="stL3">Plan actif</div>
+      <div class="stat-val" id="stV3" style="font-size:16px">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-lbl" id="stL4">Utilisateurs</div>
+      <div class="stat-val" id="stV4">1 <span id="stU4">/ max</span></div>
     </div>
   </div>
 
   <!-- Tools -->
-  <div class="section-title">Outils disponibles</div>
-  <div class="tools-grid">
+  <div class="sec-title" id="secTools">Outils disponibles</div>
+  <div class="tools-grid" id="toolsGrid">
 
-    <div class="tool-card" id="toolMain" onclick="openTool()">
-      <span class="tool-tag free">Inclus</span>
-      <div class="tool-icon">📊</div>
-      <div class="tool-name">Analyse de fiabilité</div>
-      <div class="tool-desc">MTBF · Weibull · Courbes de défaillance</div>
+    <!-- 1. Life Data Analysis -->
+    <div class="tool-card" id="tc-lda" onclick="openTool('lda')">
+      <div class="tool-visual tv-blue">
+        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+          <polyline points="10,90 40,70 70,50 100,35 130,25 160,20 190,18" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-linecap="round"/>
+          <polyline points="10,90 40,80 70,75 100,65 130,60 160,58 190,57" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <circle cx="100" cy="35" r="4" fill="#0ea5e9"/>
+          <circle cx="160" cy="20" r="3" fill="#0ea5e9" opacity=".6"/>
+        </svg>
+        <div class="tool-access-dot dot-active" id="dot-lda"></div>
+        <div class="tool-emoji">📊</div>
+      </div>
+      <div class="tool-body">
+        <div class="tool-name" id="tn1">Life Data Analysis</div>
+        <div class="tool-desc" id="td1">Weibull · Lognormal · Exponentielle</div>
+        <span class="tool-plan-tag" style="background:rgba(245,158,11,.1);color:#fbbf24" id="tt1">Tous plans</span>
+      </div>
     </div>
 
-    <div class="tool-card" id="toolMaint" onclick="openTool()">
-      <span class="tool-tag free">Inclus</span>
-      <div class="tool-icon">🔧</div>
-      <div class="tool-name">Maintenance préventive</div>
-      <div class="tool-desc">Optimisation des intervalles · Planning</div>
+    <!-- 2. Reliability Metrics -->
+    <div class="tool-card" id="tc-rm" onclick="openTool('rm')">
+      <div class="tool-visual tv-teal">
+        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="60" width="20" height="40" rx="3" fill="#14b8a6" opacity=".7"/>
+          <rect x="50" y="40" width="20" height="60" rx="3" fill="#14b8a6" opacity=".85"/>
+          <rect x="80" y="25" width="20" height="75" rx="3" fill="#14b8a6"/>
+          <rect x="110" y="45" width="20" height="55" rx="3" fill="#14b8a6" opacity=".75"/>
+          <rect x="140" y="55" width="20" height="45" rx="3" fill="#14b8a6" opacity=".6"/>
+          <rect x="170" y="70" width="20" height="30" rx="3" fill="#14b8a6" opacity=".45"/>
+        </svg>
+        <div class="tool-access-dot dot-active" id="dot-rm"></div>
+        <div class="tool-emoji">⏱️</div>
+      </div>
+      <div class="tool-body">
+        <div class="tool-name" id="tn2">Reliability Metrics</div>
+        <div class="tool-desc" id="td2">MTBF · R(t) · F(t) · h(t)</div>
+        <span class="tool-plan-tag" style="background:rgba(245,158,11,.1);color:#fbbf24" id="tt2">Tous plans</span>
+      </div>
     </div>
 
-    <div class="tool-card locked" id="toolStock">
-      <span class="tool-tag lock">🔒 Pro</span>
-      <div class="tool-icon">📦</div>
-      <div class="tool-name">Gestion des stocks</div>
-      <div class="tool-desc">Pièces de rechange · EOQ · Réapprovisionnement</div>
+    <!-- 3. Probability Plots -->
+    <div class="tool-card" id="tc-pp" onclick="openTool('pp')">
+      <div class="tool-visual tv-yellow">
+        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+          <line x1="15" y1="95" x2="190" y2="95" stroke="#64748b" stroke-width="1"/>
+          <line x1="15" y1="95" x2="15" y2="10" stroke="#64748b" stroke-width="1"/>
+          <circle cx="35" cy="85" r="3.5" fill="#f59e0b"/>
+          <circle cx="60" cy="72" r="3.5" fill="#f59e0b"/>
+          <circle cx="85" cy="58" r="3.5" fill="#f59e0b"/>
+          <circle cx="110" cy="45" r="3.5" fill="#f59e0b"/>
+          <circle cx="135" cy="35" r="3.5" fill="#f59e0b"/>
+          <circle cx="160" cy="28" r="3.5" fill="#f59e0b"/>
+          <circle cx="180" cy="22" r="3.5" fill="#f59e0b"/>
+          <line x1="30" y1="90" x2="185" y2="18" stroke="#f59e0b" stroke-width="1.5" opacity=".5"/>
+        </svg>
+        <div class="tool-access-dot dot-active" id="dot-pp"></div>
+        <div class="tool-emoji">📈</div>
+      </div>
+      <div class="tool-body">
+        <div class="tool-name" id="tn3">Probability Plots</div>
+        <div class="tool-desc" id="td3">Validation des distributions statistiques</div>
+        <span class="tool-plan-tag" style="background:rgba(245,158,11,.1);color:#fbbf24" id="tt3">Tous plans</span>
+      </div>
     </div>
 
-    <div class="tool-card locked" id="toolKpi">
-      <span class="tool-tag lock">🔒 Pro</span>
-      <div class="tool-icon">📈</div>
-      <div class="tool-name">Dashboard KPI</div>
-      <div class="tool-desc">OEE · MTTR · Disponibilité · Rapports</div>
+    <!-- 4. Confidence Bounds -->
+    <div class="tool-card" id="tc-cb" onclick="openTool('cb')">
+      <div class="tool-visual tv-blue">
+        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10,95 Q60,20 190,10" fill="none" stroke="#0ea5e9" stroke-width="2.5"/>
+          <path d="M10,95 Q60,35 190,25" fill="none" stroke="#0ea5e9" stroke-width="1" stroke-dasharray="4,3" opacity=".5"/>
+          <path d="M10,95 Q60,10 190,5"  fill="none" stroke="#0ea5e9" stroke-width="1" stroke-dasharray="4,3" opacity=".5"/>
+          <path d="M10,95 Q60,35 190,25 L190,5 Q60,10 10,95 Z" fill="#0ea5e9" opacity=".07"/>
+        </svg>
+        <div class="tool-access-dot dot-active" id="dot-cb"></div>
+        <div class="tool-emoji">🎯</div>
+      </div>
+      <div class="tool-body">
+        <div class="tool-name" id="tn4">Confidence Bounds</div>
+        <div class="tool-desc" id="td4">Intervalles de confiance sur les estimations</div>
+        <span class="tool-plan-tag" style="background:rgba(245,158,11,.1);color:#fbbf24" id="tt4">Tous plans</span>
+      </div>
     </div>
 
-    <div class="tool-card locked" id="toolExport">
-      <span class="tool-tag lock">🔒 Pro</span>
-      <div class="tool-icon">📤</div>
-      <div class="tool-name">Export & rapports</div>
-      <div class="tool-desc">PDF · Excel · Rapports automatisés</div>
+    <!-- 5. Advanced Reporting -->
+    <div class="tool-card" id="tc-ar" onclick="openTool('ar')">
+      <div class="tool-visual tv-green">
+        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="15" width="160" height="80" rx="6" fill="none" stroke="#10b981" stroke-width="1.5" opacity=".4"/>
+          <rect x="32" y="28" width="80" height="6" rx="3" fill="#10b981" opacity=".6"/>
+          <rect x="32" y="42" width="136" height="4" rx="2" fill="#64748b" opacity=".4"/>
+          <rect x="32" y="52" width="110" height="4" rx="2" fill="#64748b" opacity=".4"/>
+          <rect x="32" y="62" width="120" height="4" rx="2" fill="#64748b" opacity=".4"/>
+          <rect x="32" y="72" width="90"  height="4" rx="2" fill="#64748b" opacity=".4"/>
+          <rect x="148" y="65" width="22" height="22" rx="4" fill="#10b981" opacity=".2"/>
+          <text x="155" y="80" font-size="12" fill="#10b981" opacity=".7">↓</text>
+        </svg>
+        <div class="tool-access-dot" id="dot-ar"></div>
+        <div class="tool-emoji">📋</div>
+      </div>
+      <div class="tool-body">
+        <div class="tool-name" id="tn5">Advanced Reporting</div>
+        <div class="tool-desc" id="td5">PDF · Excel · Templates pro</div>
+        <span class="tool-plan-tag" style="background:rgba(14,165,233,.1);color:#0ea5e9" id="tt5">Essentiel+</span>
+      </div>
     </div>
 
-    <div class="tool-card" style="background:linear-gradient(135deg,rgba(14,165,233,0.06),rgba(16,185,129,0.04));border-color:rgba(14,165,233,0.2)" onclick="window.location.href='#upgrade'">
-      <div class="tool-icon">🚀</div>
-      <div class="tool-name">Passer à Pro</div>
-      <div class="tool-desc">Débloque tous les outils · Stockage illimité · Support prioritaire</div>
+    <!-- 6. Degradation Analysis -->
+    <div class="tool-card" id="tc-da" onclick="openTool('da')">
+      <div class="tool-visual tv-orange">
+        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+          <polyline points="10,20 40,28 70,38 100,52 130,68 160,82 190,95" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/>
+          <polyline points="10,25 40,34 70,46 100,60 130,74 160,87 190,99" fill="none" stroke="#f97316" stroke-width="1" stroke-dasharray="4,3" opacity=".4"/>
+          <line x1="145" y1="10" x2="145" y2="100" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,3" opacity=".6"/>
+          <text x="148" y="20" font-size="9" fill="#ef4444" opacity=".8">seuil</text>
+        </svg>
+        <div class="tool-access-dot" id="dot-da"></div>
+        <div class="tool-emoji">📉</div>
+      </div>
+      <div class="tool-body">
+        <div class="tool-name" id="tn6">Degradation Analysis</div>
+        <div class="tool-desc" id="td6">Modélisation de la dégradation progressive</div>
+        <span class="tool-plan-tag" style="background:rgba(16,185,129,.1);color:#10b981" id="tt6">Professionnel+</span>
+      </div>
+    </div>
+
+    <!-- 7. Preventive Maintenance -->
+    <div class="tool-card" id="tc-pm" onclick="openTool('pm')">
+      <div class="tool-visual tv-purple">
+        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="30" width="22" height="65" rx="3" fill="#8b5cf6" opacity=".3"/>
+          <rect x="52" y="45" width="22" height="50" rx="3" fill="#8b5cf6" opacity=".5"/>
+          <rect x="84" y="20" width="22" height="75" rx="3" fill="#8b5cf6" opacity=".9"/>
+          <rect x="116" y="50" width="22" height="45" rx="3" fill="#8b5cf6" opacity=".5"/>
+          <rect x="148" y="38" width="22" height="57" rx="3" fill="#8b5cf6" opacity=".35"/>
+          <polyline points="31,30 63,45 95,20 127,50 159,38" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="tool-access-dot" id="dot-pm"></div>
+        <div class="tool-emoji">🔧</div>
+      </div>
+      <div class="tool-body">
+        <div class="tool-name" id="tn7">Preventive Maintenance</div>
+        <div class="tool-desc" id="td7">Optimisation des intervalles de maintenance</div>
+        <span class="tool-plan-tag" style="background:rgba(139,92,246,.1);color:#8b5cf6" id="tt7">Entreprise+</span>
+      </div>
+    </div>
+
+    <!-- 8. Spare Parts Forecasting -->
+    <div class="tool-card" id="tc-sp" onclick="openTool('sp')">
+      <div class="tool-visual tv-teal">
+        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+          <rect x="15" y="50" width="18" height="45" rx="3" fill="#14b8a6" opacity=".5"/>
+          <rect x="40" y="35" width="18" height="60" rx="3" fill="#14b8a6" opacity=".7"/>
+          <rect x="65" y="55" width="18" height="40" rx="3" fill="#14b8a6" opacity=".55"/>
+          <rect x="90" y="42" width="18" height="53" rx="3" fill="#14b8a6" opacity=".65"/>
+          <rect x="115" y="60" width="18" height="35" rx="3" fill="#14b8a6" opacity=".45"/>
+          <rect x="140" y="48" width="18" height="47" rx="3" fill="#14b8a6" opacity=".35" stroke="#14b8a6" stroke-dasharray="2,2"/>
+          <rect x="165" y="38" width="18" height="57" rx="3" fill="none" stroke="#14b8a6" stroke-width="1.5" stroke-dasharray="3,2" opacity=".7"/>
+        </svg>
+        <div class="tool-access-dot" id="dot-sp"></div>
+        <div class="tool-emoji">📦</div>
+      </div>
+      <div class="tool-body">
+        <div class="tool-name" id="tn8">Spare Parts Forecasting</div>
+        <div class="tool-desc" id="td8">Prévision des besoins en pièces de rechange</div>
+        <span class="tool-plan-tag" style="background:rgba(139,92,246,.1);color:#8b5cf6" id="tt8">Entreprise+</span>
+      </div>
+    </div>
+
+    <!-- 9. Multi-Asset / Fleet -->
+    <div class="tool-card" id="tc-ma" onclick="openTool('ma')">
+      <div class="tool-visual tv-rose">
+        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50"  cy="55" r="28" fill="none" stroke="#f43f5e" stroke-width="1.5" opacity=".4"/>
+          <circle cx="105" cy="45" r="22" fill="none" stroke="#f43f5e" stroke-width="1.5" opacity=".5"/>
+          <circle cx="155" cy="60" r="18" fill="none" stroke="#f43f5e" stroke-width="1.5" opacity=".4"/>
+          <line x1="50" y1="55" x2="105" y2="45" stroke="#f43f5e" stroke-width="1" opacity=".6"/>
+          <line x1="105" y1="45" x2="155" y2="60" stroke="#f43f5e" stroke-width="1" opacity=".6"/>
+          <circle cx="50"  cy="55" r="4" fill="#f43f5e"/>
+          <circle cx="105" cy="45" r="4" fill="#f43f5e"/>
+          <circle cx="155" cy="60" r="4" fill="#f43f5e"/>
+        </svg>
+        <div class="tool-access-dot" id="dot-ma"></div>
+        <div class="tool-emoji">🚗</div>
+      </div>
+      <div class="tool-body">
+        <div class="tool-name" id="tn9">Multi-Asset / Fleet</div>
+        <div class="tool-desc" id="td9">Analyse de flottes d'équipements</div>
+        <span class="tool-plan-tag" style="background:rgba(244,63,94,.1);color:#f43f5e" id="tt9">Ultimate</span>
+      </div>
+    </div>
+
+    <!-- 10. Reliability Growth -->
+    <div class="tool-card" id="tc-rg" onclick="openTool('rg')">
+      <div class="tool-visual tv-green">
+        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10,95 C40,90 60,75 80,60 C100,45 120,30 190,15" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="40"  cy="82" r="3.5" fill="#10b981" opacity=".8"/>
+          <circle cx="80"  cy="60" r="3.5" fill="#10b981" opacity=".8"/>
+          <circle cx="120" cy="38" r="3.5" fill="#10b981" opacity=".8"/>
+          <circle cx="160" cy="22" r="3.5" fill="#10b981" opacity=".8"/>
+          <text x="12" y="108" font-size="8" fill="#64748b">Crow-AMSAA</text>
+        </svg>
+        <div class="tool-access-dot" id="dot-rg"></div>
+        <div class="tool-emoji">📊</div>
+      </div>
+      <div class="tool-body">
+        <div class="tool-name" id="tn10">Reliability Growth</div>
+        <div class="tool-desc" id="td10">Crow-AMSAA · Amélioration continue</div>
+        <span class="tool-plan-tag" style="background:rgba(244,63,94,.1);color:#f43f5e" id="tt10">Ultimate</span>
+      </div>
+    </div>
+
+    <!-- 11. Portfolio / Multi-Site -->
+    <div class="tool-card" id="tc-ms" onclick="openTool('ms')">
+      <div class="tool-visual tv-purple">
+        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="15" width="55" height="40" rx="5" fill="none" stroke="#8b5cf6" stroke-width="1.5" opacity=".6"/>
+          <rect x="75" y="15" width="55" height="40" rx="5" fill="none" stroke="#8b5cf6" stroke-width="1.5" opacity=".6"/>
+          <rect x="140" y="15" width="50" height="40" rx="5" fill="none" stroke="#8b5cf6" stroke-width="1.5" opacity=".6"/>
+          <rect x="50" y="65" width="100" height="35" rx="5" fill="none" stroke="#8b5cf6" stroke-width="2" opacity=".8"/>
+          <line x1="37" y1="55" x2="80" y2="65"  stroke="#8b5cf6" stroke-width="1" opacity=".5"/>
+          <line x1="102" y1="55" x2="100" y2="65" stroke="#8b5cf6" stroke-width="1" opacity=".5"/>
+          <line x1="165" y1="55" x2="130" y2="65" stroke="#8b5cf6" stroke-width="1" opacity=".5"/>
+        </svg>
+        <div class="tool-access-dot" id="dot-ms"></div>
+        <div class="tool-emoji">🌐</div>
+      </div>
+      <div class="tool-body">
+        <div class="tool-name" id="tn11">Portfolio / Multi-Site</div>
+        <div class="tool-desc" id="td11">Dashboard consolidé multi-sites</div>
+        <span class="tool-plan-tag" style="background:rgba(244,63,94,.1);color:#f43f5e" id="tt11">Ultimate</span>
+      </div>
+    </div>
+
+    <!-- Upgrade card -->
+    <div class="tool-card" style="cursor:pointer;background:linear-gradient(135deg,rgba(14,165,233,.06),rgba(16,185,129,.04));border-color:rgba(14,165,233,.2)" onclick="location.href='payment.html'" id="tc-upgrade">
+      <div class="tool-visual" style="background:linear-gradient(135deg,rgba(14,165,233,.1),rgba(16,185,129,.06));height:110px">
+        <div class="tool-emoji">🚀</div>
+      </div>
+      <div class="tool-body">
+        <div class="tool-name" id="tn-up">Passer à Pro</div>
+        <div class="tool-desc" id="td-up">Débloquer tous les modules d'analyse</div>
+        <span class="tool-plan-tag" style="background:rgba(14,165,233,.1);color:var(--accent)">→ Voir les plans</span>
+      </div>
     </div>
 
   </div>
@@ -533,99 +449,280 @@ body {
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const supabase = createClient('https://kquwgqcxauymzkgfcxpm.supabase.co','sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx');
 
-const SUPABASE_URL = 'https://kquwgqcxauymzkgfcxpm.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const hide = () => {
-  const ls = document.getElementById('loadingScreen');
-  ls.classList.add('hide');
-  setTimeout(() => ls.remove(), 500);
+// Access matrix
+const ACCESS = {
+  lda:['trial','essentiel','professionnel','entreprise','ultimate'],
+  rm: ['trial','essentiel','professionnel','entreprise','ultimate'],
+  pp: ['trial','essentiel','professionnel','entreprise','ultimate'],
+  cb: ['trial','essentiel','professionnel','entreprise','ultimate'],
+  ar: ['essentiel','entreprise','ultimate'],
+  da: ['professionnel','entreprise','ultimate'],
+  pm: ['entreprise','ultimate'],
+  sp: ['entreprise','ultimate'],
+  ma: ['ultimate'],
+  rg: ['ultimate'],
+  ms: ['ultimate'],
 };
 
-// ── Auth guard ───────────────────────────────────────────────
-const { data: { session } } = await supabase.auth.getSession();
-if (!session) {
-  window.location.href = 'login.html';
+const PLAN_MAX_USERS = { trial:1, essentiel:1, professionnel:1, entreprise:10, ultimate:999 };
+
+const T = {
+  fr: {
+    pageTitle:'Dashboard', logoutBtn:'Déconnexion',
+    stL1:'Analyses effectuées', stL2:'Temps restant', stL3:'Plan actif', stL4:'Utilisateurs',
+    stU1:'analyses', stU2:'h restantes', stU4:'/ max',
+    secTools:'Outils disponibles',
+    tn1:'Life Data Analysis', td1:'Weibull · Lognormal · Exponentielle', tt1:'Tous plans',
+    tn2:'Reliability Metrics', td2:'MTBF · R(t) · F(t) · h(t)', tt2:'Tous plans',
+    tn3:'Probability Plots', td3:'Validation des distributions statistiques', tt3:'Tous plans',
+    tn4:'Confidence Bounds', td4:'Intervalles de confiance sur les estimations', tt4:'Tous plans',
+    tn5:'Advanced Reporting', td5:'PDF · Excel · Templates pro', tt5:'Essentiel+',
+    tn6:'Degradation Analysis', td6:'Modélisation de la dégradation progressive', tt6:'Professionnel+',
+    tn7:'Preventive Maintenance', td7:'Optimisation des intervalles de maintenance', tt7:'Entreprise+',
+    tn8:'Spare Parts Forecasting', td8:'Prévision des besoins en pièces de rechange', tt8:'Entreprise+',
+    tn9:'Multi-Asset / Fleet', td9:"Analyse de flottes d'équipements", tt9:'Ultimate',
+    tn10:'Reliability Growth', td10:'Crow-AMSAA · Amélioration continue', tt10:'Ultimate',
+    tn11:'Portfolio / Multi-Site', td11:'Dashboard consolidé multi-sites', tt11:'Ultimate',
+    'tn-up':'Passer à Pro', 'td-up':'Débloquer tous les modules d\'analyse',
+    expTitle:'Essai expiré', expBody:'Votre essai gratuit de 3h est terminé. Choisissez un plan pour continuer.',
+    expUpgrade:'Choisir un plan', expLogout:'Se déconnecter',
+    upgradeBtn:'Upgrader →',
+    trialActive:'⏱ %H% restantes sur votre essai',
+    trialExpired:'⚠️ Essai expiré',
+    planLabels:{ trial:'Trial 3h', essentiel:'Essentiel', professionnel:'Professionnel', entreprise:'Entreprise', ultimate:'Ultimate' },
+    planIcons:{ trial:'🔬', essentiel:'📊', professionnel:'🚀', entreprise:'🏢', ultimate:'👑' },
+    timeUnlimited:'∞', timeUnlimitedUnit:'illimité',
+    lockMsg:'Nécessite le plan ',
+  },
+  en: {
+    pageTitle:'Dashboard', logoutBtn:'Sign out',
+    stL1:'Analyses done', stL2:'Time remaining', stL3:'Active plan', stL4:'Users',
+    stU1:'analyses', stU2:'h left', stU4:'/ max',
+    secTools:'Available tools',
+    tn1:'Life Data Analysis', td1:'Weibull · Lognormal · Exponential', tt1:'All plans',
+    tn2:'Reliability Metrics', td2:'MTBF · R(t) · F(t) · h(t)', tt2:'All plans',
+    tn3:'Probability Plots', td3:'Statistical distribution validation', tt3:'All plans',
+    tn4:'Confidence Bounds', td4:'Confidence intervals on estimates', tt4:'All plans',
+    tn5:'Advanced Reporting', td5:'PDF · Excel · Pro templates', tt5:'Essential+',
+    tn6:'Degradation Analysis', td6:'Progressive degradation modeling', tt6:'Professional+',
+    tn7:'Preventive Maintenance', td7:'Maintenance interval optimization', tt7:'Enterprise+',
+    tn8:'Spare Parts Forecasting', td8:'Spare parts demand forecasting', tt8:'Enterprise+',
+    tn9:'Multi-Asset / Fleet', td9:'Fleet equipment analysis', tt9:'Ultimate',
+    tn10:'Reliability Growth', td10:'Crow-AMSAA · Continuous improvement', tt10:'Ultimate',
+    tn11:'Portfolio / Multi-Site', td11:'Consolidated multi-site dashboard', tt11:'Ultimate',
+    'tn-up':'Upgrade to Pro', 'td-up':'Unlock all analysis modules',
+    expTitle:'Trial expired', expBody:'Your 3h free trial is over. Choose a plan to continue.',
+    expUpgrade:'Choose a plan', expLogout:'Sign out',
+    upgradeBtn:'Upgrade →',
+    trialActive:'⏱ %H% left on your trial',
+    trialExpired:'⚠️ Trial expired',
+    planLabels:{ trial:'Trial 3h', essentiel:'Essential', professionnel:'Professional', entreprise:'Enterprise', ultimate:'Ultimate' },
+    planIcons:{ trial:'🔬', essentiel:'📊', professionnel:'🚀', entreprise:'🏢', ultimate:'👑' },
+    timeUnlimited:'∞', timeUnlimitedUnit:'unlimited',
+    lockMsg:'Requires the ',
+  }
+};
+
+let lang='fr', userPlan='trial', currentUser=null;
+
+window.setLang = function(l) {
+  lang=l;
+  document.getElementById('lFR').classList.toggle('active',l==='fr');
+  document.getElementById('lEN').classList.toggle('active',l==='en');
+  applyLang();
+};
+
+function applyLang() {
+  const t=T[lang];
+  const ids=['pageTitle','logoutBtn','stL1','stL2','stL3','stL4','stU1','stU2','stU4',
+    'secTools','expTitle','expBody','expUpgrade','expLogout','upgradeBtn',
+    'tn1','td1','tt1','tn2','td2','tt2','tn3','td3','tt3','tn4','td4','tt4',
+    'tn5','td5','tt5','tn6','td6','tt6','tn7','td7','tt7','tn8','td8','tt8',
+    'tn9','td9','tt9','tn10','td10','tt10','tn11','td11','tt11','tn-up','td-up'];
+  ids.forEach(id=>{ const el=document.getElementById(id); if(el&&t[id]) el.textContent=t[id]; });
 }
 
-const user = session.user;
-document.getElementById('userEmail').textContent = user.email;
-
-// ── Load profile + trial check ───────────────────────────────
-const { data: profile } = await supabase
-  .from('profiles')
-  .select('trial_started_at, plan')
-  .eq('id', user.id)
-  .single();
-
-if (profile) {
-  const plan = profile.plan;
+function setPlanUI(plan, profile) {
+  const t = T[lang];
+  userPlan = plan;
   const badge = document.getElementById('planBadge');
-  const planStat = document.getElementById('planStat');
+  const planClasses = { trial:'pb-trial', essentiel:'pb-essentiel', professionnel:'pb-pro', entreprise:'pb-ent', ultimate:'pb-ult' };
+  badge.className = 'plan-badge ' + (planClasses[plan]||'pb-trial');
+  badge.textContent = t.planIcons[plan]+' '+(t.planLabels[plan]||plan);
 
-  if (plan === 'pro' || plan === 'enterprise') {
-    badge.textContent = plan === 'pro' ? 'Pro' : 'Enterprise';
-    badge.className = 'plan-badge pro';
-    planStat.textContent = plan === 'pro' ? '⭐ Pro' : '🏢 Enterprise';
-    document.getElementById('timeLeftStat').innerHTML = '∞ <span>illimité</span>';
-    document.getElementById('welcomeText').textContent = `Bienvenue, ${user.email}`;
-    // Unlock all tools
-    document.querySelectorAll('.tool-card.locked').forEach(c => {
-      c.classList.remove('locked');
-      c.querySelector('.tool-tag').className = 'tool-tag pro';
-      c.querySelector('.tool-tag').textContent = 'Pro';
-      c.onclick = openTool;
-    });
+  // Stats
+  const maxU = PLAN_MAX_USERS[plan]||1;
+  document.getElementById('stV4').innerHTML = `1 <span id="stU4">/ ${maxU}</span>`;
+  document.getElementById('stV3').textContent = t.planIcons[plan]+' '+(t.planLabels[plan]||plan);
 
-  } else {
-    // Trial
-    const started = new Date(profile.trial_started_at);
-    const hoursElapsed = (Date.now() - started) / 3600000;
-    const hoursLeft = Math.max(0, 24 - hoursElapsed);
-
-    if (hoursElapsed > 24) {
-      // Expired
-      badge.textContent = 'Expiré';
-      badge.className = 'plan-badge expired';
-      planStat.textContent = '❌ Expiré';
-      document.getElementById('timeLeftStat').innerHTML = '0 <span>h</span>';
-      document.getElementById('welcomeText').textContent = 'Votre essai est terminé.';
-      const banner = document.getElementById('trialBanner');
-      banner.style.display = 'flex';
+  if (plan === 'trial') {
+    const elapsed = (Date.now()-new Date(profile.trial_started_at))/3600000;
+    const left = Math.max(0, 3-elapsed);
+    const pct = (left/3*100).toFixed(0);
+    document.getElementById('stV2').innerHTML = `${left.toFixed(1)} <span>${t.stU2}</span>`;
+    const banner = document.getElementById('trialBanner');
+    banner.classList.add('show');
+    if (elapsed>=3) {
       banner.classList.add('expired');
-      document.getElementById('trialText').textContent = '⚠️ Essai expiré';
-      document.getElementById('trialBar').style.width = '0%';
-      document.getElementById('expiredOverlay').classList.add('show');
+      document.getElementById('trialTxt').textContent = t.trialExpired;
+      document.getElementById('trialBar').style.width='0%';
+      document.getElementById('expOverlay').classList.add('show');
     } else {
-      // Active trial
-      const pct = ((hoursLeft / 24) * 100).toFixed(1);
-      const hStr = hoursLeft.toFixed(1);
-      document.getElementById('timeLeftStat').innerHTML = `${hStr} <span>h restantes</span>`;
-      planStat.textContent = '🟡 Essai actif';
-      document.getElementById('welcomeText').textContent = `Essai actif — ${hStr}h restantes`;
-      const banner = document.getElementById('trialBanner');
-      banner.style.display = 'flex';
-      document.getElementById('trialText').textContent = `⏱ ${hStr}h restantes sur votre essai`;
-      document.getElementById('trialBar').style.width = pct + '%';
+      document.getElementById('trialTxt').textContent = t.trialActive.replace('%H%', left.toFixed(1));
+      document.getElementById('trialBar').style.width = pct+'%';
+    }
+    document.getElementById('pageSub').textContent = `${t.planLabels.trial} — ${left.toFixed(1)}h ${t.stU2}`;
+  } else {
+    document.getElementById('stV2').innerHTML = `${t.timeUnlimited} <span>${t.timeUnlimitedUnit}</span>`;
+    document.getElementById('pageSub').textContent = `${t.planIcons[plan]} ${t.planLabels[plan]}`;
+    // Hide upgrade card if paid plan
+    if (['essentiel','professionnel','entreprise','ultimate'].includes(plan)) {
+      const uc = document.getElementById('tc-upgrade');
+      if(uc) uc.style.display='none';
     }
   }
-} else {
-  document.getElementById('welcomeText').textContent = `Bienvenue, ${user.email}`;
+
+  // Apply access to tool cards
+  const toolMap = {
+    'tc-lda':'lda','tc-rm':'rm','tc-pp':'pp','tc-cb':'cb',
+    'tc-ar':'ar','tc-da':'da','tc-pm':'pm','tc-sp':'sp',
+    'tc-ma':'ma','tc-rg':'rg','tc-ms':'ms'
+  };
+
+  Object.entries(toolMap).forEach(([cardId, feature]) => {
+    const card = document.getElementById(cardId);
+    const dot  = document.getElementById('dot-'+feature);
+    const allowed = ACCESS[feature]||[];
+    if (!allowed.includes(plan)) {
+      card.classList.add('locked');
+      if(dot){ dot.className='tool-access-dot dot-locked'; }
+      // Add lock badge if not present
+      if(!card.querySelector('.tool-lock-badge')) {
+        const lb = document.createElement('div');
+        lb.className='tool-lock-badge';
+        lb.innerHTML='🔒 '+getMinPlanLabel(feature);
+        card.querySelector('.tool-visual').appendChild(lb);
+      }
+    } else {
+      card.classList.remove('locked');
+      if(dot){ dot.className='tool-access-dot dot-active'; }
+    }
+  });
 }
 
-hide();
+function getMinPlanLabel(feature) {
+  const order=['trial','essentiel','professionnel','entreprise','ultimate'];
+  const allowed=ACCESS[feature]||[];
+  const min = order.find(p=>allowed.includes(p))||'ultimate';
+  return T[lang].planLabels[min]||min;
+}
 
-// ── Actions ──────────────────────────────────────────────────
-window.openTool = function() {
-  window.location.href = 'app.html';
+window.openApp = function() {
+  if(userPlan==='trial'){
+    const profile = window._profile;
+    if(profile){
+      const elapsed=(Date.now()-new Date(profile.trial_started_at))/3600000;
+      if(elapsed>=3){ document.getElementById('expOverlay').classList.add('show'); return; }
+    }
+  }
+  window.location.href='relia.html';
+};
+
+window.openTool = function(feature) {
+  const allowed=ACCESS[feature]||[];
+  if(!allowed.includes(userPlan)){
+    window.location.href='payment.html'; return;
+  }
+  window.location.href='relia.html';
 };
 
 window.doLogout = async function() {
   await supabase.auth.signOut();
-  window.location.href = 'login.html';
+  window.location.href='login.html';
 };
+
+// ── Init ──────────────────────────────────────────────────────
+const { data:{ session } } = await supabase.auth.getSession();
+if(!session){ window.location.href='login.html'; }
+else {
+  currentUser=session.user;
+  document.getElementById('userEmail').textContent=currentUser.email;
+
+  const { data:profile } = await supabase.from('profiles').select('plan,trial_started_at').eq('id',currentUser.id).single();
+  window._profile=profile;
+
+  setPlanUI(profile?.plan||'trial', profile||{trial_started_at:new Date().toISOString()});
+  applyLang();
+
+  const ls=document.getElementById('ls');
+  ls.classList.add('hide'); setTimeout(()=>ls.remove(),500);
+}
 </script>
 </body>
 </html>
+<!-- PATCH: remplace openTool et openApp dans dashboard.html -->
+<script type="module">
+// Ce patch remplace les fonctions openTool/openApp du dashboard
+// pour utiliser les query params access= et type=
+
+import { openApp, defaultType, ACCESS_TYPES, checkTrial } from './access.js';
+
+// Mapping tool card → access type
+const TOOL_TYPES = {
+  lda: 'life_data',
+  rm:  'reliability_metrics',
+  pp:  'probability_plots',
+  cb:  'confidence_bounds',
+  ar:  'advanced_reporting',
+  da:  'degradation',
+  pm:  'preventive_maint',
+  sp:  'spare_parts',
+  ma:  'multi_asset',
+  rg:  'reliability_growth',
+  ms:  'portfolio_multisite',
+};
+
+window.openTool = function(toolKey) {
+  const plan    = window.userPlan || 'trial';
+  const type    = TOOL_TYPES[toolKey] || 'life_data';
+  const allowed = ACCESS_TYPES[type] || [];
+
+  if (!allowed.includes(plan)) {
+    // Pas accès → pricing
+    const min = ['trial','essentiel','professionnel','entreprise','ultimate']
+                  .find(p => allowed.includes(p)) || 'ultimate';
+    window.location.href = `payment.html?reason=feature_locked&required=${min}&type=${type}`;
+    return;
+  }
+
+  // Accès OK → ouvre relia.html avec params
+  window.location.href = `relia.html?access=${plan}&type=${type}`;
+};
+
+window.openApp = function() {
+  const plan    = window.userPlan || 'trial';
+  const profile = window._profile;
+
+  // Vérif trial
+  if (plan === 'trial' && profile?.trial_started_at) {
+    const t = checkTrial(profile.trial_started_at);
+    if (!t.valid) {
+      document.getElementById('expOverlay').classList.add('show');
+      return;
+    }
+  }
+
+  const type = defaultType(plan);
+  window.location.href = `relia.html?access=${plan}&type=${type}`;
+};
+
+// Expose plan globalement pour openTool
+supabase.auth.getSession().then(({ data:{ session } }) => {
+  if (session) {
+    supabase.from('profiles').select('plan').eq('id', session.user.id).single()
+      .then(({ data }) => { window.userPlan = data?.plan || 'trial'; });
+  }
+});
+</script>

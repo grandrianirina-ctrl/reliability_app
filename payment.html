@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Choisir un plan — Reliability Suite Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --bg:#0a0e1a; --surface:#111827; --border:#1e2d45;
+  --accent:#0ea5e9; --accent2:#10b981; --warning:#f59e0b; --purple:#8b5cf6; --rose:#f43f5e;
+  --text:#f0f4ff; --muted:#64748b; --muted2:#94a3b8; --card:#131c2e;
+}
+body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+.bg-glow { position:fixed; inset:0; pointer-events:none; background:radial-gradient(ellipse 70% 50% at 50% 0%, rgba(14,165,233,.07) 0%, transparent 65%); }
+.grid-bg { position:fixed; inset:0; pointer-events:none; background-image:linear-gradient(rgba(14,165,233,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(14,165,233,.03) 1px,transparent 1px); background-size:44px 44px; }
+
+/* TOPBAR */
+.topbar { position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between; padding:14px 36px; background:rgba(10,14,26,.92); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+.brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); }
+.brand-icon { width:32px; height:32px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.brand-name { font-size:14px; font-weight:700; letter-spacing:.04em; }
+.brand-name em { font-style:normal; color:var(--accent); }
+.topbar-right { display:flex; align-items:center; gap:8px; }
+.lang-btn { padding:5px 11px; background:transparent; border:1px solid var(--border); border-radius:6px; color:var(--muted); font-size:11px; font-weight:700; font-family:'JetBrains Mono',monospace; cursor:pointer; transition:all .2s; }
+.lang-btn.active, .lang-btn:hover { border-color:var(--accent); color:var(--accent); }
+.back-btn { padding:7px 14px; background:transparent; border:1px solid var(--border); border-radius:7px; color:var(--muted2); font-size:12px; font-family:'Syne',sans-serif; font-weight:600; cursor:pointer; transition:all .2s; }
+.back-btn:hover { border-color:var(--accent2); color:var(--accent2); }
+
+/* HERO */
+.hero { text-align:center; padding:52px 24px 28px; position:relative; z-index:2; }
+.hero h1 { font-size:clamp(26px,4.5vw,46px); font-weight:800; letter-spacing:-.03em; line-height:1.08; margin-bottom:10px; }
+.hero h1 em { font-style:normal; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hero p { color:var(--muted2); font-size:13px; font-family:'JetBrains Mono',monospace; line-height:1.7; }
+
+/* TOGGLE */
+.toggle-wrap { display:flex; justify-content:center; margin:22px 0; }
+.toggle-inner { display:inline-flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--border); border-radius:30px; padding:6px 16px; font-size:12px; font-family:'JetBrains Mono',monospace; color:var(--muted2); }
+.toggle-track { width:44px; height:22px; background:var(--border); border-radius:11px; cursor:pointer; position:relative; transition:background .25s; }
+.toggle-track.on { background:var(--accent2); }
+.toggle-thumb { position:absolute; top:3px; left:3px; width:16px; height:16px; background:white; border-radius:50%; transition:transform .25s; box-shadow:0 1px 4px rgba(0,0,0,.3); }
+.toggle-track.on .toggle-thumb { transform:translateX(22px); }
+.save-pill { padding:3px 9px; background:rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.3); border-radius:10px; font-size:10px; font-weight:700; color:var(--accent2); }
+
+/* GRID */
+.cards-wrap { max-width:1140px; margin:0 auto; padding:0 20px 60px; position:relative; z-index:2; }
+.sec-label { font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--muted); text-transform:uppercase; letter-spacing:.14em; margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+.sec-label::after { content:''; flex:1; height:1px; background:var(--border); }
+.personal-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:14px; }
+.ent-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:40px; }
+
+/* CARD */
+.pc { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:26px 22px; position:relative; overflow:hidden; transition:transform .2s,border-color .2s; }
+.pc:hover { transform:translateY(-3px); }
+.pc.c-blue   { border-color:rgba(14,165,233,.3); }
+.pc.c-green  { border-color:rgba(16,185,129,.3); }
+.pc.c-purple { border-color:rgba(139,92,246,.3); }
+.pc.c-rose   { border-color:rgba(244,63,94,.3); }
+.pc.c-blue::before   { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--accent),#0284c7); }
+.pc.c-green::before  { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--accent2),#059669); }
+.pc.c-purple::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--purple),#7c3aed); }
+.pc.c-rose::before   { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--rose),#e11d48); }
+
+.pc-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.pc-icon { font-size:24px; }
+.pc-tag { padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; font-family:'JetBrains Mono',monospace; letter-spacing:.06em; text-transform:uppercase; }
+.pt-blue   { background:rgba(14,165,233,.1);  color:var(--accent);  border:1px solid rgba(14,165,233,.2); }
+.pt-green  { background:rgba(16,185,129,.1);  color:var(--accent2); border:1px solid rgba(16,185,129,.2); }
+.pt-purple { background:rgba(139,92,246,.1);  color:var(--purple);  border:1px solid rgba(139,92,246,.2); }
+.pt-rose   { background:rgba(244,63,94,.1);   color:var(--rose);    border:1px solid rgba(244,63,94,.2); }
+
+.pc-name  { font-size:17px; font-weight:800; letter-spacing:-.02em; margin-bottom:3px; }
+.pc-users { font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:12px; }
+.pc-price { font-size:38px; font-weight:800; letter-spacing:-.04em; line-height:1; }
+.pc-price sup { font-size:17px; vertical-align:super; font-weight:600; }
+.pc-period  { font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:3px; }
+.pc-savings { font-size:11px; color:var(--accent2); font-family:'JetBrains Mono',monospace; margin-bottom:14px; min-height:14px; }
+.pc-desc { font-size:12px; color:var(--muted2); font-family:'JetBrains Mono',monospace; line-height:1.65; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+
+/* BUY BTN */
+.buy-btn { width:100%; padding:12px; border-radius:10px; font-size:13px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; letter-spacing:.03em; border:none; margin-bottom:16px; transition:opacity .2s,transform .1s; }
+.buy-btn:hover { opacity:.88; }
+.buy-btn:active { transform:scale(.98); }
+.buy-btn:disabled { opacity:.4; cursor:not-allowed; }
+.bb-blue   { background:linear-gradient(135deg,var(--accent),#0284c7); color:white; }
+.bb-green  { background:linear-gradient(135deg,var(--accent2),#059669); color:white; }
+.bb-purple { background:linear-gradient(135deg,var(--purple),#7c3aed); color:white; }
+.bb-rose   { background:linear-gradient(135deg,var(--rose),#e11d48); color:white; }
+.buy-btn .spin { display:none; width:16px; height:16px; border:2px solid rgba(255,255,255,.3); border-top-color:white; border-radius:50%; animation:spin .7s linear infinite; margin:auto; }
+.buy-btn.loading .blbl { display:none; }
+.buy-btn.loading .spin { display:block; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* FEATURES */
+.fl { font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px; }
+.fi { display:flex; align-items:flex-start; gap:8px; margin-bottom:7px; font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--muted2); line-height:1.4; }
+.fi.on { color:var(--text); }
+.fd { flex-shrink:0; width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:8px; margin-top:1px; }
+.fd.yb { background:rgba(14,165,233,.14); color:var(--accent); }
+.fd.yg { background:rgba(16,185,129,.14); color:var(--accent2); }
+.fd.yp { background:rgba(139,92,246,.14); color:var(--purple); }
+.fd.yr { background:rgba(244,63,94,.14);  color:var(--rose); }
+.fd.no { background:rgba(100,116,139,.1); color:var(--muted); }
+
+/* ULTIMATE CARD — full width contact */
+.ult-card { background:var(--card); border:1px solid rgba(244,63,94,.3); border-radius:16px; padding:28px; position:relative; overflow:hidden; }
+.ult-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--rose),#e11d48,var(--purple)); }
+.ult-inner { display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:center; }
+.ult-left .pc-name { font-size:22px; }
+.ult-price-row { display:flex; align-items:center; gap:14px; margin:12px 0 16px; }
+.ult-price-text { font-size:28px; font-weight:800; letter-spacing:-.02em; }
+.ult-badge { padding:5px 12px; background:rgba(244,63,94,.1); border:1px solid rgba(244,63,94,.2); border-radius:8px; font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--rose); }
+
+/* TRUST */
+.trust-row { display:flex; justify-content:center; gap:20px; flex-wrap:wrap; padding:0 20px 50px; position:relative; z-index:2; }
+.trust-item { display:flex; align-items:center; gap:7px; font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--muted); }
+
+/* OVERLAY */
+.overlay { position:fixed; inset:0; background:rgba(10,14,26,.95); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
+.overlay.show { display:flex; }
+.scard { background:var(--card); border:1px solid rgba(16,185,129,.3); border-radius:18px; padding:44px 36px; max-width:420px; width:100%; text-align:center; animation:fup .4s ease; }
+@keyframes fup { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.scard .sicon { font-size:52px; margin-bottom:16px; }
+.scard h2 { font-size:22px; font-weight:800; margin-bottom:10px; }
+.scard p { color:var(--muted2); font-size:12px; font-family:'JetBrains Mono',monospace; line-height:1.7; margin-bottom:22px; }
+.go-app { width:100%; padding:13px; background:linear-gradient(135deg,var(--accent2),#059669); border:none; border-radius:10px; color:white; font-size:14px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; transition:opacity .2s; margin-bottom:10px; }
+.go-app:hover { opacity:.88; }
+.go-dash { width:100%; padding:11px; background:transparent; border:1px solid var(--border); border-radius:10px; color:var(--muted2); font-size:13px; font-family:'Syne',sans-serif; cursor:pointer; transition:all .2s; }
+.go-dash:hover { border-color:var(--accent); color:var(--accent); }
+
+/* LOADING */
+.lscreen { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:300; transition:opacity .4s; }
+.lscreen.hide { opacity:0; pointer-events:none; }
+.lspin { width:34px; height:34px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
+
+@media(max-width:760px) {
+  .personal-grid,.ent-grid { grid-template-columns:1fr; }
+  .ult-inner { grid-template-columns:1fr; }
+  .topbar { padding:12px 16px; }
+}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div><div class="grid-bg"></div>
+<div class="lscreen" id="ls"><div class="lspin"></div></div>
+
+<!-- Success overlay -->
+<div class="overlay" id="sOverlay">
+  <div class="scard">
+    <div class="sicon">🎉</div>
+    <h2 id="sTitle">Plan activé !</h2>
+    <p id="sBody">Votre abonnement est actif. Accédez maintenant à l'application.</p>
+    <button class="go-app" onclick="location.href='relia.html'" id="sAppBtn">🚀 Ouvrir l'application</button>
+    <button class="go-dash" onclick="location.href='dashboard.html'" id="sDashBtn">Voir le Dashboard</button>
+  </div>
+</div>
+
+<!-- Topbar -->
+<div class="topbar">
+  <a class="brand" href="index.html"><div class="brand-icon">⚙️</div><div class="brand-name">Reliability <em>Suite Pro</em></div></a>
+  <div class="topbar-right">
+    <button class="lang-btn active" id="lFR" onclick="setLang('fr')">FR</button>
+    <button class="lang-btn" id="lEN" onclick="setLang('en')">EN</button>
+    <button class="back-btn" onclick="history.back()" id="backBtn">← Retour</button>
+  </div>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <h1 id="hTitle">Choisissez votre<br><em>plan d'accès</em></h1>
+  <p id="hSub">Essai 3h gratuit · Plans personnels · Entreprise · Ultimate sur devis</p>
+</div>
+
+<!-- Toggle -->
+<div class="toggle-wrap">
+  <div class="toggle-inner">
+    <span id="tMo">Mensuel</span>
+    <div class="toggle-track" id="bToggle" onclick="toggleBilling()"><div class="toggle-thumb"></div></div>
+    <span id="tAn">Annuel</span>
+    <span class="save-pill" id="tSave">économisez ~17%</span>
+  </div>
+</div>
+
+<div class="cards-wrap">
+
+  <!-- PERSONAL -->
+  <div class="sec-label" id="secP" style="margin-bottom:14px">👤 Plans Personnels</div>
+  <div class="personal-grid">
+
+    <!-- ESSENTIEL -->
+    <div class="pc c-blue">
+      <div class="pc-header"><div class="pc-icon">📊</div><span class="pc-tag pt-blue" id="tgE">Essentiel</span></div>
+      <div class="pc-name" id="nmE">Essentiel</div>
+      <div class="pc-users" id="usE">1 utilisateur</div>
+      <div class="pc-price" id="prE">30<sup>$</sup></div>
+      <div class="pc-period" id="peE">/mois</div>
+      <div class="pc-savings" id="svE">&nbsp;</div>
+      <div class="pc-desc" id="dE">Analyse de fiabilité complète. Weibull, MTBF, Probability Plots, Confidence Bounds + Reporting avancé.</div>
+      <button class="buy-btn bb-blue" id="btnE" onclick="buy('essentiel')"><span class="blbl" id="lbE">Choisir Essentiel</span><div class="spin"></div></button>
+      <div class="fl" id="flE">Inclus :</div>
+      <div class="fi on"><span class="fd yb">✓</span><span id="e1">Life Data Analysis (Weibull, Lognormal, Exp)</span></div>
+      <div class="fi on"><span class="fd yb">✓</span><span id="e2">Reliability Metrics (MTBF, R(t), F(t), h(t))</span></div>
+      <div class="fi on"><span class="fd yb">✓</span><span id="e3">Probability Plots</span></div>
+      <div class="fi on"><span class="fd yb">✓</span><span id="e4">Confidence Bounds</span></div>
+      <div class="fi on"><span class="fd yb">✓</span><span id="e5">Advanced Reporting & Templates</span></div>
+      <div class="fi on"><span class="fd yb">✓</span><span id="e6">Export PDF & Excel</span></div>
+      <div class="fi"><span class="fd no">—</span><span id="e7">Degradation Analysis</span></div>
+      <div class="fi"><span class="fd no">—</span><span id="e8">Maintenance & Spare Parts</span></div>
+    </div>
+
+    <!-- PROFESSIONNEL -->
+    <div class="pc c-green">
+      <div class="pc-header"><div class="pc-icon">🚀</div><span class="pc-tag pt-green" id="tgP">Professionnel</span></div>
+      <div class="pc-name" id="nmP">Professionnel</div>
+      <div class="pc-users" id="usP">1 utilisateur</div>
+      <div class="pc-price" id="prP">50<sup>$</sup></div>
+      <div class="pc-period" id="peP">/mois</div>
+      <div class="pc-savings" id="svP">&nbsp;</div>
+      <div class="pc-desc" id="dP">Tout Essentiel + Degradation Analysis. La solution complète pour un ingénieur de fiabilité.</div>
+      <button class="buy-btn bb-green" id="btnP" onclick="buy('professionnel')"><span class="blbl" id="lbP">Choisir Professionnel</span><div class="spin"></div></button>
+      <div class="fl" id="flP">Tout Essentiel, plus :</div>
+      <div class="fi on"><span class="fd yg">✓</span><span id="p1">Degradation Analysis</span></div>
+      <div class="fi on"><span class="fd yg">✓</span><span id="p2">Historique illimité</span></div>
+      <div class="fi on"><span class="fd yg">✓</span><span id="p3">Support prioritaire 24h</span></div>
+      <div class="fi"><span class="fd no">—</span><span id="p4">Preventive Maintenance Optimization</span></div>
+      <div class="fi"><span class="fd no">—</span><span id="p5">Spare Parts Forecasting</span></div>
+      <div class="fi"><span class="fd no">—</span><span id="p6">Multi-utilisateurs</span></div>
+    </div>
+
+  </div>
+
+  <!-- ENTREPRISE / ULTIMATE -->
+  <div class="sec-label" id="secE" style="margin-bottom:14px">🏢 Plans Organisation</div>
+  <div class="ent-grid">
+
+    <!-- ENTREPRISE -->
+    <div class="pc c-purple">
+      <div class="pc-header"><div class="pc-icon">🏢</div><span class="pc-tag pt-purple" id="tgEnt">Entreprise</span></div>
+      <div class="pc-name" id="nmEnt">Entreprise</div>
+      <div class="pc-users" id="usEnt">Jusqu'à 10 utilisateurs</div>
+      <div class="pc-price">450<sup>$</sup></div>
+      <div class="pc-period" id="peEnt">/mois</div>
+      <div class="pc-savings">&nbsp;</div>
+      <div class="pc-desc" id="dEnt">Tout Professionnel + Maintenance & Stocks + Multi-équipes. Pour les organisations.</div>
+      <button class="buy-btn bb-purple" id="btnEnt" onclick="buy('entreprise')"><span class="blbl" id="lbEnt">Choisir Entreprise</span><div class="spin"></div></button>
+      <div class="fl" id="flEnt">Tout Professionnel, plus :</div>
+      <div class="fi on"><span class="fd yp">✓</span><span id="ent1">Preventive Maintenance Optimization</span></div>
+      <div class="fi on"><span class="fd yp">✓</span><span id="ent2">Spare Parts Forecasting</span></div>
+      <div class="fi on"><span class="fd yp">✓</span><span id="ent3">10 utilisateurs simultanés</span></div>
+      <div class="fi on"><span class="fd yp">✓</span><span id="ent4">Gestion multi-équipes</span></div>
+      <div class="fi on"><span class="fd yp">✓</span><span id="ent5">Support dédié 24/7</span></div>
+      <div class="fi"><span class="fd no">—</span><span id="ent6">Multi-Asset / Fleet Analysis</span></div>
+      <div class="fi"><span class="fd no">—</span><span id="ent7">Portfolio / Multi-Site Dashboard</span></div>
+    </div>
+
+    <!-- ULTIMATE info panel -->
+    <div class="pc c-rose">
+      <div class="pc-header"><div class="pc-icon">👑</div><span class="pc-tag pt-rose" id="tgUlt">Ultimate</span></div>
+      <div class="pc-name" id="nmUlt">Ultimate</div>
+      <div class="pc-users" id="usUlt">Utilisateurs illimités · Multi-sites</div>
+      <div style="margin:12px 0 4px">
+        <span style="font-size:22px;font-weight:800" id="ultPriceTxt">Sur devis</span>
+      </div>
+      <div class="pc-period" id="peUlt">Tarif personnalisé</div>
+      <div class="pc-savings">&nbsp;</div>
+      <div class="pc-desc" id="dUlt">La solution la plus complète : Multi-Asset, Fleet Analysis, Reliability Growth, Portfolio Multi-Site. Pour les grandes organisations.</div>
+      <button class="buy-btn bb-rose" id="btnUlt" onclick="contactUltimate()"><span class="blbl" id="lbUlt">📧 Demander un devis</span><div class="spin"></div></button>
+      <div class="fl" id="flUlt">Tout Entreprise, plus :</div>
+      <div class="fi on"><span class="fd yr">✓</span><span id="u1">Multi-Asset / Fleet Analysis</span></div>
+      <div class="fi on"><span class="fd yr">✓</span><span id="u2">Reliability Growth Analysis (Crow-AMSAA)</span></div>
+      <div class="fi on"><span class="fd yr">✓</span><span id="u3">Portfolio / Multi-Site Dashboard</span></div>
+      <div class="fi on"><span class="fd yr">✓</span><span id="u4">Utilisateurs illimités</span></div>
+      <div class="fi on"><span class="fd yr">✓</span><span id="u5">Déploiement on-premise</span></div>
+      <div class="fi on"><span class="fd yr">✓</span><span id="u6">SLA garanti + support VIP</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Trust -->
+<div class="trust-row">
+  <div class="trust-item"><span>🔒</span><span id="tr1">Paiement sécurisé SSL</span></div>
+  <div class="trust-item"><span>💳</span><span id="tr2">Visa · Mastercard · AMEX</span></div>
+  <div class="trust-item"><span>🔄</span><span id="tr3">Annulation à tout moment</span></div>
+  <div class="trust-item"><span>📧</span><span id="tr4">Support inclus</span></div>
+  <div class="trust-item"><span>🌍</span><span id="tr5">Paiement mondial via Paddle</span></div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const supabase = createClient('https://kquwgqcxauymzkgfcxpm.supabase.co','sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx');
+
+const PADDLE_TOKEN = 'live_4a6671ddf9b19f023a90ce0cb36';
+const PRICES = {
+  essentiel_monthly:     'pri_01ktp3xx307qepx6f6xk2sqzpp',
+  essentiel_annual:      'pri_01ktp46y44cs7ayt5h7cxt0qgb',
+  professionnel_monthly: 'pri_01ktnhwg7zwyvrhearx3nxacbr',
+  professionnel_annual:  'pri_01ktnkerfqfnp2sqnvv2k4t9yw',
+  entreprise_monthly:    'pri_01ktnkndn91851hx3hd8znxp2s',
+};
+
+Paddle.Initialize({
+  token: PADDLE_TOKEN,
+  eventCallback: async (e) => { if (e.name==='checkout.completed') await onSuccess(e.data); }
+});
+
+let lang='fr', annual=false, user=null;
+
+// ── i18n ──────────────────────────────────────────────────────
+const T = {
+  fr: {
+    hTitle:'Choisissez votre<br><em>plan d\'accès</em>',
+    hSub:'Essai 3h gratuit · Plans personnels · Entreprise · Ultimate sur devis',
+    tMo:'Mensuel', tAn:'Annuel', tSave:'économisez ~17%', backBtn:'← Retour',
+    secP:'👤 Plans Personnels', secE:'🏢 Plans Organisation',
+    nmE:'Essentiel', usE:'1 utilisateur', peE:'/mois',
+    dE:'Analyse de fiabilité complète. Weibull, MTBF, Probability Plots, Confidence Bounds + Reporting avancé.',
+    lbE:'Choisir Essentiel', flE:'Inclus :',
+    nmP:'Professionnel', usP:'1 utilisateur', peP:'/mois',
+    dP:'Tout Essentiel + Degradation Analysis. La solution complète pour un ingénieur de fiabilité.',
+    lbP:'Choisir Professionnel', flP:'Tout Essentiel, plus :',
+    nmEnt:'Entreprise', usEnt:"Jusqu'à 10 utilisateurs", peEnt:'/mois',
+    dEnt:'Tout Professionnel + Maintenance & Stocks + Multi-équipes.',
+    lbEnt:'Choisir Entreprise', flEnt:'Tout Professionnel, plus :',
+    nmUlt:'Ultimate', usUlt:'Utilisateurs illimités · Multi-sites', peUlt:'Tarif personnalisé',
+    ultPriceTxt:'Sur devis',
+    dUlt:'La solution la plus complète. Multi-Asset, Fleet, Reliability Growth, Portfolio Multi-Site.',
+    lbUlt:'📧 Demander un devis', flUlt:'Tout Entreprise, plus :',
+    e1:'Life Data Analysis (Weibull, Lognormal, Exp)', e2:'Reliability Metrics (MTBF, R(t), F(t), h(t))',
+    e3:'Probability Plots', e4:'Confidence Bounds', e5:'Advanced Reporting & Templates',
+    e6:'Export PDF & Excel', e7:'Degradation Analysis', e8:'Maintenance & Spare Parts',
+    p1:'Degradation Analysis', p2:'Historique illimité', p3:'Support prioritaire 24h',
+    p4:'Preventive Maintenance Optimization', p5:'Spare Parts Forecasting', p6:'Multi-utilisateurs',
+    ent1:'Preventive Maintenance Optimization', ent2:'Spare Parts Forecasting',
+    ent3:'10 utilisateurs simultanés', ent4:'Gestion multi-équipes',
+    ent5:'Support dédié 24/7', ent6:'Multi-Asset / Fleet Analysis', ent7:'Portfolio / Multi-Site Dashboard',
+    u1:'Multi-Asset / Fleet Analysis', u2:'Reliability Growth Analysis (Crow-AMSAA)',
+    u3:'Portfolio / Multi-Site Dashboard', u4:'Utilisateurs illimités',
+    u5:'Déploiement on-premise', u6:'SLA garanti + support VIP',
+    tr1:'Paiement sécurisé SSL', tr2:'Visa · Mastercard · AMEX',
+    tr3:'Annulation à tout moment', tr4:'Support inclus', tr5:'Paiement mondial via Paddle',
+    svE300:'Facturé 300$/an — économisez 60$', svP500:'Facturé 500$/an — économisez 100$',
+    sTitle:'Plan activé !', sBody:'Votre abonnement est actif. Accédez maintenant à l\'application.',
+    sAppBtn:'🚀 Ouvrir l\'application', sDashBtn:'Voir le Dashboard',
+  },
+  en: {
+    hTitle:'Choose your<br><em>access plan</em>',
+    hSub:'Free 3h trial · Personal plans · Enterprise · Ultimate custom pricing',
+    tMo:'Monthly', tAn:'Annual', tSave:'save ~17%', backBtn:'← Back',
+    secP:'👤 Personal Plans', secE:'🏢 Organization Plans',
+    nmE:'Essential', usE:'1 user', peE:'/month',
+    dE:'Full reliability analysis. Weibull, MTBF, Probability Plots, Confidence Bounds + Advanced Reporting.',
+    lbE:'Choose Essential', flE:'Included:',
+    nmP:'Professional', usP:'1 user', peP:'/month',
+    dP:'Everything in Essential + Degradation Analysis. The complete solution for a reliability engineer.',
+    lbP:'Choose Professional', flP:'Everything in Essential, plus:',
+    nmEnt:'Enterprise', usEnt:'Up to 10 users', peEnt:'/month',
+    dEnt:'Everything in Professional + Maintenance & Spare Parts + Multi-team management.',
+    lbEnt:'Choose Enterprise', flEnt:'Everything in Professional, plus:',
+    nmUlt:'Ultimate', usUlt:'Unlimited users · Multi-site', peUlt:'Custom pricing',
+    ultPriceTxt:'Custom quote',
+    dUlt:'The most complete solution. Multi-Asset, Fleet, Reliability Growth, Portfolio Multi-Site.',
+    lbUlt:'📧 Request a quote', flUlt:'Everything in Enterprise, plus:',
+    e1:'Life Data Analysis (Weibull, Lognormal, Exp)', e2:'Reliability Metrics (MTBF, R(t), F(t), h(t))',
+    e3:'Probability Plots', e4:'Confidence Bounds', e5:'Advanced Reporting & Templates',
+    e6:'PDF & Excel Export', e7:'Degradation Analysis', e8:'Maintenance & Spare Parts',
+    p1:'Degradation Analysis', p2:'Unlimited history', p3:'Priority support 24h',
+    p4:'Preventive Maintenance Optimization', p5:'Spare Parts Forecasting', p6:'Multi-user',
+    ent1:'Preventive Maintenance Optimization', ent2:'Spare Parts Forecasting',
+    ent3:'10 simultaneous users', ent4:'Multi-team management',
+    ent5:'Dedicated 24/7 support', ent6:'Multi-Asset / Fleet Analysis', ent7:'Portfolio / Multi-Site Dashboard',
+    u1:'Multi-Asset / Fleet Analysis', u2:'Reliability Growth Analysis (Crow-AMSAA)',
+    u3:'Portfolio / Multi-Site Dashboard', u4:'Unlimited users',
+    u5:'On-premise deployment', u6:'Guaranteed SLA + VIP support',
+    tr1:'SSL secured payment', tr2:'Visa · Mastercard · AMEX',
+    tr3:'Cancel anytime', tr4:'Support included', tr5:'Worldwide payment via Paddle',
+    svE300:'Billed $300/year — save $60', svP500:'Billed $500/year — save $100',
+    sTitle:'Plan activated!', sBody:'Your subscription is active. Access the application now.',
+    sAppBtn:'🚀 Open application', sDashBtn:'View Dashboard',
+  }
+};
+
+window.setLang = function(l) {
+  lang = l;
+  document.getElementById('lFR').classList.toggle('active',l==='fr');
+  document.getElementById('lEN').classList.toggle('active',l==='en');
+  const t = T[l];
+  const htmlIds = ['hTitle'];
+  Object.keys(t).forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    htmlIds.includes(id) ? el.innerHTML=t[id] : el.textContent=t[id];
+  });
+  updatePrices();
+};
+
+window.toggleBilling = function() {
+  annual = !annual;
+  document.getElementById('bToggle').classList.toggle('on', annual);
+  updatePrices();
+};
+
+function updatePrices() {
+  const t = T[lang];
+  const mo = lang==='fr' ? '/mois' : '/month';
+  if (annual) {
+    document.getElementById('prE').innerHTML = '25<sup>$</sup>';
+    document.getElementById('svE').textContent = t.svE300;
+    document.getElementById('prP').innerHTML = '41<sup>$</sup>';
+    document.getElementById('svP').textContent = t.svP500;
+  } else {
+    document.getElementById('prE').innerHTML = '30<sup>$</sup>';
+    document.getElementById('svE').textContent = '\u00a0';
+    document.getElementById('prP').innerHTML = '50<sup>$</sup>';
+    document.getElementById('svP').textContent = '\u00a0';
+  }
+}
+
+window.buy = async function(plan) {
+  if (!user) { location.href='login.html'; return; }
+  const map = { essentiel:'btnE', professionnel:'btnP', entreprise:'btnEnt' };
+  const btn = document.getElementById(map[plan]);
+  btn.classList.add('loading'); btn.disabled=true;
+  const priceMap = {
+    essentiel:    annual ? PRICES.essentiel_annual    : PRICES.essentiel_monthly,
+    professionnel:annual ? PRICES.professionnel_annual: PRICES.professionnel_monthly,
+    entreprise:   PRICES.entreprise_monthly,
+  };
+  try {
+    Paddle.Checkout.open({
+      items:[{ priceId: priceMap[plan], quantity:1 }],
+      customer:{ email: user.email },
+      customData:{ supabase_user_id: user.id, plan },
+      settings:{ theme:'dark', locale:lang,
+        successUrl:`${window.location.origin}/reliability_app/payment.html?success=1&plan=${plan}` }
+    });
+  } catch(e){ console.error(e); }
+  finally { btn.classList.remove('loading'); btn.disabled=false; }
+};
+
+window.contactUltimate = function() {
+  window.location.href = 'mailto:contact@reliabilitysuite.pro?subject=Ultimate Plan — Demande de devis&body=Bonjour,%0A%0AJe suis intéressé par le plan Ultimate de Reliability Suite Pro.%0A%0ANom:%0AOrganisation:%0ANombre d\'utilisateurs:%0ABesoins spécifiques:%0A%0AMerci.';
+};
+
+async function onSuccess(data) {
+  const plan = data?.customData?.plan || 'essentiel';
+  if (user) await supabase.from('profiles').update({ plan }).eq('id', user.id);
+  document.getElementById('sOverlay').classList.add('show');
+}
+
+async function checkSuccess() {
+  const p = new URLSearchParams(window.location.search);
+  if (p.get('success')==='1' && user) {
+    const plan = p.get('plan') || 'essentiel';
+    await supabase.from('profiles').update({ plan }).eq('id', user.id);
+    document.getElementById('sOverlay').classList.add('show');
+    window.history.replaceState({},'', window.location.pathname);
+  }
+}
+
+const { data:{ session } } = await supabase.auth.getSession();
+if (!session) { location.href='login.html'; }
+else {
+  user = session.user;
+  const { data:profile } = await supabase.from('profiles').select('plan').eq('id',user.id).single();
+  if (['essentiel','professionnel','entreprise','ultimate'].includes(profile?.plan)) {
+    location.href='dashboard.html';
+  }
+  await checkSuccess();
+  const ls=document.getElementById('ls');
+  ls.classList.add('hide'); setTimeout(()=>ls.remove(),500);
+}
+</script>
+</body>
+</html>

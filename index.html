@@ -5,565 +5,431 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reliability Suite Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 :root {
-  --bg: #0a0e1a;
-  --accent: #0ea5e9;
-  --accent2: #10b981;
-  --text: #f0f4ff;
-  --muted: #64748b;
-  --card: #131c2e;
-  --border: #1e2d45;
+  --bg:#0a0e1a; --surface:#111827; --border:#1e2d45;
+  --accent:#0ea5e9; --accent2:#10b981; --warning:#f59e0b; --purple:#8b5cf6;
+  --text:#f0f4ff; --muted:#64748b; --muted2:#94a3b8; --card:#131c2e;
 }
+body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
 
-body {
-  font-family: 'Syne', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+/* BG */
+.bg-glow { position:fixed; inset:0; pointer-events:none; background:radial-gradient(ellipse 80% 60% at 50% 20%, rgba(14,165,233,.09) 0%, transparent 70%); }
+.grid-bg { position:fixed; inset:0; pointer-events:none; background-image:linear-gradient(rgba(14,165,233,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(14,165,233,.04) 1px,transparent 1px); background-size:44px 44px; }
 
-/* ── TOPBAR ─────────────────────────────────────────── */
-.topbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 40px;
-  background: rgba(10,14,26,0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(30,45,69,0.6);
-}
+/* TOPBAR */
+.topbar { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:16px 44px; background:rgba(10,14,26,.85); backdrop-filter:blur(14px); border-bottom:1px solid rgba(30,45,69,.5); }
+.brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); }
+.brand-icon { width:34px; height:34px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:17px; }
+.brand-name { font-size:14px; font-weight:700; letter-spacing:.04em; }
+.brand-name em { font-style:normal; color:var(--accent); }
+.topbar-nav { display:flex; align-items:center; gap:6px; }
+.nav-link { padding:7px 14px; background:transparent; border:none; color:var(--muted2); font-size:13px; font-family:'Syne',sans-serif; font-weight:600; cursor:pointer; border-radius:6px; transition:color .2s; }
+.nav-link:hover { color:var(--text); }
+.lang-btn { padding:5px 10px; background:transparent; border:1px solid var(--border); border-radius:6px; color:var(--muted); font-size:11px; font-weight:700; font-family:'JetBrains Mono',monospace; cursor:pointer; transition:all .2s; }
+.lang-btn.active, .lang-btn:hover { border-color:var(--accent); color:var(--accent); }
+.nav-btn-buy { padding:8px 18px; background:linear-gradient(135deg,var(--accent2),#059669); border:none; border-radius:7px; color:white; font-size:13px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; letter-spacing:.03em; transition:opacity .2s; }
+.nav-btn-buy:hover { opacity:.85; }
+.nav-btn-dash { padding:8px 18px; background:linear-gradient(135deg,var(--accent),#0284c7); border:none; border-radius:7px; color:white; font-size:13px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; letter-spacing:.03em; transition:opacity .2s; display:none; }
+.nav-btn-dash:hover { opacity:.85; }
 
-.topbar-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
+/* HERO */
+.hero { min-height:100vh; display:flex; align-items:center; justify-content:center; text-align:center; position:relative; padding:110px 30px 70px; }
+.hero-inner { position:relative; z-index:2; max-width:820px; }
+.hero-label { display:inline-flex; align-items:center; gap:8px; padding:5px 16px; background:rgba(14,165,233,.08); border:1px solid rgba(14,165,233,.2); border-radius:20px; font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--accent); letter-spacing:.1em; text-transform:uppercase; margin-bottom:26px; }
+.hero h1 { font-size:clamp(38px,7vw,80px); font-weight:800; letter-spacing:-.035em; line-height:1.04; margin-bottom:22px; }
+.hero h1 em { font-style:normal; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hero-sub { font-size:16px; color:var(--muted2); font-family:'JetBrains Mono',monospace; line-height:1.75; margin-bottom:42px; max-width:600px; margin-left:auto; margin-right:auto; }
+.hero-btns { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-bottom:56px; }
 
-.topbar-brand .dot {
-  width: 32px; height: 32px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border-radius: 7px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-}
+/* Buttons */
+.btn-try { padding:15px 36px; background:linear-gradient(135deg,var(--accent),#0284c7); border:none; border-radius:11px; color:white; font-size:16px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; letter-spacing:.03em; transition:opacity .2s, transform .15s; box-shadow:0 8px 30px rgba(14,165,233,.25); }
+.btn-try:hover { opacity:.9; transform:translateY(-2px); }
+.btn-buy { padding:15px 36px; background:linear-gradient(135deg,var(--accent2),#059669); border:none; border-radius:11px; color:white; font-size:16px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; letter-spacing:.03em; transition:opacity .2s, transform .15s; box-shadow:0 8px 30px rgba(16,185,129,.2); }
+.btn-buy:hover { opacity:.9; transform:translateY(-2px); }
 
-.topbar-brand span { color: var(--accent); }
+/* TRIAL BADGE */
+.trial-note { display:inline-flex; align-items:center; gap:8px; font-size:12px; font-family:'JetBrains Mono',monospace; color:var(--muted); }
+.trial-note span { background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.25); border-radius:6px; padding:3px 10px; color:var(--warning); font-size:11px; font-weight:700; }
 
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+/* STATS ROW */
+.stats-row { display:flex; justify-content:center; gap:50px; flex-wrap:wrap; margin-top:60px; }
+.stat-item { text-align:center; }
+.stat-num { font-size:32px; font-weight:800; letter-spacing:-.03em; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.stat-lbl { font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.1em; margin-top:4px; }
 
-.lang-btn {
-  padding: 6px 12px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
-  cursor: pointer;
-  transition: all 0.2s;
-  letter-spacing: 0.06em;
-}
+/* FEATURES SECTION */
+.section { padding:80px 30px; max-width:1100px; margin:auto; position:relative; z-index:2; }
+.section-head { text-align:center; margin-bottom:52px; }
+.section-head h2 { font-size:clamp(26px,4vw,40px); font-weight:800; letter-spacing:-.025em; margin-bottom:10px; }
+.section-head p { color:var(--muted2); font-size:13px; font-family:'JetBrains Mono',monospace; }
 
-.lang-btn:hover, .lang-btn.active {
-  border-color: var(--accent);
-  color: var(--accent);
-}
+/* Feature grid */
+.feat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; }
+.feat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:26px; transition:border-color .2s, transform .2s; }
+.feat-card:hover { border-color:var(--accent); transform:translateY(-3px); }
+.feat-card-icon { font-size:30px; margin-bottom:14px; }
+.feat-card-title { font-size:15px; font-weight:700; margin-bottom:8px; letter-spacing:-.01em; }
+.feat-card-desc { font-size:12px; color:var(--muted2); font-family:'JetBrains Mono',monospace; line-height:1.7; }
+.feat-plan-tag { display:inline-block; margin-top:10px; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.07em; }
+.tag-all      { background:rgba(245,158,11,.1); color:var(--warning); }
+.tag-ess      { background:rgba(14,165,233,.1);  color:var(--accent);  }
+.tag-pro      { background:rgba(16,185,129,.1);  color:var(--accent2); }
+.tag-ent      { background:rgba(139,92,246,.1);  color:var(--purple);  }
+.tag-ult      { background:rgba(244,63,94,.1);   color:#f43f5e;        }
 
-.login-btn {
-  padding: 8px 20px;
-  background: linear-gradient(135deg, var(--accent), #0284c7);
-  border: none;
-  border-radius: 7px;
-  color: white;
-  font-size: 13px;
-  font-weight: 700;
-  font-family: 'Syne', sans-serif;
-  cursor: pointer;
-  letter-spacing: 0.03em;
-  transition: opacity 0.2s;
-}
+/* PLANS OVERVIEW */
+.plans-overview { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; }
+.pov-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:22px 18px; text-align:center; transition:border-color .2s; }
+.pov-card:hover { border-color:var(--accent); }
+.pov-icon { font-size:28px; margin-bottom:10px; }
+.pov-name { font-size:14px; font-weight:700; margin-bottom:4px; }
+.pov-price { font-size:22px; font-weight:800; letter-spacing:-.02em; margin-bottom:4px; }
+.pov-period { font-size:10px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:12px; }
+.pov-btn { width:100%; padding:9px; border:none; border-radius:8px; font-size:12px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; transition:opacity .2s; letter-spacing:.03em; }
+.pov-btn:hover { opacity:.85; }
+.pov-btn.blue   { background:linear-gradient(135deg,var(--accent),#0284c7); color:white; }
+.pov-btn.green  { background:linear-gradient(135deg,var(--accent2),#059669); color:white; }
+.pov-btn.purple { background:linear-gradient(135deg,var(--purple),#7c3aed); color:white; }
+.pov-btn.rose   { background:linear-gradient(135deg,#f43f5e,#e11d48); color:white; }
+.pov-btn.ghost  { background:transparent; border:1px solid var(--border); color:var(--text); }
 
-.login-btn:hover { opacity: 0.85; }
+/* CTA BOTTOM */
+.cta-section { padding:80px 30px; text-align:center; position:relative; z-index:2; }
+.cta-bg { position:absolute; inset:0; background:radial-gradient(ellipse 60% 80% at 50% 50%, rgba(14,165,233,.06) 0%, transparent 70%); pointer-events:none; }
+.cta-inner { position:relative; z-index:2; max-width:560px; margin:auto; }
+.cta-inner h2 { font-size:clamp(26px,4vw,40px); font-weight:800; letter-spacing:-.025em; margin-bottom:12px; }
+.cta-inner p { color:var(--muted2); font-size:13px; font-family:'JetBrains Mono',monospace; line-height:1.7; margin-bottom:28px; }
+.cta-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.cta-btn { padding:13px 28px; border-radius:10px; font-size:14px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; border:none; transition:opacity .2s, transform .15s; }
+.cta-btn:hover { opacity:.88; transform:translateY(-1px); }
+.cta-btn.primary { background:linear-gradient(135deg,var(--accent),#0284c7); color:white; }
+.cta-btn.success { background:linear-gradient(135deg,var(--accent2),#059669); color:white; }
 
-.dashboard-btn {
-  padding: 8px 20px;
-  background: linear-gradient(135deg, var(--accent2), #059669);
-  border: none;
-  border-radius: 7px;
-  color: white;
-  font-size: 13px;
-  font-weight: 700;
-  font-family: 'Syne', sans-serif;
-  cursor: pointer;
-  letter-spacing: 0.03em;
-  transition: opacity 0.2s;
-  display: none;
-}
+footer { text-align:center; padding:28px; color:var(--muted); font-size:11px; font-family:'JetBrains Mono',monospace; border-top:1px solid var(--border); position:relative; z-index:2; }
+footer a { color:var(--muted); text-decoration:none; }
+footer a:hover { color:var(--accent); }
 
-.dashboard-btn:hover { opacity: 0.85; }
-
-/* ── HERO ────────────────────────────────────────────── */
-.hero {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  padding: 100px 30px 60px;
-}
-
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 70% 60% at 50% 40%, rgba(14,165,233,0.1) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 50% at 20% 80%, rgba(16,185,129,0.07) 0%, transparent 60%),
-    var(--bg);
-}
-
-.grid-overlay {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(14,165,233,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(14,165,233,0.04) 1px, transparent 1px);
-  background-size: 50px 50px;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-  max-width: 780px;
-}
-
-.hero-label {
-  display: inline-block;
-  padding: 5px 14px;
-  background: rgba(14,165,233,0.1);
-  border: 1px solid rgba(14,165,233,0.25);
-  border-radius: 20px;
-  font-size: 11px;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--accent);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 28px;
-}
-
-.hero h1 {
-  font-size: clamp(38px, 7vw, 80px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-  margin-bottom: 24px;
-}
-
-.hero h1 em {
-  font-style: normal;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.hero p {
-  font-size: 17px;
-  color: var(--muted);
-  font-family: 'JetBrains Mono', monospace;
-  line-height: 1.7;
-  margin-bottom: 40px;
-  max-width: 560px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.hero-btns {
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.btn-primary {
-  padding: 14px 32px;
-  background: linear-gradient(135deg, var(--accent), #0284c7);
-  border: none;
-  border-radius: 10px;
-  color: white;
-  font-size: 15px;
-  font-weight: 700;
-  font-family: 'Syne', sans-serif;
-  cursor: pointer;
-  letter-spacing: 0.03em;
-  transition: opacity 0.2s, transform 0.15s;
-}
-
-.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-
-.btn-secondary {
-  padding: 14px 32px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  font-size: 15px;
-  font-weight: 700;
-  font-family: 'Syne', sans-serif;
-  cursor: pointer;
-  letter-spacing: 0.03em;
-  transition: all 0.2s;
-}
-
-.btn-secondary:hover {
-  border-color: var(--accent2);
-  color: var(--accent2);
-}
-
-/* ── FEATURES ────────────────────────────────────────── */
-.section {
-  padding: 80px 30px;
-  max-width: 1100px;
-  margin: auto;
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 50px;
-}
-
-.section-header h2 {
-  font-size: 36px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  margin-bottom: 10px;
-}
-
-.section-header p {
-  color: var(--muted);
-  font-size: 13px;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-}
-
-.feat-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 28px;
-  transition: border-color 0.2s, transform 0.2s;
-}
-
-.feat-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-3px);
-}
-
-.feat-icon { font-size: 32px; margin-bottom: 16px; }
-
-.feat-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  letter-spacing: -0.01em;
-}
-
-.feat-desc {
-  font-size: 12px;
-  color: var(--muted);
-  font-family: 'JetBrains Mono', monospace;
-  line-height: 1.7;
-}
-
-/* ── PRICING ──────────────────────────────────────────── */
-.pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
-  max-width: 900px;
-  margin: auto;
-}
-
-.price-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 32px;
-  text-align: center;
-  transition: border-color 0.2s;
-}
-
-.price-card.featured {
-  border-color: var(--accent);
-  position: relative;
-  overflow: hidden;
-}
-
-.price-card.featured::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-}
-
-.price-name {
-  font-size: 12px;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 14px;
-}
-
-.price-amount {
-  font-size: 42px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  margin-bottom: 6px;
-}
-
-.price-amount span {
-  font-size: 16px;
-  color: var(--muted);
-  font-weight: 400;
-}
-
-.price-desc {
-  font-size: 12px;
-  color: var(--muted);
-  font-family: 'JetBrains Mono', monospace;
-  margin-bottom: 24px;
-  line-height: 1.7;
-}
-
-.price-btn {
-  width: 100%;
-  padding: 11px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  font-family: 'Syne', sans-serif;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  letter-spacing: 0.03em;
-  border: none;
-}
-
-.price-btn.outline {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-
-.price-btn.fill {
-  background: linear-gradient(135deg, var(--accent), #0284c7);
-  color: white;
-}
-
-.price-btn:hover { opacity: 0.85; }
-
-/* ── FOOTER ───────────────────────────────────────────── */
-footer {
-  text-align: center;
-  padding: 30px;
-  color: var(--muted);
-  font-size: 12px;
-  font-family: 'JetBrains Mono', monospace;
-  border-top: 1px solid var(--border);
-}
-
-@media (max-width: 600px) {
-  .topbar { padding: 14px 20px; }
-  .topbar-brand .dot { display: none; }
+@media(max-width:600px) {
+  .topbar { padding:12px 18px; }
+  .topbar-nav .nav-link { display:none; }
+  .stats-row { gap:28px; }
 }
 </style>
 </head>
 <body>
 
+<div class="bg-glow"></div>
+<div class="grid-bg"></div>
+
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="topbar-brand">
-    <div class="dot">⚙️</div>
-    Reliability <span>&nbsp;Suite Pro</span>
-  </div>
-  <div class="topbar-right">
-    <button class="lang-btn active" onclick="setLang('fr');this.classList.add('active');document.querySelectorAll('.lang-btn')[1].classList.remove('active')">FR</button>
-    <button class="lang-btn" onclick="setLang('en');this.classList.add('active');document.querySelectorAll('.lang-btn')[0].classList.remove('active')">EN</button>
-    <button class="nav-link" onclick="window.location.href='pricing.html'" style="padding:8px 14px;background:transparent;border:none;color:#94a3b8;font-size:13px;font-family:'Syne',sans-serif;font-weight:600;cursor:pointer;border-radius:6px;transition:color 0.2s;letter-spacing:0.02em" onmouseover="this.style.color='#f0f4ff'" onmouseout="this.style.color='#94a3b8'">Tarifs</button>
-    <button class="login-btn" id="loginBtn" onclick="window.location.href='login.html'">Connexion</button>
-    <button class="dashboard-btn" id="dashBtn" onclick="window.location.href='dashboard.html'">Dashboard →</button>
+  <a class="brand" href="#">
+    <div class="brand-icon">⚙️</div>
+    <div class="brand-name">Reliability <em>Suite Pro</em></div>
+  </a>
+  <div class="topbar-nav">
+    <button class="lang-btn active" id="lFR" onclick="setLang('fr')">FR</button>
+    <button class="lang-btn" id="lEN" onclick="setLang('en')">EN</button>
+    <button class="nav-link" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})" id="navFeat">Fonctionnalités</button>
+    <button class="nav-link" onclick="location.href='pricing.html'" id="navPricing">Tarifs</button>
+    <button class="nav-btn-buy" onclick="location.href='pricing.html'" id="navBuy">Acheter</button>
+    <button class="nav-btn-dash" onclick="location.href='dashboard.html'" id="navDash">Dashboard →</button>
   </div>
 </div>
 
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-bg"></div>
-  <div class="grid-overlay"></div>
-  <div class="hero-content">
-    <div class="hero-label" id="heroLabel">✦ Analyse industrielle avancée</div>
-    <h1 id="heroTitle">Reliability<br><em>Suite Pro</em></h1>
-    <p id="heroSub">Analyse de fiabilité · Maintenance préventive<br>Optimisation des stocks de pièces de rechange</p>
+  <div class="hero-inner">
+    <div class="hero-label" id="heroLabel">⚙️ Reliability Engineering Software</div>
+    <h1 id="heroTitle">Analyse de fiabilité<br><em>professionnelle</em></h1>
+    <p class="hero-sub" id="heroSub">Weibull · MTBF · Maintenance préventive · Gestion des stocks<br>De l'essai gratuit au déploiement entreprise</p>
+
     <div class="hero-btns">
-      <button class="btn-primary" onclick="window.location.href='login.html'" id="tryBtn">🚀 Essayer gratuitement</button>
-      <button class="btn-secondary" onclick="scrollTo({top:document.querySelector('.section').offsetTop,behavior:'smooth'})" id="learnBtn">En savoir plus</button>
+      <button class="btn-try" onclick="startTrial()" id="btnTry">🚀 Essayer gratuitement</button>
+      <button class="btn-buy" onclick="location.href='pricing.html'" id="btnBuy">💳 Acheter un plan</button>
+    </div>
+
+    <div class="trial-note">
+      <span id="trialBadge">3h GRATUIT</span>
+      <span id="trialNote">Aucune carte requise · 1 essai par appareil</span>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-num">4</div>
+        <div class="stat-lbl" id="statL1">Plans disponibles</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">11</div>
+        <div class="stat-lbl" id="statL2">Modules d'analyse</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">3h</div>
+        <div class="stat-lbl" id="statL3">Essai gratuit</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">100%</div>
+        <div class="stat-lbl" id="statL4">Sécurisé</div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- FEATURES -->
+<div class="section" id="features">
+  <div class="section-head">
+    <h2 id="featTitle">Fonctionnalités par plan</h2>
+    <p id="featSub">Chaque plan débloque de nouvelles capacités d'analyse</p>
+  </div>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-card-icon">📊</div>
+      <div class="feat-card-title" id="fc1t">Life Data Analysis</div>
+      <div class="feat-card-desc" id="fc1d">Weibull, Lognormal, Exponentielle. Modélisation statistique complète des défaillances.</div>
+      <span class="feat-plan-tag tag-all" id="fc1p">Tous les plans</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon">⏱️</div>
+      <div class="feat-card-title" id="fc2t">Reliability Metrics</div>
+      <div class="feat-card-desc" id="fc2d">MTBF, R(t), F(t), h(t). Indicateurs clés de fiabilité calculés automatiquement.</div>
+      <span class="feat-plan-tag tag-all" id="fc2p">Tous les plans</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon">📈</div>
+      <div class="feat-card-title" id="fc3t">Probability Plots</div>
+      <div class="feat-card-desc" id="fc3d">Graphiques de probabilité pour validation des distributions et ajustement des paramètres.</div>
+      <span class="feat-plan-tag tag-all" id="fc3p">Tous les plans</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon">🎯</div>
+      <div class="feat-card-title" id="fc4t">Confidence Bounds</div>
+      <div class="feat-card-desc" id="fc4d">Intervalles de confiance sur les estimations de fiabilité et paramètres Weibull.</div>
+      <span class="feat-plan-tag tag-all" id="fc4p">Tous les plans</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon">📉</div>
+      <div class="feat-card-title" id="fc5t">Degradation Analysis</div>
+      <div class="feat-card-desc" id="fc5d">Modélisation de la dégradation progressive des équipements pour prédire les défaillances.</div>
+      <span class="feat-plan-tag tag-pro" id="fc5p">Professionnel+</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon">🔧</div>
+      <div class="feat-card-title" id="fc6t">Preventive Maintenance</div>
+      <div class="feat-card-desc" id="fc6d">Optimisation des intervalles de maintenance préventive pour minimiser coûts et arrêts.</div>
+      <span class="feat-plan-tag tag-ent" id="fc6p">Entreprise+</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon">📦</div>
+      <div class="feat-card-title" id="fc7t">Spare Parts Forecasting</div>
+      <div class="feat-card-desc" id="fc7d">Prévision des besoins en pièces de rechange basée sur les données de fiabilité.</div>
+      <span class="feat-plan-tag tag-ent" id="fc7p">Entreprise+</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon">🚗</div>
+      <div class="feat-card-title" id="fc8t">Multi-Asset / Fleet</div>
+      <div class="feat-card-desc" id="fc8d">Analyse simultanée de flottes et d'actifs multiples avec comparaisons inter-équipements.</div>
+      <span class="feat-plan-tag tag-ult" id="fc8p">Ultimate</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon">📋</div>
+      <div class="feat-card-title" id="fc9t">Advanced Reporting</div>
+      <div class="feat-card-desc" id="fc9d">Templates de rapports professionnels, export PDF & Excel, rapports automatisés.</div>
+      <span class="feat-plan-tag tag-ess" id="fc9p">Essentiel+</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon">🌐</div>
+      <div class="feat-card-title" id="fc10t">Portfolio / Multi-Site</div>
+      <div class="feat-card-desc" id="fc10d">Dashboard consolidé multi-sites. Vue portefeuille pour toute l'organisation.</div>
+      <span class="feat-plan-tag tag-ult" id="fc10p">Ultimate</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon">📊</div>
+      <div class="feat-card-title" id="fc11t">Reliability Growth</div>
+      <div class="feat-card-desc" id="fc11d">Analyse de la croissance de fiabilité (Crow-AMSAA) pour suivre l'amélioration des systèmes.</div>
+      <span class="feat-plan-tag tag-ult" id="fc11p">Ultimate</span>
+    </div>
+  </div>
+</div>
+
+<!-- PLANS OVERVIEW -->
 <div class="section">
-  <div class="section-header">
-    <h2 id="featTitle">Fonctionnalités</h2>
-    <p id="featSub">Tout ce dont vous avez besoin pour analyser et optimiser</p>
+  <div class="section-head">
+    <h2 id="plansTitle">Choisissez votre plan</h2>
+    <p id="plansSub">De l'ingénieur indépendant à la grande entreprise</p>
   </div>
-  <div class="features-grid">
-    <div class="feat-card">
-      <div class="feat-icon">📊</div>
-      <div class="feat-title" id="f1">Analyse Weibull</div>
-      <div class="feat-desc" id="f1d">Modélisation statistique des défaillances avec paramètres β et η.</div>
+  <div class="plans-overview">
+    <div class="pov-card">
+      <div class="pov-icon">🔬</div>
+      <div class="pov-name" id="pn0">Trial</div>
+      <div class="pov-price">0$</div>
+      <div class="pov-period" id="pp0">3 heures · 1 appareil</div>
+      <button class="pov-btn ghost" onclick="startTrial()" id="pb0">Essayer</button>
     </div>
-    <div class="feat-card">
-      <div class="feat-icon">⏱️</div>
-      <div class="feat-title" id="f2">MTBF / MTTR</div>
-      <div class="feat-desc" id="f2d">Calcul automatique des indicateurs de fiabilité et maintenabilité.</div>
+    <div class="pov-card">
+      <div class="pov-icon">📊</div>
+      <div class="pov-name" id="pn1">Essentiel</div>
+      <div class="pov-price">30$</div>
+      <div class="pov-period" id="pp1">/mois</div>
+      <button class="pov-btn blue" onclick="location.href='pricing.html'" id="pb1">Choisir</button>
     </div>
-    <div class="feat-card">
-      <div class="feat-icon">🔧</div>
-      <div class="feat-title" id="f3">Maintenance préventive</div>
-      <div class="feat-desc" id="f3d">Optimisation des intervalles de maintenance pour minimiser les coûts.</div>
+    <div class="pov-card">
+      <div class="pov-icon">🚀</div>
+      <div class="pov-name" id="pn2">Professionnel</div>
+      <div class="pov-price">50$</div>
+      <div class="pov-period" id="pp2">/mois</div>
+      <button class="pov-btn green" onclick="location.href='pricing.html'" id="pb2">Choisir</button>
     </div>
-    <div class="feat-card">
-      <div class="feat-icon">📦</div>
-      <div class="feat-title" id="f4">Gestion des stocks</div>
-      <div class="feat-desc" id="f4d">EOQ, point de commande et stock de sécurité pour pièces critiques.</div>
+    <div class="pov-card">
+      <div class="pov-icon">🏢</div>
+      <div class="pov-name" id="pn3">Entreprise</div>
+      <div class="pov-price">450$</div>
+      <div class="pov-period" id="pp3">/mois · 10 users</div>
+      <button class="pov-btn purple" onclick="location.href='pricing.html'" id="pb3">Choisir</button>
     </div>
-  </div>
-</div>
-
-<!-- PRICING -->
-<div class="section" id="upgrade">
-  <div class="section-header">
-    <h2 id="pricTitle">Tarifs</h2>
-    <p id="pricSub">Commencez gratuitement, évoluez selon vos besoins</p>
-  </div>
-  <div class="pricing-grid">
-    <div class="price-card">
-      <div class="price-name">Free Trial</div>
-      <div class="price-amount">0€ <span>/24h</span></div>
-      <div class="price-desc" id="pd1">Accès complet pendant 24h.<br>1 essai par appareil.</div>
-      <button class="price-btn outline" onclick="window.location.href='login.html'">Essayer</button>
-    </div>
-    <div class="price-card featured">
-      <div class="price-name">Pro</div>
-      <div class="price-amount">29€ <span>/mois</span></div>
-      <div class="price-desc" id="pd2">Accès illimité à tous les outils.<br>Support prioritaire. Export PDF/Excel.</div>
-      <button class="price-btn fill" onclick="window.location.href='login.html'">Démarrer</button>
-    </div>
-    <div class="price-card">
-      <div class="price-name">Entreprise</div>
-      <div class="price-amount" style="font-size:28px">Sur devis</div>
-      <div class="price-desc" id="pd3">Multi-sites · Intégrations sur mesure.<br>Formation & accompagnement.</div>
-      <button class="price-btn outline">Contacter</button>
+    <div class="pov-card">
+      <div class="pov-icon">👑</div>
+      <div class="pov-name" id="pn4">Ultimate</div>
+      <div class="pov-price" style="font-size:16px;padding:4px 0" id="ultPrice">Sur devis</div>
+      <div class="pov-period" id="pp4">Multi-sites illimité</div>
+      <button class="pov-btn rose" onclick="location.href='pricing.html#ultimate'" id="pb4">Contacter</button>
     </div>
   </div>
 </div>
 
-<footer>© 2026 Reliability Suite Pro — Tous droits réservés</footer>
+<!-- CTA BOTTOM -->
+<div class="cta-section">
+  <div class="cta-bg"></div>
+  <div class="cta-inner">
+    <h2 id="ctaTitle">Prêt à commencer ?</h2>
+    <p id="ctaSub">Essayez gratuitement pendant 3h sans carte bancaire.<br>Passez à un plan payant quand vous êtes prêt.</p>
+    <div class="cta-btns">
+      <button class="cta-btn primary" onclick="startTrial()" id="ctaTry">🚀 Essai gratuit 3h</button>
+      <button class="cta-btn success" onclick="location.href='pricing.html'" id="ctaBuy">💳 Voir les plans</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2026 Reliability Suite Pro —
+  <a href="pricing.html" id="fPricing">Tarifs</a> ·
+  <a href="login.html" id="fLogin">Connexion</a> ·
+  <a href="mailto:contact@reliabilitysuite.pro">Contact</a>
+</footer>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const supabase = createClient('https://kquwgqcxauymzkgfcxpm.supabase.co','sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx');
 
-const SUPABASE_URL = 'https://kquwgqcxauymzkgfcxpm.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// Vérifier si déjà connecté → afficher Dashboard btn
-supabase.auth.getSession().then(({ data: { session } }) => {
-  if (session) {
-    document.getElementById('loginBtn').style.display = 'none';
-    document.getElementById('dashBtn').style.display = 'block';
-    document.getElementById('tryBtn').textContent = '→ Dashboard';
-    document.getElementById('tryBtn').onclick = () => window.location.href = 'dashboard.html';
-  }
-});
-
-// ── i18n ─────────────────────────────────────────────────────
-const t = {
+// ── i18n ──────────────────────────────────────────────────────
+const T = {
   fr: {
-    login:'Connexion', dash:'Dashboard →',
-    label:'✦ Analyse industrielle avancée',
-    sub:'Analyse de fiabilité · Maintenance préventive\nOptimisation des stocks de pièces de rechange',
-    try:'🚀 Essayer gratuitement', learn:'En savoir plus',
-    featTitle:'Fonctionnalités', featSub:'Tout ce dont vous avez besoin pour analyser et optimiser',
-    f1:'Analyse Weibull', f1d:'Modélisation statistique des défaillances avec paramètres β et η.',
-    f2:'MTBF / MTTR', f2d:'Calcul automatique des indicateurs de fiabilité et maintenabilité.',
-    f3:'Maintenance préventive', f3d:"Optimisation des intervalles de maintenance pour minimiser les coûts.",
-    f4:'Gestion des stocks', f4d:'EOQ, point de commande et stock de sécurité pour pièces critiques.',
-    pricTitle:'Tarifs', pricSub:'Commencez gratuitement, évoluez selon vos besoins',
-    pd1:'Accès complet pendant 24h.\n1 essai par appareil.',
-    pd2:'Accès illimité à tous les outils.\nSupport prioritaire. Export PDF/Excel.',
-    pd3:'Multi-sites · Intégrations sur mesure.\nFormation & accompagnement.'
+    heroLabel:'⚙️ Logiciel d\'ingénierie de fiabilité',
+    heroTitle:'Analyse de fiabilité<br><em>professionnelle</em>',
+    heroSub:'Weibull · MTBF · Maintenance préventive · Gestion des stocks<br>De l\'essai gratuit au déploiement entreprise',
+    btnTry:'🚀 Essayer gratuitement', btnBuy:'💳 Acheter un plan',
+    trialBadge:'3h GRATUIT', trialNote:'Aucune carte requise · 1 essai par appareil',
+    statL1:'Plans disponibles', statL2:'Modules d\'analyse', statL3:'Essai gratuit', statL4:'Sécurisé',
+    navFeat:'Fonctionnalités', navPricing:'Tarifs', navBuy:'Acheter', navDash:'Dashboard →',
+    featTitle:'Fonctionnalités par plan', featSub:'Chaque plan débloque de nouvelles capacités d\'analyse',
+    fc1t:'Life Data Analysis', fc1d:'Weibull, Lognormal, Exponentielle.', fc1p:'Tous les plans',
+    fc2t:'Reliability Metrics',  fc2d:'MTBF, R(t), F(t), h(t).', fc2p:'Tous les plans',
+    fc3t:'Probability Plots', fc3d:'Graphiques de probabilité pour validation des distributions.', fc3p:'Tous les plans',
+    fc4t:'Confidence Bounds', fc4d:'Intervalles de confiance sur les estimations.', fc4p:'Tous les plans',
+    fc5t:'Degradation Analysis', fc5d:'Modélisation de la dégradation des équipements.', fc5p:'Professionnel+',
+    fc6t:'Preventive Maintenance', fc6d:'Optimisation des intervalles de maintenance.', fc6p:'Entreprise+',
+    fc7t:'Spare Parts Forecasting', fc7d:'Prévision des besoins en pièces de rechange.', fc7p:'Entreprise+',
+    fc8t:'Multi-Asset / Fleet', fc8d:'Analyse simultanée de flottes d\'équipements.', fc8p:'Ultimate',
+    fc9t:'Advanced Reporting', fc9d:'Templates professionnels, PDF & Excel.', fc9p:'Essentiel+',
+    fc10t:'Portfolio / Multi-Site', fc10d:'Dashboard consolidé multi-sites.', fc10p:'Ultimate',
+    fc11t:'Reliability Growth', fc11d:'Analyse Crow-AMSAA de croissance de fiabilité.', fc11p:'Ultimate',
+    plansTitle:'Choisissez votre plan', plansSub:'De l\'ingénieur indépendant à la grande entreprise',
+    pn0:'Trial', pp0:'3 heures · 1 appareil', pb0:'Essayer',
+    pn1:'Essentiel', pp1:'/mois', pb1:'Choisir',
+    pn2:'Professionnel', pp2:'/mois', pb2:'Choisir',
+    pn3:'Entreprise', pp3:'/mois · 10 users', pb3:'Choisir',
+    pn4:'Ultimate', pp4:'Multi-sites illimité', pb4:'Contacter', ultPrice:'Sur devis',
+    ctaTitle:'Prêt à commencer ?',
+    ctaSub:'Essayez gratuitement pendant 3h sans carte bancaire.<br>Passez à un plan payant quand vous êtes prêt.',
+    ctaTry:'🚀 Essai gratuit 3h', ctaBuy:'💳 Voir les plans',
+    fPricing:'Tarifs', fLogin:'Connexion',
   },
   en: {
-    login:'Login', dash:'Dashboard →',
-    label:'✦ Advanced industrial analysis',
-    sub:'Reliability Analysis · Preventive Maintenance\nSpare Parts Inventory Optimization',
-    try:'🚀 Try for free', learn:'Learn more',
-    featTitle:'Features', featSub:'Everything you need to analyze and optimize',
-    f1:'Weibull Analysis', f1d:'Statistical failure modeling with β and η parameters.',
-    f2:'MTBF / MTTR', f2d:'Automatic calculation of reliability and maintainability metrics.',
-    f3:'Preventive Maintenance', f3d:'Optimize maintenance intervals to minimize costs.',
-    f4:'Inventory Management', f4d:'EOQ, reorder point and safety stock for critical parts.',
-    pricTitle:'Pricing', pricSub:'Start free, scale as you grow',
-    pd1:'Full access for 24 hours.\n1 trial per device.',
-    pd2:'Unlimited access to all tools.\nPriority support. PDF/Excel export.',
-    pd3:'Multi-site · Custom integrations.\nTraining & onboarding.'
+    heroLabel:'⚙️ Reliability Engineering Software',
+    heroTitle:'Professional<br><em>reliability analysis</em>',
+    heroSub:'Weibull · MTBF · Preventive Maintenance · Spare Parts<br>From free trial to enterprise deployment',
+    btnTry:'🚀 Try for free', btnBuy:'💳 Buy a plan',
+    trialBadge:'3h FREE', trialNote:'No card required · 1 trial per device',
+    statL1:'Available plans', statL2:'Analysis modules', statL3:'Free trial', statL4:'Secured',
+    navFeat:'Features', navPricing:'Pricing', navBuy:'Buy', navDash:'Dashboard →',
+    featTitle:'Features by plan', featSub:'Each plan unlocks new analysis capabilities',
+    fc1t:'Life Data Analysis', fc1d:'Weibull, Lognormal, Exponential.', fc1p:'All plans',
+    fc2t:'Reliability Metrics', fc2d:'MTBF, R(t), F(t), h(t).', fc2p:'All plans',
+    fc3t:'Probability Plots', fc3d:'Probability charts for distribution validation.', fc3p:'All plans',
+    fc4t:'Confidence Bounds', fc4d:'Confidence intervals on reliability estimates.', fc4p:'All plans',
+    fc5t:'Degradation Analysis', fc5d:'Equipment degradation modeling.', fc5p:'Professional+',
+    fc6t:'Preventive Maintenance', fc6d:'Maintenance interval optimization.', fc6p:'Enterprise+',
+    fc7t:'Spare Parts Forecasting', fc7d:'Spare parts demand forecasting.', fc7p:'Enterprise+',
+    fc8t:'Multi-Asset / Fleet', fc8d:'Simultaneous fleet analysis.', fc8p:'Ultimate',
+    fc9t:'Advanced Reporting', fc9d:'Professional templates, PDF & Excel.', fc9p:'Essential+',
+    fc10t:'Portfolio / Multi-Site', fc10d:'Consolidated multi-site dashboard.', fc10p:'Ultimate',
+    fc11t:'Reliability Growth', fc11d:'Crow-AMSAA reliability growth analysis.', fc11p:'Ultimate',
+    plansTitle:'Choose your plan', plansSub:'From independent engineer to large enterprise',
+    pn0:'Trial', pp0:'3 hours · 1 device', pb0:'Try now',
+    pn1:'Essential', pp1:'/month', pb1:'Choose',
+    pn2:'Professional', pp2:'/month', pb2:'Choose',
+    pn3:'Enterprise', pp3:'/month · 10 users', pb3:'Choose',
+    pn4:'Ultimate', pp4:'Unlimited multi-site', pb4:'Contact us', ultPrice:'Custom pricing',
+    ctaTitle:'Ready to start?',
+    ctaSub:'Try free for 3 hours, no credit card required.<br>Upgrade when you\'re ready.',
+    ctaTry:'🚀 Free 3h trial', ctaBuy:'💳 View plans',
+    fPricing:'Pricing', fLogin:'Login',
   }
 };
 
-window.setLang = function(lang) {
-  const l = t[lang];
-  document.getElementById('loginBtn').textContent = l.login;
-  document.getElementById('dashBtn').textContent = l.dash;
-  document.getElementById('heroLabel').textContent = l.label;
-  document.getElementById('heroSub').textContent = l.sub;
-  document.getElementById('tryBtn').textContent = l.try;
-  document.getElementById('learnBtn').textContent = l.learn;
-  document.getElementById('featTitle').textContent = l.featTitle;
-  document.getElementById('featSub').textContent = l.featSub;
-  ['f1','f2','f3','f4'].forEach(k => {
-    document.getElementById(k).textContent = l[k];
-    document.getElementById(k+'d').textContent = l[k+'d'];
+let lang = 'fr';
+window.setLang = function(l) {
+  lang = l;
+  document.getElementById('lFR').classList.toggle('active', l==='fr');
+  document.getElementById('lEN').classList.toggle('active', l==='en');
+  const t = T[l];
+  const htmlIds = ['heroTitle','ctaSub'];
+  Object.keys(t).forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (htmlIds.includes(id)) el.innerHTML = t[id];
+    else el.textContent = t[id];
   });
-  document.getElementById('pricTitle').textContent = l.pricTitle;
-  document.getElementById('pricSub').textContent = l.pricSub;
-  document.getElementById('pd1').textContent = l.pd1;
-  document.getElementById('pd2').textContent = l.pd2;
-  document.getElementById('pd3').textContent = l.pd3;
 };
+
+// ── Trial / Auth ──────────────────────────────────────────────
+window.startTrial = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    // Déjà connecté → vérifier le plan
+    const { data: profile } = await supabase.from('profiles').select('plan,trial_started_at').eq('id', session.user.id).single();
+    if (profile?.plan && profile.plan !== 'trial') {
+      window.location.href = 'relia.html'; return;
+    }
+    if (profile?.plan === 'trial') {
+      const elapsed = (Date.now() - new Date(profile.trial_started_at)) / 3600000;
+      if (elapsed < 3) { window.location.href = 'relia.html'; return; }
+      else { window.location.href = 'pricing.html'; return; }
+    }
+  }
+  // Pas connecté → login avec redirect
+  sessionStorage.setItem('rsp_after_login', 'trial');
+  window.location.href = 'login.html';
+};
+
+// ── Check session → show Dashboard btn ───────────────────────
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    document.getElementById('navDash').style.display = 'block';
+    document.getElementById('navBuy').style.display = 'none';
+  }
+});
 </script>
 </body>
 </html>
