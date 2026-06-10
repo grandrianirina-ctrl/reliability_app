@@ -133,8 +133,8 @@ footer a:hover { color:var(--accent); }
     <button class="lang-btn active" id="lFR" onclick="setLang('fr')">FR</button>
     <button class="lang-btn" id="lEN" onclick="setLang('en')">EN</button>
     <button class="nav-link" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})" id="navFeat">Fonctionnalités</button>
-    <button class="nav-link" onclick="location.href='pricing.html'" id="navPricing">Tarifs</button>
-    <button class="nav-btn-buy" onclick="location.href='pricing.html'" id="navBuy">Acheter</button>
+    <button class="nav-link" onclick="location.href='payment.html'" id="navPricing">Tarifs</button>
+    <button class="nav-btn-buy" onclick="location.href='payment.html'" id="navBuy">Acheter</button>
     <button class="nav-btn-dash" onclick="location.href='dashboard.html'" id="navDash">Dashboard →</button>
   </div>
 </div>
@@ -148,7 +148,7 @@ footer a:hover { color:var(--accent); }
 
     <div class="hero-btns">
       <button class="btn-try" onclick="startTrial()" id="btnTry">🚀 Essayer gratuitement</button>
-      <button class="btn-buy" onclick="location.href='pricing.html'" id="btnBuy">💳 Acheter un plan</button>
+      <button class="btn-buy" onclick="location.href='payment.html'" id="btnBuy">💳 Acheter un plan</button>
     </div>
 
     <div class="trial-note">
@@ -272,28 +272,28 @@ footer a:hover { color:var(--accent); }
       <div class="pov-name" id="pn1">Essentiel</div>
       <div class="pov-price">30$</div>
       <div class="pov-period" id="pp1">/mois</div>
-      <button class="pov-btn blue" onclick="location.href='pricing.html'" id="pb1">Choisir</button>
+      <button class="pov-btn blue" onclick="location.href='payment.html'" id="pb1">Choisir</button>
     </div>
     <div class="pov-card">
       <div class="pov-icon">🚀</div>
       <div class="pov-name" id="pn2">Professionnel</div>
       <div class="pov-price">50$</div>
       <div class="pov-period" id="pp2">/mois</div>
-      <button class="pov-btn green" onclick="location.href='pricing.html'" id="pb2">Choisir</button>
+      <button class="pov-btn green" onclick="location.href='payment.html'" id="pb2">Choisir</button>
     </div>
     <div class="pov-card">
       <div class="pov-icon">🏢</div>
       <div class="pov-name" id="pn3">Entreprise</div>
       <div class="pov-price">450$</div>
       <div class="pov-period" id="pp3">/mois · 10 users</div>
-      <button class="pov-btn purple" onclick="location.href='pricing.html'" id="pb3">Choisir</button>
+      <button class="pov-btn purple" onclick="location.href='payment.html'" id="pb3">Choisir</button>
     </div>
     <div class="pov-card">
       <div class="pov-icon">👑</div>
       <div class="pov-name" id="pn4">Ultimate</div>
       <div class="pov-price" style="font-size:16px;padding:4px 0" id="ultPrice">Sur devis</div>
       <div class="pov-period" id="pp4">Multi-sites illimité</div>
-      <button class="pov-btn rose" onclick="location.href='pricing.html#ultimate'" id="pb4">Contacter</button>
+      <button class="pov-btn rose" onclick="location.href='payment.html#ultimate'" id="pb4">Contacter</button>
     </div>
   </div>
 </div>
@@ -306,14 +306,14 @@ footer a:hover { color:var(--accent); }
     <p id="ctaSub">Essayez gratuitement pendant 3h sans carte bancaire.<br>Passez à un plan payant quand vous êtes prêt.</p>
     <div class="cta-btns">
       <button class="cta-btn primary" onclick="startTrial()" id="ctaTry">🚀 Essai gratuit 3h</button>
-      <button class="cta-btn success" onclick="location.href='pricing.html'" id="ctaBuy">💳 Voir les plans</button>
+      <button class="cta-btn success" onclick="location.href='payment.html'" id="ctaBuy">💳 Voir les plans</button>
     </div>
   </div>
 </div>
 
 <footer>
   © 2026 Reliability Suite Pro —
-  <a href="pricing.html" id="fPricing">Tarifs</a> ·
+  <a href="payment.html" id="fPricing">Tarifs</a> ·
   <a href="login.html" id="fLogin">Connexion</a> ·
   <a href="mailto:contact@reliabilitysuite.pro">Contact</a>
 </footer>
@@ -415,7 +415,7 @@ window.startTrial = async function() {
     if (profile?.plan === 'trial') {
       const elapsed = (Date.now() - new Date(profile.trial_started_at)) / 3600000;
       if (elapsed < 3) { window.location.href = 'relia.html'; return; }
-      else { window.location.href = 'pricing.html'; return; }
+      else { window.location.href = 'payment.html'; return; }
     }
   }
   // Pas connecté → login avec redirect
