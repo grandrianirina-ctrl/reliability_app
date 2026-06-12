@@ -677,7 +677,7 @@ window.sendReset = async function() {
   setLoading('resetBtn', true);
   clearAllMsgs();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/reset-password.html'
+    redirectTo: 'https://reliasuitepro.com/reset-password.html'
   });
   setLoading('resetBtn', false);
   if (error) return showMsg('msgForgot', t.errResetGeneric, 'error');
@@ -690,7 +690,7 @@ window.resendReset = async function() {
   const t = T[lang];
   if (!lastResetEmail) return;
   const { error } = await supabase.auth.resetPasswordForEmail(lastResetEmail, {
-    redirectTo: window.location.origin + '/reset-password.html'
+    redirectTo: 'https://reliasuitepro.com/reset-password.html'
   });
   if (error) showMsg('msgResend', t.errResetGeneric, 'error');
   else       showMsg('msgResend', t.successResend,   'success');

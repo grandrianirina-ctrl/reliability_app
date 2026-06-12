@@ -434,7 +434,7 @@ window.buy = async function(plan) {
       customer:{ email: user.email },
       customData:{ supabase_user_id: user.id, plan },
       settings:{ theme:'dark', locale:lang,
-        successUrl:`${window.location.origin}/reliability_app/payment.html?success=1&plan=${plan}` }
+        successUrl:`https://reliasuitepro.com/payment.html?success=1&plan=${plan}` }
     });
   } catch(e){ console.error(e); }
   finally { btn.classList.remove('loading'); btn.disabled=false; }
