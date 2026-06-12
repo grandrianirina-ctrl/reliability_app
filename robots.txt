@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /relia.html
+Disallow: /Relia.html
+Disallow: /app.html
+
+Sitemap: https://reliasuitepro.com/sitemap.xml
