@@ -637,12 +637,32 @@ async function doLogin(email, password) {
   const t = T[lang];
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw new Error(te(error.message));
-  const { data: profile } = await supabase
-    .from('profiles').select('trial_started_at,plan').eq('id', data.user.id).single();
-  if (profile && profile.plan !== 'pro' && profile.plan !== 'enterprise') {
-    const h = (Date.now() - new Date(profile.trial_started_at)) / 3600000;
-    if (h > 24) { await supabase.auth.signOut(); throw new Error(t.errTrialExpired); }
+
+  const userId = data.user.id;
+
+  // ── Vérifier le plan côté serveur ─────────────────────────
+  const { data: planData } = await supabase.rpc('verify_user_plan', {
+    p_user_id: userId
+  });
+
+  if (!planData) {
+    await supabase.auth.signOut();
+    throw new Error(t.errTrialExpired);
   }
+
+  // ── Enregistrer la session (désactive les autres) ─────────
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  const token = Array.from(array).map(b => b.toString(16).padStart(2,'0')).join('');
+  localStorage.setItem('rsp_session_token', token);
+
+  await supabase.rpc('register_session', {
+    p_user_id:     userId,
+    p_token:       token,
+    p_device_info: `${navigator.userAgent} | ${screen.width}x${screen.height}`,
+    p_ip:          null
+  });
+
   showMsg('msg', t.successLogin, 'success');
   setTimeout(() => window.location.href = 'dashboard.html', 1200);
 }
@@ -663,6 +683,19 @@ async function doRegister(email, password) {
     supabase.from('device_trials').insert({ fingerprint:fp, email })
   ]);
   localStorage.setItem('rsp_trial_fp', fp);
+  // ── Enregistrer la session après inscription ─────────────
+  const array2 = new Uint8Array(32);
+  crypto.getRandomValues(array2);
+  const sessionToken = Array.from(array2).map(b => b.toString(16).padStart(2,'0')).join('');
+  localStorage.setItem('rsp_session_token', sessionToken);
+
+  await supabase.rpc('register_session', {
+    p_user_id:     userId,
+    p_token:       sessionToken,
+    p_device_info: `${navigator.userAgent} | ${screen.width}x${screen.height}`,
+    p_ip:          null
+  });
+
   showMsg('msg', t.successRegister, 'success');
   setTimeout(() => window.location.href = 'dashboard.html', 1500);
 }
