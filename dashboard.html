@@ -662,12 +662,7 @@ else {
 </script>
 </body>
 </html>
-<!-- PATCH: remplace openTool et openApp dans dashboard.html -->
-<script type="module">
-// Ce patch remplace les fonctions openTool/openApp du dashboard
-// pour utiliser les query params access= et type=
-
-import { openApp, defaultType, ACCESS_TYPES, checkTrial } from './access.js';
+<!-- plan.js gère l'ouverture de relia.html -->
 
 // Mapping tool card → access type
 const TOOL_TYPES = {
@@ -701,21 +696,31 @@ window.openTool = function(toolKey) {
   window.location.href = `relia.html?access=${plan}&type=${type}`;
 };
 
-window.openApp = function() {
-  const plan    = window.userPlan || 'trial';
-  const profile = window._profile;
+window.openApp = async function() {
+  const { default: _ } = await import('./plan.js');
+};
 
-  // Vérif trial
-  if (plan === 'trial' && profile?.trial_started_at) {
-    const t = checkTrial(profile.trial_started_at);
-    if (!t.valid) {
-      document.getElementById('expOverlay').classList.add('show');
-      return;
-    }
+window.openTool = async function(feature) {
+  const plan = window.RSP_PLAN || 'trial';
+  const ACCESS = {
+    lda:['trial','essentiel','professionnel','entreprise','ultimate'],
+    rm: ['trial','essentiel','professionnel','entreprise','ultimate'],
+    pp: ['trial','essentiel','professionnel','entreprise','ultimate'],
+    cb: ['trial','essentiel','professionnel','entreprise','ultimate'],
+    ar: ['essentiel','entreprise','ultimate'],
+    da: ['professionnel','entreprise','ultimate'],
+    pm: ['entreprise','ultimate'],
+    sp: ['entreprise','ultimate'],
+    ma: ['ultimate'],
+    rg: ['ultimate'],
+    ms: ['ultimate'],
+  };
+  const allowed = ACCESS[feature] || [];
+  if (!allowed.includes(plan)) {
+    window.location.href = 'payment.html?reason=feature_locked';
+    return;
   }
-
-  const type = defaultType(plan);
-  window.location.href = `relia.html?access=${plan}&type=${type}`;
+  const { default: _ } = await import('./plan.js');
 };
 
 // Expose plan globalement pour openTool
