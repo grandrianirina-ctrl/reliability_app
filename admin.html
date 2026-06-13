@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Reliability Suite Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --bg:#0a0e1a; --surface:#111827; --card:#131c2e; --border:#1e2d45;
+  --accent:#0ea5e9; --accent2:#10b981; --warning:#f59e0b;
+  --purple:#8b5cf6; --rose:#f43f5e; --danger:#ef4444;
+  --text:#f0f4ff; --muted:#64748b; --muted2:#94a3b8;
+}
+body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* ── HEADER ── */
+.header { background:var(--card); border-bottom:1px solid var(--border); padding:0 28px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+.header::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--rose),var(--warning),var(--accent2)); }
+.brand { display:flex; align-items:center; gap:10px; }
+.brand-icon { width:32px; height:32px; background:linear-gradient(135deg,var(--rose),var(--warning)); border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.brand-name { font-size:14px; font-weight:700; }
+.brand-name span { color:var(--rose); }
+.admin-badge { padding:3px 10px; background:rgba(244,63,94,.15); border:1px solid rgba(244,63,94,.3); border-radius:20px; font-size:10px; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--rose); letter-spacing:.08em; }
+.header-right { display:flex; align-items:center; gap:10px; }
+.logout-btn { padding:7px 14px; background:transparent; border:1px solid var(--border); border-radius:7px; color:var(--muted); font-size:12px; font-family:'Syne',sans-serif; font-weight:600; cursor:pointer; transition:all .2s; }
+.logout-btn:hover { border-color:var(--danger); color:#fca5a5; }
+
+/* ── LAYOUT ── */
+.layout { display:grid; grid-template-columns:220px 1fr; min-height:calc(100vh - 60px); }
+
+/* ── SIDEBAR ── */
+.sidebar { background:var(--card); border-right:1px solid var(--border); padding:20px 0; }
+.nav-section { font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--muted); text-transform:uppercase; letter-spacing:.12em; padding:0 20px 8px; margin-top:16px; }
+.nav-item { display:flex; align-items:center; gap:10px; padding:10px 20px; font-size:13px; font-weight:600; color:var(--muted2); cursor:pointer; transition:all .2s; border-left:2px solid transparent; }
+.nav-item:hover { color:var(--text); background:rgba(255,255,255,.03); }
+.nav-item.active { color:var(--text); border-left-color:var(--accent); background:rgba(14,165,233,.06); }
+.nav-item .icon { font-size:16px; }
+.nav-badge { margin-left:auto; padding:2px 7px; background:rgba(14,165,233,.15); border-radius:10px; font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--accent); }
+
+/* ── MAIN ── */
+.main { padding:28px; overflow-y:auto; }
+.page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+.page-title { font-size:22px; font-weight:800; letter-spacing:-.02em; }
+.page-sub { color:var(--muted); font-size:12px; font-family:'JetBrains Mono',monospace; margin-top:3px; }
+
+/* ── STATS ROW ── */
+.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:28px; }
+.stat-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; position:relative; overflow:hidden; }
+.stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.stat-card.blue::before  { background:var(--accent); }
+.stat-card.green::before { background:var(--accent2); }
+.stat-card.yellow::before{ background:var(--warning); }
+.stat-card.rose::before  { background:var(--rose); }
+.stat-card.purple::before{ background:var(--purple); }
+.stat-lbl { font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px; }
+.stat-val { font-size:28px; font-weight:800; letter-spacing:-.02em; }
+.stat-val span { font-size:12px; color:var(--muted); font-weight:400; }
+
+/* ── TABLE ── */
+.table-card { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:24px; }
+.table-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); }
+.table-title { font-size:14px; font-weight:700; }
+.table-actions { display:flex; gap:8px; }
+.search-input { padding:7px 12px; background:var(--surface); border:1px solid var(--border); border-radius:7px; color:var(--text); font-size:12px; font-family:'JetBrains Mono',monospace; outline:none; width:220px; transition:border-color .2s; }
+.search-input:focus { border-color:var(--accent); }
+.search-input::placeholder { color:var(--muted); }
+.refresh-btn { padding:7px 14px; background:transparent; border:1px solid var(--border); border-radius:7px; color:var(--muted2); font-size:12px; font-family:'Syne',sans-serif; font-weight:600; cursor:pointer; transition:all .2s; }
+.refresh-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+table { width:100%; border-collapse:collapse; }
+thead th { padding:11px 16px; font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; text-align:left; border-bottom:1px solid var(--border); background:var(--surface); }
+tbody tr { border-bottom:1px solid rgba(30,45,69,.5); transition:background .15s; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:rgba(255,255,255,.02); }
+tbody td { padding:12px 16px; font-size:13px; font-family:'JetBrains Mono',monospace; color:var(--muted2); vertical-align:middle; }
+tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:600; font-size:13px; }
+
+/* Plan badges */
+.plan-pill { display:inline-block; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.07em; }
+.pill-trial    { background:rgba(245,158,11,.12); color:#fbbf24; border:1px solid rgba(245,158,11,.25); }
+.pill-essentiel{ background:rgba(14,165,233,.12); color:var(--accent); border:1px solid rgba(14,165,233,.25); }
+.pill-professionnel{ background:rgba(16,185,129,.12); color:var(--accent2); border:1px solid rgba(16,185,129,.25); }
+.pill-entreprise{ background:rgba(139,92,246,.12); color:var(--purple); border:1px solid rgba(139,92,246,.25); }
+.pill-ultimate { background:rgba(244,63,94,.12); color:var(--rose); border:1px solid rgba(244,63,94,.25); }
+.pill-expired  { background:rgba(239,68,68,.12); color:#fca5a5; border:1px solid rgba(239,68,68,.25); }
+
+/* Action buttons */
+.action-btn { padding:4px 10px; border-radius:5px; font-size:11px; font-family:'JetBrains Mono',monospace; font-weight:600; cursor:pointer; border:none; transition:opacity .2s; margin-right:4px; }
+.action-btn:hover { opacity:.8; }
+.btn-edit   { background:rgba(14,165,233,.15); color:var(--accent); }
+.btn-ban    { background:rgba(239,68,68,.12); color:#fca5a5; }
+.btn-kick   { background:rgba(245,158,11,.12); color:#fbbf24; }
+
+/* ── MODAL ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(10,14,26,.85); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.show { display:flex; }
+.modal { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:32px; width:100%; max-width:440px; animation:fadeUp .3s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.modal h3 { font-size:18px; font-weight:800; margin-bottom:6px; }
+.modal-sub { color:var(--muted); font-size:12px; font-family:'JetBrains Mono',monospace; margin-bottom:24px; }
+.modal-field { margin-bottom:16px; }
+.modal-field label { display:block; font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-bottom:7px; }
+.modal-field select, .modal-field input {
+  width:100%; padding:10px 14px; background:var(--surface); border:1px solid var(--border);
+  border-radius:8px; color:var(--text); font-size:13px; font-family:'JetBrains Mono',monospace; outline:none;
+}
+.modal-field select:focus, .modal-field input:focus { border-color:var(--accent); }
+.modal-field select option { background:var(--surface); }
+.modal-btns { display:flex; gap:10px; margin-top:20px; }
+.modal-save { flex:1; padding:11px; background:linear-gradient(135deg,var(--accent),#0284c7); border:none; border-radius:8px; color:white; font-size:13px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; transition:opacity .2s; }
+.modal-save:hover { opacity:.88; }
+.modal-cancel { padding:11px 20px; background:transparent; border:1px solid var(--border); border-radius:8px; color:var(--muted2); font-size:13px; font-family:'Syne',sans-serif; cursor:pointer; transition:all .2s; }
+.modal-cancel:hover { border-color:var(--danger); color:#fca5a5; }
+
+/* ── VIEWS ── */
+.view { display:none; }
+.view.active { display:block; }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:24px; right:24px; padding:12px 20px; border-radius:10px; font-size:13px; font-family:'JetBrains Mono',monospace; z-index:500; animation:slideIn .3s ease; display:none; }
+.toast.show { display:block; }
+.toast.success { background:rgba(16,185,129,.15); border:1px solid rgba(16,185,129,.3); color:#6ee7b7; }
+.toast.error   { background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.3); color:#fca5a5; }
+@keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+
+/* Loading */
+.lscreen { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:300; transition:opacity .4s; }
+.lscreen.hide { opacity:0; pointer-events:none; }
+.lspin { width:34px; height:34px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* Empty state */
+.empty { text-align:center; padding:50px 20px; color:var(--muted); font-size:13px; font-family:'JetBrains Mono',monospace; }
+.empty .icon { font-size:36px; margin-bottom:12px; }
+
+@media(max-width:768px) {
+  .layout { grid-template-columns:1fr; }
+  .sidebar { display:none; }
+}
+</style>
+</head>
+<body>
+
+<div class="lscreen" id="ls"><div class="lspin"></div></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Edit Plan Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3>✏️ Modifier le plan</h3>
+    <div class="modal-sub" id="editModalEmail">utilisateur@email.com</div>
+    <input type="hidden" id="editUserId">
+    <div class="modal-field">
+      <label>Plan</label>
+      <select id="editPlan">
+        <option value="trial">🔬 Trial</option>
+        <option value="essentiel">📊 Essentiel</option>
+        <option value="professionnel">🚀 Professionnel</option>
+        <option value="entreprise">🏢 Entreprise</option>
+        <option value="ultimate">👑 Ultimate</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Date d'expiration (optionnel)</label>
+      <input type="datetime-local" id="editExpires" placeholder="Laisser vide = illimité">
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Annuler</button>
+      <button class="modal-save" onclick="savePlan()">💾 Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="brand">
+    <div class="brand-icon">🛡️</div>
+    <div class="brand-name">Reliability <span>Admin</span></div>
+    <span class="admin-badge">ADMIN</span>
+  </div>
+  <div class="header-right">
+    <span id="adminEmail" style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted)"></span>
+    <button class="logout-btn" onclick="doLogout()">Déconnexion</button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div style="padding:16px 20px 8px">
+      <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace">Connecté en tant qu'admin</div>
+    </div>
+    <div class="nav-section">Navigation</div>
+    <div class="nav-item active" onclick="showView('viewOverview')">
+      <span class="icon">📊</span> Vue d'ensemble
+    </div>
+    <div class="nav-item" onclick="showView('viewUsers')">
+      <span class="icon">👥</span> Utilisateurs
+      <span class="nav-badge" id="nbUsers">0</span>
+    </div>
+    <div class="nav-item" onclick="showView('viewPayments')">
+      <span class="icon">💳</span> Paiements
+      <span class="nav-badge" id="nbPayments">0</span>
+    </div>
+    <div class="nav-item" onclick="showView('viewSessions')">
+      <span class="icon">🔐</span> Sessions actives
+      <span class="nav-badge" id="nbSessions">0</span>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- ══ VIEW: OVERVIEW ══ -->
+    <div class="view active" id="viewOverview">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Vue d'ensemble</div>
+          <div class="page-sub">Statistiques en temps réel</div>
+        </div>
+        <button class="refresh-btn" onclick="loadAll()">🔄 Actualiser</button>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card blue">
+          <div class="stat-lbl">Total utilisateurs</div>
+          <div class="stat-val" id="statTotal">— <span></span></div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-lbl">Trials actifs</div>
+          <div class="stat-val" id="statTrials">— <span></span></div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-lbl">Abonnés payants</div>
+          <div class="stat-val" id="statPaid">— <span></span></div>
+        </div>
+        <div class="stat-card rose">
+          <div class="stat-lbl">Trials expirés</div>
+          <div class="stat-val" id="statExpired">— <span></span></div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-lbl">Sessions actives</div>
+          <div class="stat-val" id="statSessions">— <span></span></div>
+        </div>
+      </div>
+
+      <!-- Plans breakdown -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">📈 Répartition des plans</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Nombre d'utilisateurs</th>
+              <th>Revenu mensuel estimé</th>
+            </tr>
+          </thead>
+          <tbody id="plansBreakdown">
+            <tr><td colspan="3" class="empty"><div class="icon">⏳</div>Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Recent payments -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">💰 Paiements récents</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Plan</th>
+              <th>Montant</th>
+              <th>Date</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody id="recentPayments">
+            <tr><td colspan="5" class="empty"><div class="icon">⏳</div>Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: USERS ══ -->
+    <div class="view" id="viewUsers">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Utilisateurs</div>
+          <div class="page-sub">Gérer les plans et accès</div>
+        </div>
+        <button class="refresh-btn" onclick="loadUsers()">🔄 Actualiser</button>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">👥 Tous les utilisateurs</div>
+          <div class="table-actions">
+            <input type="text" class="search-input" id="searchUsers"
+              placeholder="Rechercher par email..." oninput="filterUsers()">
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Plan actif</th>
+              <th>Trial démarré</th>
+              <th>Expiration</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTable">
+            <tr><td colspan="5" class="empty"><div class="icon">⏳</div>Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: PAYMENTS ══ -->
+    <div class="view" id="viewPayments">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Paiements</div>
+          <div class="page-sub">Historique des transactions Paddle</div>
+        </div>
+        <button class="refresh-btn" onclick="loadPayments()">🔄 Actualiser</button>
+      </div>
+
+      <!-- Revenue stats -->
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card green">
+          <div class="stat-lbl">Revenu total</div>
+          <div class="stat-val" id="revTotal">— <span>USD</span></div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-lbl">Ce mois</div>
+          <div class="stat-val" id="revMonth">— <span>USD</span></div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-lbl">Transactions</div>
+          <div class="stat-val" id="revCount">—</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">💳 Toutes les transactions</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Plan</th>
+              <th>Cycle</th>
+              <th>Montant</th>
+              <th>Date</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody id="paymentsTable">
+            <tr><td colspan="6" class="empty"><div class="icon">⏳</div>Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: SESSIONS ══ -->
+    <div class="view" id="viewSessions">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Sessions actives</div>
+          <div class="page-sub">Gérer les connexions en cours</div>
+        </div>
+        <button class="refresh-btn" onclick="loadSessions()">🔄 Actualiser</button>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">🔐 Sessions en cours</div>
+          <div class="table-actions">
+            <button class="refresh-btn" style="color:var(--rose);border-color:rgba(244,63,94,.3)"
+              onclick="killAllSessions()">⚡ Couper toutes les sessions</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Appareil</th>
+              <th>Dernière activité</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="sessionsTable">
+            <tr><td colspan="5" class="empty"><div class="icon">⏳</div>Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// ⚠️ Utilise la clé SERVICE ROLE pour l'admin (accès complet)
+// Cette page ne doit JAMAIS être accessible au public !
+const SUPABASE_URL  = 'https://kquwgqcxauymzkgfcxpm.supabase.co';
+const SUPABASE_KEY  = 'sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx';
+
+// ⚠️ REMPLACE PAR TON EMAIL ADMIN — seul cet email peut accéder
+const ADMIN_EMAIL = 'grandrianirina@gmail.com';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const PLAN_ICONS  = { trial:'🔬', essentiel:'📊', professionnel:'🚀', entreprise:'🏢', ultimate:'👑' };
+const PLAN_PRICES = { essentiel:30, professionnel:50, entreprise:450, ultimate:0 };
+
+let allUsers = [];
+
+// ── Auth guard ────────────────────────────────────────────────
+const { data: { session } } = await supabase.auth.getSession();
+if (!session || session.user.email !== ADMIN_EMAIL) {
+  document.body.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:'JetBrains Mono',monospace;color:#fca5a5">
+      <div style="font-size:48px">🔒</div>
+      <div style="font-size:18px;font-weight:700">Accès refusé</div>
+      <div style="font-size:13px;color:#64748b">Réservé aux administrateurs</div>
+      <a href="login.html" style="margin-top:8px;padding:10px 24px;background:#0ea5e9;color:white;border-radius:8px;text-decoration:none;font-size:13px">Se connecter</a>
+    </div>`;
+  return;
+}
+
+document.getElementById('adminEmail').textContent = session.user.email;
+
+// ── Toast ─────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Nav ───────────────────────────────────────────────────────
+window.showView = function(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const map = { viewOverview:0, viewUsers:1, viewPayments:2, viewSessions:3 };
+  document.querySelectorAll('.nav-item')[map[id]]?.classList.add('active');
+  if (id==='viewUsers')    loadUsers();
+  if (id==='viewPayments') loadPayments();
+  if (id==='viewSessions') loadSessions();
+};
+
+// ── Plan pill ─────────────────────────────────────────────────
+function planPill(plan, expired = false) {
+  if (expired) return `<span class="plan-pill pill-expired">⏱ Expiré</span>`;
+  const cls = `pill-${plan}`;
+  return `<span class="plan-pill ${cls}">${PLAN_ICONS[plan]||''} ${plan}</span>`;
+}
+
+function statusPill(status) {
+  const map = {
+    completed: '<span class="plan-pill pill-essentiel">✅ Payé</span>',
+    cancelled: '<span class="plan-pill pill-expired">❌ Annulé</span>',
+    failed:    '<span class="plan-pill pill-expired">⚠️ Échoué</span>',
+  };
+  return map[status] || status;
+}
+
+function timeAgo(date) {
+  if (!date) return '—';
+  const d = new Date(date);
+  const diff = (Date.now() - d) / 1000;
+  if (diff < 60)   return 'À l\'instant';
+  if (diff < 3600) return `${Math.floor(diff/60)}min`;
+  if (diff < 86400)return `${Math.floor(diff/3600)}h`;
+  return d.toLocaleDateString('fr-FR');
+}
+
+// ── LOAD ALL ─────────────────────────────────────────────────
+window.loadAll = async function() {
+  await Promise.all([loadOverview(), loadUsers(), loadPayments(), loadSessions()]);
+};
+
+// ── OVERVIEW ─────────────────────────────────────────────────
+async function loadOverview() {
+  const { data: profiles } = await supabase
+    .from('user_access_status')
+    .select('*');
+
+  if (!profiles) return;
+
+  const total   = profiles.length;
+  const trials  = profiles.filter(p => p.plan==='trial' && p.has_access).length;
+  const paid    = profiles.filter(p => ['essentiel','professionnel','entreprise','ultimate'].includes(p.active_plan)).length;
+  const expired = profiles.filter(p => !p.has_access).length;
+
+  document.getElementById('statTotal').innerHTML   = `${total}`;
+  document.getElementById('statTrials').innerHTML  = `${trials}`;
+  document.getElementById('statPaid').innerHTML    = `${paid}`;
+  document.getElementById('statExpired').innerHTML = `${expired}`;
+
+  // Plans breakdown
+  const planCount = {};
+  profiles.forEach(p => {
+    const plan = p.active_plan || 'expired';
+    planCount[plan] = (planCount[plan] || 0) + 1;
+  });
+
+  const breakdownHtml = Object.entries(planCount).map(([plan, count]) => {
+    const price = PLAN_PRICES[plan] || 0;
+    const mrr   = price * count;
+    return `<tr>
+      <td>${planPill(plan, plan==='expired')}</td>
+      <td class="main">${count} utilisateur${count>1?'s':''}</td>
+      <td class="main">${mrr > 0 ? '$'+mrr+'/mois' : '—'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('plansBreakdown').innerHTML = breakdownHtml || '<tr><td colspan="3" class="empty">Aucun utilisateur</td></tr>';
+
+  // Recent payments
+  const { data: payments } = await supabase
+    .from('payments')
+    .select('*, profiles(email)')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  const payHtml = payments?.map(p => `<tr>
+    <td class="main">${p.profiles?.email || '—'}</td>
+    <td>${planPill(p.plan)}</td>
+    <td>$${p.amount}</td>
+    <td>${timeAgo(p.created_at)}</td>
+    <td>${statusPill(p.status)}</td>
+  </tr>`).join('') || '<tr><td colspan="5" class="empty"><div class="icon">💳</div>Aucun paiement</td></tr>';
+  document.getElementById('recentPayments').innerHTML = payHtml;
+}
+
+// ── USERS ─────────────────────────────────────────────────────
+async function loadUsers() {
+  const { data } = await supabase
+    .from('user_access_status')
+    .select('*')
+    .order('trial_started_at', { ascending: false });
+
+  allUsers = data || [];
+  document.getElementById('nbUsers').textContent = allUsers.length;
+  renderUsers(allUsers);
+}
+
+function renderUsers(users) {
+  const html = users.map(u => {
+    const expired = !u.has_access;
+    const daysLeft = u.trial_days_left ? parseFloat(u.trial_days_left).toFixed(1) : null;
+    const expiresStr = u.trial_expires_at
+      ? new Date(u.trial_expires_at).toLocaleDateString('fr-FR')
+      : u.plan_expires_at
+        ? new Date(u.plan_expires_at).toLocaleDateString('fr-FR')
+        : '∞';
+    const startedStr = u.trial_started_at
+      ? new Date(u.trial_started_at).toLocaleDateString('fr-FR')
+      : '—';
+
+    return `<tr>
+      <td class="main">${u.email || '—'}</td>
+      <td>${planPill(u.active_plan || u.plan, expired)}</td>
+      <td>${startedStr}</td>
+      <td>${u.active_plan==='trial' ? `${daysLeft}j restants` : expiresStr}</td>
+      <td>
+        <button class="action-btn btn-edit" onclick="openEdit('${u.id}','${u.email}','${u.plan}')">✏️ Modifier</button>
+        <button class="action-btn btn-ban"  onclick="banUser('${u.id}','${u.email}')">🚫 Bloquer</button>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" class="empty"><div class="icon">👥</div>Aucun utilisateur</td></tr>';
+  document.getElementById('usersTable').innerHTML = html;
+}
+
+window.filterUsers = function() {
+  const q = document.getElementById('searchUsers').value.toLowerCase();
+  renderUsers(allUsers.filter(u => u.email?.toLowerCase().includes(q)));
+};
+
+// ── PAYMENTS ─────────────────────────────────────────────────
+async function loadPayments() {
+  const { data } = await supabase
+    .from('payments')
+    .select('*, profiles(email)')
+    .order('created_at', { ascending: false });
+
+  const payments = data || [];
+  document.getElementById('nbPayments').textContent = payments.length;
+
+  const total    = payments.filter(p=>p.status==='completed').reduce((s,p)=>s+(p.amount||0),0);
+  const thisMonth= payments.filter(p=>{
+    const d = new Date(p.created_at);
+    const now = new Date();
+    return p.status==='completed' && d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  }).reduce((s,p)=>s+(p.amount||0),0);
+
+  document.getElementById('revTotal').innerHTML  = `${total.toFixed(0)} <span>USD</span>`;
+  document.getElementById('revMonth').innerHTML  = `${thisMonth.toFixed(0)} <span>USD</span>`;
+  document.getElementById('revCount').textContent= payments.filter(p=>p.status==='completed').length;
+
+  const html = payments.map(p => `<tr>
+    <td class="main">${p.profiles?.email || '—'}</td>
+    <td>${planPill(p.plan)}</td>
+    <td>${p.billing_cycle==='annual' ? '📅 Annuel' : '🔄 Mensuel'}</td>
+    <td>$${p.amount}</td>
+    <td>${new Date(p.created_at).toLocaleDateString('fr-FR')}</td>
+    <td>${statusPill(p.status)}</td>
+  </tr>`).join('') || '<tr><td colspan="6" class="empty"><div class="icon">💳</div>Aucun paiement</td></tr>';
+  document.getElementById('paymentsTable').innerHTML = html;
+}
+
+// ── SESSIONS ─────────────────────────────────────────────────
+async function loadSessions() {
+  const { data } = await supabase
+    .from('user_sessions')
+    .select('*, profiles(email)')
+    .eq('is_active', true)
+    .order('last_active', { ascending: false });
+
+  const sessions = data || [];
+  document.getElementById('nbSessions').textContent   = sessions.length;
+  document.getElementById('statSessions').textContent = sessions.length;
+
+  const html = sessions.map(s => `<tr>
+    <td class="main">${s.profiles?.email || s.user_id?.substring(0,8)+'...'}</td>
+    <td style="font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis">${s.device_info || '—'}</td>
+    <td>${timeAgo(s.last_active)}</td>
+    <td><span class="plan-pill pill-essentiel">🟢 Active</span></td>
+    <td><button class="action-btn btn-kick" onclick="killSession('${s.id}','${s.user_id}')">⚡ Déconnecter</button></td>
+  </tr>`).join('') || '<tr><td colspan="5" class="empty"><div class="icon">🔐</div>Aucune session active</td></tr>';
+  document.getElementById('sessionsTable').innerHTML = html;
+}
+
+// ── EDIT PLAN MODAL ──────────────────────────────────────────
+window.openEdit = function(userId, email, plan) {
+  document.getElementById('editUserId').value    = userId;
+  document.getElementById('editModalEmail').textContent = email;
+  document.getElementById('editPlan').value      = plan;
+  document.getElementById('editExpires').value   = '';
+  document.getElementById('editModal').classList.add('show');
+};
+
+window.closeModal = function() {
+  document.getElementById('editModal').classList.remove('show');
+};
+
+window.savePlan = async function() {
+  const userId  = document.getElementById('editUserId').value;
+  const plan    = document.getElementById('editPlan').value;
+  const expires = document.getElementById('editExpires').value;
+
+  const update = {
+    plan,
+    updated_at: new Date().toISOString(),
+    plan_expires_at: expires ? new Date(expires).toISOString() : null
+  };
+
+  const { error } = await supabase
+    .from('profiles')
+    .update(update)
+    .eq('id', userId);
+
+  if (error) {
+    showToast('❌ Erreur : ' + error.message, 'error');
+  } else {
+    showToast('✅ Plan mis à jour avec succès !');
+    closeModal();
+    loadUsers();
+    loadOverview();
+  }
+};
+
+// ── BAN USER ────────────────────────────────────────────────
+window.banUser = async function(userId, email) {
+  if (!confirm(`Bloquer l'utilisateur ${email} ?\n\nCela va désactiver toutes ses sessions.`)) return;
+
+  // Désactiver toutes ses sessions
+  await supabase.from('user_sessions')
+    .update({ is_active: false })
+    .eq('user_id', userId);
+
+  // Forcer plan expiré
+  await supabase.from('profiles')
+    .update({ plan_expires_at: new Date(Date.now() - 1000).toISOString() })
+    .eq('id', userId);
+
+  showToast(`🚫 ${email} bloqué`);
+  loadUsers();
+  loadSessions();
+};
+
+// ── KILL SESSION ─────────────────────────────────────────────
+window.killSession = async function(sessionId, userId) {
+  await supabase.from('user_sessions')
+    .update({ is_active: false })
+    .eq('id', sessionId);
+  showToast('⚡ Session terminée');
+  loadSessions();
+};
+
+// ── KILL ALL SESSIONS ────────────────────────────────────────
+window.killAllSessions = async function() {
+  if (!confirm('Couper TOUTES les sessions actives ?')) return;
+  await supabase.from('user_sessions').update({ is_active: false }).eq('is_active', true);
+  showToast('⚡ Toutes les sessions coupées');
+  loadSessions();
+};
+
+// ── LOGOUT ──────────────────────────────────────────────────
+window.doLogout = async function() {
+  await supabase.auth.signOut();
+  window.location.href = 'login.html';
+};
+
+// ── Init ─────────────────────────────────────────────────────
+await loadAll();
+const ls = document.getElementById('ls');
+ls.classList.add('hide');
+setTimeout(() => ls.remove(), 500);
+</script>
+</body>
+</html>
