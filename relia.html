@@ -14675,8 +14675,8 @@ window.toggleDataEntry = function(){
 /* ═══════════════════════════════════════════════════════════════════
    PACKAGE GATING
    Called once on load. Reads ?package= from URL and restricts UI.
-   No ?package= param → redirect to index.html.
-   Unknown value       → redirect to index.html.
+   No ?package= param → redirect to login.html.
+   Unknown value       → redirect to login.html.
 ═══════════════════════════════════════════════════════════════════ */
 function applyPackage(pkg) {
   /* Trial has identical feature access to Ultimate */
@@ -14756,7 +14756,7 @@ function reapplyTagColumnVisibility() {
 
   function goIndex(reason) {
     sessionStorage.removeItem(SESSION_KEY);
-    window.location.href = 'index.html?reason=' + reason;
+    window.location.href = 'login.html?reason=' + reason;
   }
 
   function showTrialExpiredDialog() {
@@ -14812,7 +14812,7 @@ function reapplyTagColumnVisibility() {
   let pkg, expiresAt;
 
   if (VALID.includes(urlPkg)) {
-    /* ── CASE 1: ?package= present → fresh login from index.html
+    /* ── CASE 1: ?package= present → fresh login from login.html
        Always overwrite any previous session with the new one.     */
     pkg       = urlPkg;
     const dur = pkg === 'trial' ? TRIAL_DURATION_MS : SESSION_DURATION_MS;
