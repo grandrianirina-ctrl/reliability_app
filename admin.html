@@ -431,18 +431,20 @@ let allUsers = [];
 
 // ── Auth guard ────────────────────────────────────────────────
 const { data: { session } } = await supabase.auth.getSession();
-if (!session || session.user.email !== ADMIN_EMAIL) {
-  document.body.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:'JetBrains Mono',monospace;color:#fca5a5">
-      <div style="font-size:48px">🔒</div>
-      <div style="font-size:18px;font-weight:700">Accès refusé</div>
-      <div style="font-size:13px;color:#64748b">Réservé aux administrateurs</div>
-      <a href="login.html" style="margin-top:8px;padding:10px 24px;background:#0ea5e9;color:white;border-radius:8px;text-decoration:none;font-size:13px">Se connecter</a>
-    </div>`;
-  return;
-}
 
-document.getElementById('adminEmail').textContent = session.user.email;
+async function initAdmin() {
+  if (!session || session.user.email !== ADMIN_EMAIL) {
+    document.body.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:'JetBrains Mono',monospace;color:#fca5a5">
+        <div style="font-size:48px">🔒</div>
+        <div style="font-size:18px;font-weight:700">Accès refusé</div>
+        <div style="font-size:13px;color:#64748b">Réservé aux administrateurs</div>
+        <a href="login.html" style="margin-top:8px;padding:10px 24px;background:#0ea5e9;color:white;border-radius:8px;text-decoration:none;font-size:13px">Se connecter</a>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('adminEmail').textContent = session.user.email;
 
 // ── Toast ─────────────────────────────────────────────────────
 function showToast(msg, type = 'success') {
@@ -727,11 +729,15 @@ window.doLogout = async function() {
   window.location.href = 'login.html';
 };
 
-// ── Init ─────────────────────────────────────────────────────
-await loadAll();
-const ls = document.getElementById('ls');
-ls.classList.add('hide');
-setTimeout(() => ls.remove(), 500);
+  // ── Init ─────────────────────────────────────────────────────
+  await loadAll();
+  const ls = document.getElementById('ls');
+  ls.classList.add('hide');
+  setTimeout(() => ls.remove(), 500);
+}
+
+// Lancer
+initAdmin();
 </script>
 </body>
 </html>
