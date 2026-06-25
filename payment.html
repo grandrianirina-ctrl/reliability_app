@@ -301,10 +301,15 @@ const PRICES = {
   entreprise_monthly:    'pri_01ktnkndn91851hx3hd8znxp2s',
 };
 
-Paddle.Initialize({
-  token: PADDLE_TOKEN,
-  eventCallback: async (e) => { if (e.name==='checkout.completed') await onSuccess(e.data); }
-});
+// Attendre que Paddle.js soit chargé avant d'initialiser
+function initPaddle() {
+  if (typeof Paddle === 'undefined') { setTimeout(initPaddle, 100); return; }
+  Paddle.Initialize({
+    token: PADDLE_TOKEN,
+    eventCallback: async (e) => { if (e.name==='checkout.completed') await onSuccess(e.data); }
+  });
+}
+initPaddle();
 
 let lang='fr', annual=false, user=null;
 
