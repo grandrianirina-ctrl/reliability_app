@@ -434,14 +434,38 @@ window.buy = async function(plan) {
     entreprise:   PRICES.entreprise_monthly,
   };
   try {
-    Paddle.Checkout.open({
-      items:[{ priceId: priceMap[plan], quantity:1 }],
-      customer:{ email: user.email },
-      customData:{ supabase_user_id: user.id, plan },
-      settings:{ theme:'dark', locale:lang,
-        successUrl:`https://reliasuitepro.com/payment.html?success=1&plan=${plan}` }
-    });
-  } catch(e){ console.error(e); }
+    // Vérifier que l'utilisateur est connecté
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const checkoutParams = {
+      items: [{ priceId: priceMap[plan], quantity: 1 }],
+      settings: {
+        theme: 'dark',
+        locale: lang,
+        successUrl: `https://reliasuitepro.com/payment.html?success=1&plan=${plan}`
+      },
+      customData: {
+        supabase_user_id: session.user.id,
+        plan: plan
+      }
+    };
+
+    // Ajouter l'email seulement si disponible
+    if (session.user.email) {
+      checkoutParams.customer = { email: session.user.email };
+    }
+
+    console.log('Opening Paddle checkout:', checkoutParams);
+    Paddle.Checkout.open(checkoutParams);
+
+  } catch(e) {
+    console.error('Paddle checkout error:', e);
+    alert('Erreur lors de l\'ouverture du checkout. Veuillez réessayer.');
+  }
   finally { btn.classList.remove('loading'); btn.disabled=false; }
 };
 
