@@ -459,8 +459,9 @@ window.buy = async function(plan) {
       checkoutParams.customer = { email: session.user.email };
     }
 
-    console.log('Opening Paddle checkout:', checkoutParams);
-    Paddle.Checkout.open(checkoutParams);
+   console.log('Items:', JSON.stringify(checkoutParams.items));
+console.log('PriceId:', checkoutParams.items[0].priceId);
+Paddle.Checkout.open(checkoutParams);
 
   } catch(e) {
     console.error('Paddle checkout error:', e);
