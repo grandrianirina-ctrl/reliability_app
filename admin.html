@@ -420,7 +420,7 @@ const SUPABASE_URL  = 'https://kquwgqcxauymzkgfcxpm.supabase.co';
 const SUPABASE_KEY  = 'sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx';
 
 // ⚠️ REMPLACE PAR TON EMAIL ADMIN — seul cet email peut accéder
-const ADMIN_EMAIL = {'grandrianirina@gmail.com','rateliniainalioka@gmail.com'};
+const ADMIN_EMAILS = ['grandrianirina@gmail.com', 'rateliniainalioka@gmail.com'];
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -433,7 +433,7 @@ let allUsers = [];
 const { data: { session } } = await supabase.auth.getSession();
 
 async function initAdmin() {
-  if (!session || session.user.email !== ADMIN_EMAIL) {
+  if (!session || !ADMIN_EMAILS.includes(session.user.email)) {
     document.body.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:'JetBrains Mono',monospace;color:#fca5a5">
         <div style="font-size:48px">🔒</div>
