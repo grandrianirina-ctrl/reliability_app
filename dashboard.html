@@ -796,7 +796,7 @@ document.querySelectorAll('.modal-overlay').forEach(ov => {
 
 // ── Init ──
 const { data:{ session } } = await supabase.auth.getSession();
-if(!session){ location.href='index.html'; }
+if(!session){ /*location.href='index.html';*/ }  /* TODO: re-enable redirect for production */
 else {
   const currentUser = session.user;
   document.getElementById('userEmail').textContent = currentUser.email;
