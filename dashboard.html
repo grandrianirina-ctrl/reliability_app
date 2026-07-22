@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard — Reliability Suite Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -12,24 +14,24 @@
   --accent:#0ea5e9;--accent2:#10b981;--warning:#f59e0b;--purple:#8b5cf6;--rose:#f43f5e;--danger:#ef4444;
   --text:#f0f4ff;--muted:#64748b;--muted2:#94a3b8;--card:#131c2e;
 }
-body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
 
 /* HEADER */
 .header{background:var(--card);border-bottom:1px solid var(--border);padding:0 28px;height:62px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
 .header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2),transparent);}
 .brand{display:flex;align-items:center;gap:10px;}
-.brand-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.brand-icon {width:34px;height:34px;background:#0ea5e9;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;}
 .brand-name{font-size:14px;font-weight:700;letter-spacing:.04em;}
 .brand-name em{font-style:normal;color:var(--accent);}
+.brand-sub { font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--muted2); letter-spacing:.08em; text-transform:uppercase; margin-top:2px; }
 .header-right{display:flex;align-items:center;gap:12px;}
 .user-info{text-align:right;}
 .user-email{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
 .plan-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.07em;margin-top:2px;}
 .pb-trial      {background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3);}
-.pb-essentiel  {background:rgba(14,165,233,.15);color:var(--accent);border:1px solid rgba(14,165,233,.3);}
-.pb-pro        {background:rgba(16,185,129,.15);color:var(--accent2);border:1px solid rgba(16,185,129,.3);}
-.pb-ent        {background:rgba(139,92,246,.15);color:var(--purple);border:1px solid rgba(139,92,246,.3);}
-.pb-ult        {background:rgba(244,63,94,.15);color:var(--rose);border:1px solid rgba(244,63,94,.3);}
+.pb-essential  {background:rgba(14,165,233,.15);color:var(--accent);border:1px solid rgba(14,165,233,.3);}
+.pb-professional{background:rgba(16,185,129,.15);color:var(--accent2);border:1px solid rgba(16,185,129,.3);}
+.pb-ultimate   {background:rgba(244,63,94,.15);color:var(--rose);border:1px solid rgba(244,63,94,.3);}
 .pb-expired    {background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3);}
 .lang-btn{padding:4px 10px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;cursor:pointer;transition:all .2s;}
 .lang-btn.active,.lang-btn:hover{border-color:var(--accent);color:var(--accent);}
@@ -46,67 +48,6 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 .trial-bar{height:100%;background:linear-gradient(90deg,var(--accent2),var(--warning));border-radius:2px;transition:width .5s;}
 .btn-upgrade-banner{padding:6px 14px;background:linear-gradient(135deg,var(--accent2),#059669);border:none;border-radius:6px;color:white;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap;transition:opacity .2s;}
 .btn-upgrade-banner:hover{opacity:.85;}
-
-/* MAIN */
-.main{padding:32px 28px;max-width:1200px;margin:auto;}
-.page-title{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px;}
-.page-sub{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;margin-bottom:28px;}
-
-/* STATS */
-.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:32px;}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;transition:border-color .2s;}
-.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:.5;}
-.stat-lbl{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
-.stat-val{font-size:26px;font-weight:800;letter-spacing:-.02em;}
-.stat-val span{font-size:12px;color:var(--muted);font-weight:400;}
-
-/* SECTION TITLE */
-.sec-title{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
-.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
-
-/* TOOL GRID */
-.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-bottom:32px;}
-
-/* TOOL CARD */
-.tool-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative;transition:all .2s;cursor:pointer;}
-.tool-card:hover:not(.locked){border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 24px rgba(14,165,233,.1);}
-.tool-card.locked{cursor:not-allowed;opacity:.65;}
-
-/* Visual top image area */
-.tool-visual{height:110px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-.tool-visual svg{width:100%;height:100%;position:absolute;top:0;left:0;}
-.tool-visual .tool-emoji{font-size:36px;position:relative;z-index:2;}
-
-/* Color themes per tool */
-.tv-blue   {background:linear-gradient(135deg,rgba(14,165,233,.12),rgba(14,165,233,.04));}
-.tv-green  {background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(16,185,129,.04));}
-.tv-yellow {background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.04));}
-.tv-purple {background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(139,92,246,.04));}
-.tv-rose   {background:linear-gradient(135deg,rgba(244,63,94,.12),rgba(244,63,94,.04));}
-.tv-teal   {background:linear-gradient(135deg,rgba(20,184,166,.12),rgba(20,184,166,.04));}
-.tv-orange {background:linear-gradient(135deg,rgba(249,115,22,.12),rgba(249,115,22,.04));}
-
-/* Inline chart decorations */
-.mini-chart{position:absolute;bottom:10px;left:10px;right:10px;height:40px;opacity:.4;}
-.mini-bar{position:absolute;bottom:0;width:10%;border-radius:2px 2px 0 0;}
-.mini-line{position:absolute;bottom:0;left:0;right:0;height:100%;}
-
-.tool-lock-badge{position:absolute;top:8px;right:8px;background:rgba(10,14,26,.8);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);display:flex;align-items:center;gap:4px;}
-.tool-access-dot{position:absolute;top:8px;left:8px;width:8px;height:8px;border-radius:50%;}
-.dot-active {background:var(--accent2);}
-.dot-locked {background:var(--muted);}
-
-.tool-body{padding:14px 16px;}
-.tool-name{font-size:13px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px;}
-.tool-desc{font-size:11px;color:var(--muted2);font-family:'JetBrains Mono',monospace;line-height:1.55;}
-.tool-plan-tag{display:inline-block;margin-top:8px;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.07em;}
-
-/* UPGRADE CARD */
-.upgrade-card{background:linear-gradient(135deg,rgba(14,165,233,.07),rgba(16,185,129,.05));border:1px solid rgba(14,165,233,.2);border-radius:14px;padding:22px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-.upgrade-card-text h3{font-size:15px;font-weight:700;margin-bottom:4px;}
-.upgrade-card-text p{font-size:12px;color:var(--muted2);font-family:'JetBrains Mono',monospace;}
-.btn-upgrade-card{padding:11px 22px;background:linear-gradient(135deg,var(--accent),#0284c7);border:none;border-radius:9px;color:white;font-size:13px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap;transition:opacity .2s;}
-.btn-upgrade-card:hover{opacity:.88;}
 
 /* EXPIRED OVERLAY */
 .exp-overlay{position:fixed;inset:0;background:rgba(10,14,26,.92);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
@@ -126,7 +67,111 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 .lspin{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-@media(max-width:600px){.header{padding:0 14px;}.main{padding:20px 14px;}.header-right .lang-btn{display:none;}}
+/* MAIN */
+.main{padding:32px 28px;max-width:1200px;margin:auto;width:100%;flex:1;}
+.page-title{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px;}
+.page-sub{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;margin-bottom:28px;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:32px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;transition:border-color .2s;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:.5;}
+.stat-lbl{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.stat-val{font-size:26px;font-weight:800;letter-spacing:-.02em;}
+.stat-val span{font-size:12px;color:var(--muted);font-weight:400;}
+
+/* SECTION TITLE */
+.sec-title{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* TOOL GRID — 3 cards only */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:36px;}
+
+/* TOOL CARD */
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative;transition:all .2s;cursor:pointer;}
+.tool-card:hover:not(.locked){border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 24px rgba(14,165,233,.12);}
+.tool-card.locked{cursor:not-allowed;opacity:.55;filter:grayscale(.3);}
+.tool-visual{height:120px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.tool-visual svg{width:100%;height:100%;position:absolute;top:0;left:0;}
+.tool-visual .tool-emoji{font-size:42px;position:relative;z-index:2;}
+.tv-blue  {background:linear-gradient(135deg,rgba(14,165,233,.15),rgba(14,165,233,.04));}
+.tv-green {background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(16,185,129,.04));}
+.tv-orange{background:linear-gradient(135deg,rgba(249,115,22,.15),rgba(249,115,22,.04));}
+.tool-lock-badge{position:absolute;top:8px;right:8px;background:rgba(10,14,26,.85);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);display:flex;align-items:center;gap:4px;}
+.tool-access-dot{position:absolute;top:8px;left:8px;width:8px;height:8px;border-radius:50%;}
+.dot-active{background:var(--accent2);}
+.dot-locked{background:var(--muted);}
+.tool-body{padding:16px 18px;}
+.tool-name{font-size:15px;font-weight:700;letter-spacing:-.01em;margin-bottom:5px;}
+.tool-desc{font-size:11px;color:var(--muted2);font-family:'JetBrains Mono',monospace;line-height:1.55;}
+.tool-plan-tag{display:inline-block;margin-top:10px;padding:3px 8px;border-radius:4px;font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.07em;}
+
+/* PACKAGE COMPARISON TABLE */
+.pkg-section{margin-bottom:36px;}
+.pkg-grid{display:grid;grid-template-columns:180px repeat(3,1fr);gap:0;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.toggle-wrap{display:flex;justify-content:center;margin:16px 0 0;}
+.toggle-inner{display:inline-flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:30px;padding:6px 16px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted2);}
+.toggle-track{width:44px;height:22px;background:var(--border);border-radius:11px;cursor:pointer;position:relative;transition:background .25s;}
+.toggle-track.on{background:var(--accent2);}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;background:white;border-radius:50%;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.toggle-track.on .toggle-thumb{transform:translateX(22px);}
+.save-pill{padding:3px 9px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);border-radius:10px;font-size:10px;font-weight:700;color:var(--accent2);}
+.pkg-col-header{padding:16px 14px;background:var(--card);border-bottom:1px solid var(--border);font-size:12px;font-weight:700;text-align:center;}
+.pkg-col-header:first-child{text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+.pkg-col-header.current{background:linear-gradient(135deg,rgba(14,165,233,.1),rgba(16,185,129,.06));border-bottom-color:var(--accent);}
+.pkg-col-header .pkg-name{font-size:14px;font-weight:800;letter-spacing:-.01em;margin-bottom:2px;}
+.pkg-col-header .pkg-sub{font-size:10px;color:var(--muted);font-weight:400;font-family:'JetBrains Mono',monospace;}
+.pkg-row{display:contents;}
+.pkg-cell{padding:11px 14px;border-bottom:1px solid var(--border);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.pkg-cell:first-child{color:var(--muted2);font-size:11px;}
+.pkg-cell:not(:first-child){text-align:center;color:var(--text);}
+.pkg-cell.current-col{background:rgba(14,165,233,.03);}
+.pkg-tick{color:var(--accent2);font-size:14px;}
+.pkg-dash{color:var(--muted);font-size:14px;}
+.pkg-footer-row{display:contents;}
+.pkg-footer-cell{padding:14px;background:var(--card);}
+.pkg-footer-cell:not(:first-child){text-align:center;}
+.pkg-footer-cell.current-col{background:rgba(14,165,233,.04);}
+.pkg-group-header{grid-column:1/-1;padding:10px 14px 6px;font-size:10px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace;background:var(--card);border-bottom:1px solid var(--border);}
+.pkg-feat-name{font-weight:600;color:var(--text);}
+.pkg-feat-desc{color:var(--muted);font-size:10.5px;margin-top:1px;}
+.btn-upgrade{padding:8px 16px;background:linear-gradient(135deg,var(--accent),#0284c7);border:none;border-radius:8px;color:white;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
+.btn-upgrade:hover{opacity:.85;}
+.btn-current{padding:8px 16px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;color:var(--accent2);font-size:11px;font-weight:700;font-family:'Syne',sans-serif;cursor:default;}
+
+/* FOOTER */
+footer{background:var(--card);border-top:2px solid var(--accent);font-size:11px;color:var(--muted2);margin-top:auto;}
+.footer-inner{max-width:1200px;margin:0 auto;padding:20px 28px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;}
+.footer-brand{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;letter-spacing:.02em;}
+.footer-links{display:flex;flex-direction:column;gap:6px;}
+.footer-links a{color:var(--muted);text-decoration:none;transition:color .15s;font-size:11px;}
+.footer-links a:hover{color:var(--accent);}
+.footer-section-label{font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.footer-bottom{border-top:1px solid var(--border);padding:8px 28px;text-align:center;font-size:10px;letter-spacing:.03em;color:var(--muted);}
+
+/* FOOTER MODALS */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9800;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:min(600px,94vw);max-height:82vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.5);}
+.modal-header{display:flex;align-items:center;padding:14px 20px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0;}
+.modal-title{font-size:14px;font-weight:700;color:var(--text);flex:1;}
+.modal-close{border:none;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px 8px;border-radius:6px;transition:color .15s;}
+.modal-close:hover{color:var(--text);}
+.modal-body{padding:24px;overflow-y:auto;font-size:13px;color:var(--text);line-height:1.75;}
+.modal-body h3{font-size:14px;font-weight:700;color:var(--accent);margin:18px 0 8px;}
+.modal-body h3:first-child{margin-top:0;}
+.modal-body p{margin-bottom:12px;color:var(--muted2);}
+.modal-body ul{padding-left:18px;margin-bottom:12px;color:var(--muted2);}
+.modal-body li{margin-bottom:4px;}
+
+@media(max-width:700px){
+  .header{padding:0 14px;}
+  .main{padding:20px 14px;}
+  .header-right .lang-btn{display:none;}
+  .pkg-grid{grid-template-columns:1fr;}
+  .footer-inner{grid-template-columns:1fr;}
+  .tools-grid{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
@@ -137,67 +182,84 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 <div class="exp-overlay" id="expOverlay">
   <div class="exp-modal">
     <div class="exp-icon">⏱️</div>
-    <h2 id="expTitle">Essai expiré</h2>
-    <p id="expBody">Votre essai gratuit de 3h est terminé. Choisissez un plan pour continuer.</p>
-    <button class="btn-exp-upgrade" onclick="location.href='payment.html'" id="expUpgrade">Choisir un plan</button>
-    <button class="btn-exp-logout" onclick="doLogout()" id="expLogout">Se déconnecter</button>
+    <h2 id="expTitle">Trial expired</h2>
+    <p id="expBody">Your free trial is over. Choose a plan to continue.</p>
+    <button class="btn-exp-upgrade" onclick="goUpgrade()" id="expUpgrade">Choose a plan</button>
+    <button class="btn-exp-logout" onclick="doLogout()" id="expLogout">Sign out</button>
+  </div>
+</div>
+
+<!-- Upgrade selection modal — shows only tiers above the user's current
+     plan, each with its real price. Downgrade is never offered here. -->
+<div id="upgradeSelectOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--card,#131c2e);border:1px solid var(--border,#1e2d45);border-radius:16px;padding:32px 36px;max-width:460px;width:90%">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+      <h2 id="upgSelTitle" style="margin:0;font-size:19px;font-weight:700">Choose your plan</h2>
+      <button onclick="closeUpgradeSelect()" style="background:none;border:none;color:var(--muted,#94a3b8);font-size:20px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <p id="upgSelCurrent" style="margin:0 0 16px;font-size:12.5px;color:var(--muted,#94a3b8)"></p>
+    <div id="upgSelToggle" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:18px;padding:4px;background:rgba(255,255,255,.03);border:1px solid var(--border,#1e2d45);border-radius:10px">
+      <button id="upgSelMonthlyBtn" onclick="setUpgradeCycle('monthly')" style="flex:1;padding:8px 10px;border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;background:#0f62fe;color:#fff">Monthly</button>
+      <button id="upgSelAnnualBtn" onclick="setUpgradeCycle('yearly')" style="flex:1;padding:8px 10px;border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted,#94a3b8)">Annual <span style="color:#22c55e;font-size:10.5px">save ~17%</span></button>
+    </div>
+    <div id="upgSelCards" style="display:flex;flex-direction:column;gap:10px"></div>
   </div>
 </div>
 
 <!-- Header -->
 <div class="header">
   <div class="brand">
-    <div class="brand-icon">⚙️</div>
-    <div class="brand-name">Reliability <em>Suite Pro</em></div>
+    <div class="brand-icon"><svg viewBox="0 0 16 16" width="60%" height="60%"><rect x="1" y="11" width="2" height="3" fill="white"/><rect x="4" y="8" width="2" height="6" fill="white"/><rect x="7" y="3" width="2" height="11" fill="white"/><rect x="10" y="6" width="2" height="8" fill="white"/><rect x="13" y="10" width="2" height="4" fill="white"/><path d="M1 12C3 12 5 3 8 3C11 3 12 9 15 11" fill="none" stroke="white" stroke-width="1" stroke-linecap="round"/></svg></div>
+    <div><div class="brand-name">Reliability <em>Suite Pro</em></div><div class="brand-sub">Reliability Analysis Platform</div></div>
   </div>
   <div class="header-right">
-    <button class="lang-btn active" id="lFR" onclick="setLang('fr')">FR</button>
-    <button class="lang-btn" id="lEN" onclick="setLang('en')">EN</button>
     <div class="user-info">
       <div class="user-email" id="userEmail">—</div>
       <div class="plan-badge pb-trial" id="planBadge">Trial</div>
     </div>
-    <button class="btn-logout" onclick="doLogout()" id="logoutBtn">Déconnexion</button>
+    <button class="btn-logout" onclick="location.href='admin.html'" id="adminBtn" style="display:none;background:transparent;border:1px solid rgba(139,92,246,.4);color:#a78bfa">🛡️ Admin</button>
+    <button class="btn-logout" onclick="openModal('supportModal');loadTicketHistory();" id="supportBtn" style="background:transparent;border:1px solid var(--border);color:var(--muted2)">💬 Support</button>
+    <button class="btn-logout" onclick="doLogout()" id="logoutBtn">Sign out</button>
   </div>
 </div>
 
 <!-- Trial banner -->
 <div class="trial-banner" id="trialBanner">
-  <span class="trial-txt" id="trialTxt">⏱ Essai en cours</span>
+  <span class="trial-txt" id="trialTxt">⏱ Trial in progress</span>
   <div class="trial-bar-wrap"><div class="trial-bar" id="trialBar" style="width:100%"></div></div>
-  <button class="btn-upgrade-banner" onclick="location.href='payment.html'" id="upgradeBtn">Upgrader →</button>
+  <button class="btn-upgrade-banner" onclick="goUpgrade()" id="upgradeBtn">Upgrade →</button>
 </div>
 
 <!-- Main -->
 <div class="main">
   <div class="page-title" id="pageTitle">Dashboard</div>
-  <div class="page-sub" id="pageSub">Bienvenue</div>
+  <div class="page-sub" id="pageSub">Welcome</div>
 
   <!-- Stats -->
   <div class="stats-row">
     <div class="stat-card">
-      <div class="stat-lbl" id="stL1">Analyses effectuées</div>
-      <div class="stat-val" id="stV1" style="cursor:pointer" onclick="openApp()">0 <span id="stU1">analyses</span></div>
+      <div class="stat-lbl" id="stL1">Available analyses</div>
+      <div class="stat-val" id="stV1">— <span id="stU1">analyses</span></div>
     </div>
     <div class="stat-card">
-      <div class="stat-lbl" id="stL2">Temps restant</div>
+      <div class="stat-lbl" id="stL2">Time remaining</div>
       <div class="stat-val" id="stV2">— <span id="stU2">h</span></div>
     </div>
     <div class="stat-card">
-      <div class="stat-lbl" id="stL3">Plan actif</div>
+      <div class="stat-lbl" id="stL3">Active package</div>
       <div class="stat-val" id="stV3" style="font-size:16px">—</div>
     </div>
     <div class="stat-card">
-      <div class="stat-lbl" id="stL4">Utilisateurs</div>
+      <div class="stat-lbl" id="stL4">Users</div>
       <div class="stat-val" id="stV4">1 <span id="stU4">/ max</span></div>
     </div>
   </div>
 
-  <!-- Tools -->
-  <div class="sec-title" id="secTools">Outils disponibles</div>
+  <!-- Available Analysis Tools — 3 cards -->
+  <div class="sec-title" id="secTools">Available tools</div>
   <div class="tools-grid" id="toolsGrid">
 
-    <!-- 1. Life Data Analysis -->
+    <!-- Life Data Analysis -->
     <div class="tool-card" id="tc-lda" onclick="openTool('lda')">
       <div class="tool-visual tv-blue">
         <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
@@ -207,189 +269,15 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
           <circle cx="160" cy="20" r="3" fill="#0ea5e9" opacity=".6"/>
         </svg>
         <div class="tool-access-dot dot-active" id="dot-lda"></div>
-        <div class="tool-emoji">📊</div>
       </div>
       <div class="tool-body">
         <div class="tool-name" id="tn1">Life Data Analysis</div>
-        <div class="tool-desc" id="td1">Weibull · Lognormal · Exponentielle</div>
-        <span class="tool-plan-tag" style="background:rgba(245,158,11,.1);color:#fbbf24" id="tt1">Tous plans</span>
+        <div class="tool-desc" id="td1">Weibull · Lognormal · Exponential</div>
+        <span class="tool-plan-tag" style="background:rgba(14,165,233,.1);color:var(--accent)" id="tt1">Essential+</span>
       </div>
     </div>
 
-    <!-- 2. Reliability Metrics -->
-    <div class="tool-card" id="tc-rm" onclick="openTool('rm')">
-      <div class="tool-visual tv-teal">
-        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
-          <rect x="20" y="60" width="20" height="40" rx="3" fill="#14b8a6" opacity=".7"/>
-          <rect x="50" y="40" width="20" height="60" rx="3" fill="#14b8a6" opacity=".85"/>
-          <rect x="80" y="25" width="20" height="75" rx="3" fill="#14b8a6"/>
-          <rect x="110" y="45" width="20" height="55" rx="3" fill="#14b8a6" opacity=".75"/>
-          <rect x="140" y="55" width="20" height="45" rx="3" fill="#14b8a6" opacity=".6"/>
-          <rect x="170" y="70" width="20" height="30" rx="3" fill="#14b8a6" opacity=".45"/>
-        </svg>
-        <div class="tool-access-dot dot-active" id="dot-rm"></div>
-        <div class="tool-emoji">⏱️</div>
-      </div>
-      <div class="tool-body">
-        <div class="tool-name" id="tn2">Reliability Metrics</div>
-        <div class="tool-desc" id="td2">MTBF · R(t) · F(t) · h(t)</div>
-        <span class="tool-plan-tag" style="background:rgba(245,158,11,.1);color:#fbbf24" id="tt2">Tous plans</span>
-      </div>
-    </div>
-
-    <!-- 3. Probability Plots -->
-    <div class="tool-card" id="tc-pp" onclick="openTool('pp')">
-      <div class="tool-visual tv-yellow">
-        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
-          <line x1="15" y1="95" x2="190" y2="95" stroke="#64748b" stroke-width="1"/>
-          <line x1="15" y1="95" x2="15" y2="10" stroke="#64748b" stroke-width="1"/>
-          <circle cx="35" cy="85" r="3.5" fill="#f59e0b"/>
-          <circle cx="60" cy="72" r="3.5" fill="#f59e0b"/>
-          <circle cx="85" cy="58" r="3.5" fill="#f59e0b"/>
-          <circle cx="110" cy="45" r="3.5" fill="#f59e0b"/>
-          <circle cx="135" cy="35" r="3.5" fill="#f59e0b"/>
-          <circle cx="160" cy="28" r="3.5" fill="#f59e0b"/>
-          <circle cx="180" cy="22" r="3.5" fill="#f59e0b"/>
-          <line x1="30" y1="90" x2="185" y2="18" stroke="#f59e0b" stroke-width="1.5" opacity=".5"/>
-        </svg>
-        <div class="tool-access-dot dot-active" id="dot-pp"></div>
-        <div class="tool-emoji">📈</div>
-      </div>
-      <div class="tool-body">
-        <div class="tool-name" id="tn3">Probability Plots</div>
-        <div class="tool-desc" id="td3">Validation des distributions statistiques</div>
-        <span class="tool-plan-tag" style="background:rgba(245,158,11,.1);color:#fbbf24" id="tt3">Tous plans</span>
-      </div>
-    </div>
-
-    <!-- 4. Confidence Bounds -->
-    <div class="tool-card" id="tc-cb" onclick="openTool('cb')">
-      <div class="tool-visual tv-blue">
-        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10,95 Q60,20 190,10" fill="none" stroke="#0ea5e9" stroke-width="2.5"/>
-          <path d="M10,95 Q60,35 190,25" fill="none" stroke="#0ea5e9" stroke-width="1" stroke-dasharray="4,3" opacity=".5"/>
-          <path d="M10,95 Q60,10 190,5"  fill="none" stroke="#0ea5e9" stroke-width="1" stroke-dasharray="4,3" opacity=".5"/>
-          <path d="M10,95 Q60,35 190,25 L190,5 Q60,10 10,95 Z" fill="#0ea5e9" opacity=".07"/>
-        </svg>
-        <div class="tool-access-dot dot-active" id="dot-cb"></div>
-        <div class="tool-emoji">🎯</div>
-      </div>
-      <div class="tool-body">
-        <div class="tool-name" id="tn4">Confidence Bounds</div>
-        <div class="tool-desc" id="td4">Intervalles de confiance sur les estimations</div>
-        <span class="tool-plan-tag" style="background:rgba(245,158,11,.1);color:#fbbf24" id="tt4">Tous plans</span>
-      </div>
-    </div>
-
-    <!-- 5. Advanced Reporting -->
-    <div class="tool-card" id="tc-ar" onclick="openTool('ar')">
-      <div class="tool-visual tv-green">
-        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
-          <rect x="20" y="15" width="160" height="80" rx="6" fill="none" stroke="#10b981" stroke-width="1.5" opacity=".4"/>
-          <rect x="32" y="28" width="80" height="6" rx="3" fill="#10b981" opacity=".6"/>
-          <rect x="32" y="42" width="136" height="4" rx="2" fill="#64748b" opacity=".4"/>
-          <rect x="32" y="52" width="110" height="4" rx="2" fill="#64748b" opacity=".4"/>
-          <rect x="32" y="62" width="120" height="4" rx="2" fill="#64748b" opacity=".4"/>
-          <rect x="32" y="72" width="90"  height="4" rx="2" fill="#64748b" opacity=".4"/>
-          <rect x="148" y="65" width="22" height="22" rx="4" fill="#10b981" opacity=".2"/>
-          <text x="155" y="80" font-size="12" fill="#10b981" opacity=".7">↓</text>
-        </svg>
-        <div class="tool-access-dot" id="dot-ar"></div>
-        <div class="tool-emoji">📋</div>
-      </div>
-      <div class="tool-body">
-        <div class="tool-name" id="tn5">Advanced Reporting</div>
-        <div class="tool-desc" id="td5">PDF · Excel · Templates pro</div>
-        <span class="tool-plan-tag" style="background:rgba(14,165,233,.1);color:#0ea5e9" id="tt5">Essentiel+</span>
-      </div>
-    </div>
-
-    <!-- 6. Degradation Analysis -->
-    <div class="tool-card" id="tc-da" onclick="openTool('da')">
-      <div class="tool-visual tv-orange">
-        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
-          <polyline points="10,20 40,28 70,38 100,52 130,68 160,82 190,95" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/>
-          <polyline points="10,25 40,34 70,46 100,60 130,74 160,87 190,99" fill="none" stroke="#f97316" stroke-width="1" stroke-dasharray="4,3" opacity=".4"/>
-          <line x1="145" y1="10" x2="145" y2="100" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,3" opacity=".6"/>
-          <text x="148" y="20" font-size="9" fill="#ef4444" opacity=".8">seuil</text>
-        </svg>
-        <div class="tool-access-dot" id="dot-da"></div>
-        <div class="tool-emoji">📉</div>
-      </div>
-      <div class="tool-body">
-        <div class="tool-name" id="tn6">Degradation Analysis</div>
-        <div class="tool-desc" id="td6">Modélisation de la dégradation progressive</div>
-        <span class="tool-plan-tag" style="background:rgba(16,185,129,.1);color:#10b981" id="tt6">Professionnel+</span>
-      </div>
-    </div>
-
-    <!-- 7. Preventive Maintenance -->
-    <div class="tool-card" id="tc-pm" onclick="openTool('pm')">
-      <div class="tool-visual tv-purple">
-        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
-          <rect x="20" y="30" width="22" height="65" rx="3" fill="#8b5cf6" opacity=".3"/>
-          <rect x="52" y="45" width="22" height="50" rx="3" fill="#8b5cf6" opacity=".5"/>
-          <rect x="84" y="20" width="22" height="75" rx="3" fill="#8b5cf6" opacity=".9"/>
-          <rect x="116" y="50" width="22" height="45" rx="3" fill="#8b5cf6" opacity=".5"/>
-          <rect x="148" y="38" width="22" height="57" rx="3" fill="#8b5cf6" opacity=".35"/>
-          <polyline points="31,30 63,45 95,20 127,50 159,38" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <div class="tool-access-dot" id="dot-pm"></div>
-        <div class="tool-emoji">🔧</div>
-      </div>
-      <div class="tool-body">
-        <div class="tool-name" id="tn7">Preventive Maintenance</div>
-        <div class="tool-desc" id="td7">Optimisation des intervalles de maintenance</div>
-        <span class="tool-plan-tag" style="background:rgba(139,92,246,.1);color:#8b5cf6" id="tt7">Entreprise+</span>
-      </div>
-    </div>
-
-    <!-- 8. Spare Parts Forecasting -->
-    <div class="tool-card" id="tc-sp" onclick="openTool('sp')">
-      <div class="tool-visual tv-teal">
-        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
-          <rect x="15" y="50" width="18" height="45" rx="3" fill="#14b8a6" opacity=".5"/>
-          <rect x="40" y="35" width="18" height="60" rx="3" fill="#14b8a6" opacity=".7"/>
-          <rect x="65" y="55" width="18" height="40" rx="3" fill="#14b8a6" opacity=".55"/>
-          <rect x="90" y="42" width="18" height="53" rx="3" fill="#14b8a6" opacity=".65"/>
-          <rect x="115" y="60" width="18" height="35" rx="3" fill="#14b8a6" opacity=".45"/>
-          <rect x="140" y="48" width="18" height="47" rx="3" fill="#14b8a6" opacity=".35" stroke="#14b8a6" stroke-dasharray="2,2"/>
-          <rect x="165" y="38" width="18" height="57" rx="3" fill="none" stroke="#14b8a6" stroke-width="1.5" stroke-dasharray="3,2" opacity=".7"/>
-        </svg>
-        <div class="tool-access-dot" id="dot-sp"></div>
-        <div class="tool-emoji">📦</div>
-      </div>
-      <div class="tool-body">
-        <div class="tool-name" id="tn8">Spare Parts Forecasting</div>
-        <div class="tool-desc" id="td8">Prévision des besoins en pièces de rechange</div>
-        <span class="tool-plan-tag" style="background:rgba(139,92,246,.1);color:#8b5cf6" id="tt8">Entreprise+</span>
-      </div>
-    </div>
-
-    <!-- 9. Multi-Asset / Fleet -->
-    <div class="tool-card" id="tc-ma" onclick="openTool('ma')">
-      <div class="tool-visual tv-rose">
-        <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="50"  cy="55" r="28" fill="none" stroke="#f43f5e" stroke-width="1.5" opacity=".4"/>
-          <circle cx="105" cy="45" r="22" fill="none" stroke="#f43f5e" stroke-width="1.5" opacity=".5"/>
-          <circle cx="155" cy="60" r="18" fill="none" stroke="#f43f5e" stroke-width="1.5" opacity=".4"/>
-          <line x1="50" y1="55" x2="105" y2="45" stroke="#f43f5e" stroke-width="1" opacity=".6"/>
-          <line x1="105" y1="45" x2="155" y2="60" stroke="#f43f5e" stroke-width="1" opacity=".6"/>
-          <circle cx="50"  cy="55" r="4" fill="#f43f5e"/>
-          <circle cx="105" cy="45" r="4" fill="#f43f5e"/>
-          <circle cx="155" cy="60" r="4" fill="#f43f5e"/>
-        </svg>
-        <div class="tool-access-dot" id="dot-ma"></div>
-        <div class="tool-emoji">🚗</div>
-      </div>
-      <div class="tool-body">
-        <div class="tool-name" id="tn9">Multi-Asset / Fleet</div>
-        <div class="tool-desc" id="td9">Analyse de flottes d'équipements</div>
-        <span class="tool-plan-tag" style="background:rgba(244,63,94,.1);color:#f43f5e" id="tt9">Ultimate</span>
-      </div>
-    </div>
-
-    <!-- 10. Reliability Growth -->
+    <!-- Reliability Growth -->
     <div class="tool-card" id="tc-rg" onclick="openTool('rg')">
       <div class="tool-visual tv-green">
         <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
@@ -401,49 +289,254 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
           <text x="12" y="108" font-size="8" fill="#64748b">Crow-AMSAA</text>
         </svg>
         <div class="tool-access-dot" id="dot-rg"></div>
-        <div class="tool-emoji">📊</div>
       </div>
       <div class="tool-body">
-        <div class="tool-name" id="tn10">Reliability Growth</div>
-        <div class="tool-desc" id="td10">Crow-AMSAA · Amélioration continue</div>
-        <span class="tool-plan-tag" style="background:rgba(244,63,94,.1);color:#f43f5e" id="tt10">Ultimate</span>
+        <div class="tool-name" id="tn2">Reliability Growth</div>
+        <div class="tool-desc" id="td2">Crow-AMSAA · Continuous improvement</div>
+        <span class="tool-plan-tag" style="background:rgba(139,92,246,.1);color:#8b5cf6" id="tt2">Professional+</span>
       </div>
     </div>
 
-    <!-- 11. Portfolio / Multi-Site -->
-    <div class="tool-card" id="tc-ms" onclick="openTool('ms')">
-      <div class="tool-visual tv-purple">
+    <!-- Degradation Analysis -->
+    <div class="tool-card" id="tc-da" onclick="openTool('da')">
+      <div class="tool-visual tv-orange">
         <svg viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg">
-          <rect x="10" y="15" width="55" height="40" rx="5" fill="none" stroke="#8b5cf6" stroke-width="1.5" opacity=".6"/>
-          <rect x="75" y="15" width="55" height="40" rx="5" fill="none" stroke="#8b5cf6" stroke-width="1.5" opacity=".6"/>
-          <rect x="140" y="15" width="50" height="40" rx="5" fill="none" stroke="#8b5cf6" stroke-width="1.5" opacity=".6"/>
-          <rect x="50" y="65" width="100" height="35" rx="5" fill="none" stroke="#8b5cf6" stroke-width="2" opacity=".8"/>
-          <line x1="37" y1="55" x2="80" y2="65"  stroke="#8b5cf6" stroke-width="1" opacity=".5"/>
-          <line x1="102" y1="55" x2="100" y2="65" stroke="#8b5cf6" stroke-width="1" opacity=".5"/>
-          <line x1="165" y1="55" x2="130" y2="65" stroke="#8b5cf6" stroke-width="1" opacity=".5"/>
+          <polyline points="10,20 40,28 70,38 100,52 130,68 160,82 190,95" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/>
+          <polyline points="10,25 40,34 70,46 100,60 130,74 160,87 190,99" fill="none" stroke="#f97316" stroke-width="1" stroke-dasharray="4,3" opacity=".4"/>
+          <line x1="145" y1="10" x2="145" y2="100" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,3" opacity=".6"/>
+          <text x="148" y="20" font-size="9" fill="#ef4444" opacity=".8">seuil</text>
         </svg>
-        <div class="tool-access-dot" id="dot-ms"></div>
-        <div class="tool-emoji">🌐</div>
+        <div class="tool-access-dot" id="dot-da"></div>
       </div>
       <div class="tool-body">
-        <div class="tool-name" id="tn11">Portfolio / Multi-Site</div>
-        <div class="tool-desc" id="td11">Dashboard consolidé multi-sites</div>
-        <span class="tool-plan-tag" style="background:rgba(244,63,94,.1);color:#f43f5e" id="tt11">Ultimate</span>
+        <div class="tool-name" id="tn3">Degradation Analysis</div>
+        <div class="tool-desc" id="td3">Progressive degradation modeling</div>
+        <span class="tool-plan-tag" style="background:rgba(244,63,94,.1);color:#f43f5e" id="tt3">Ultimate</span>
       </div>
     </div>
 
-    <!-- Upgrade card -->
-    <div class="tool-card" style="cursor:pointer;background:linear-gradient(135deg,rgba(14,165,233,.06),rgba(16,185,129,.04));border-color:rgba(14,165,233,.2)" onclick="location.href='payment.html'" id="tc-upgrade">
-      <div class="tool-visual" style="background:linear-gradient(135deg,rgba(14,165,233,.1),rgba(16,185,129,.06));height:110px">
-        <div class="tool-emoji">🚀</div>
-      </div>
-      <div class="tool-body">
-        <div class="tool-name" id="tn-up">Passer à Pro</div>
-        <div class="tool-desc" id="td-up">Débloquer tous les modules d'analyse</div>
-        <span class="tool-plan-tag" style="background:rgba(14,165,233,.1);color:var(--accent)">→ Voir les plans</span>
+  </div>
+
+  <!-- Package comparison -->
+  <div class="pkg-section">
+    <div class="sec-title" id="secPkg">Packages</div>
+    <div class="pkg-grid" id="pkgGrid">
+      <!-- JS renders this table dynamically -->
+    </div>
+    <div class="toggle-wrap">
+      <div class="toggle-inner">
+        <span id="pkgTMo">Monthly</span>
+        <div class="toggle-track" id="pkgToggle" onclick="togglePkgBilling()"><div class="toggle-thumb"></div></div>
+        <span id="pkgTAn">Annual</span>
+        <span class="save-pill" id="pkgTSave">save ~17%</span>
       </div>
     </div>
+  </div>
 
+</div><!-- /main -->
+
+<!-- Footer -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">Reliability Suite Pro</div>
+      <div style="color:var(--muted);line-height:1.7;font-size:11px;">
+        Commercial-grade reliability engineering platform for oil &amp; gas and mining professionals.
+      </div>
+    </div>
+    <div>
+      <div class="footer-section-label" id="footAbout">About</div>
+      <div class="footer-links">
+        <a href="#" onclick="openModal('aboutModal');return false;" id="footAboutLink">About ReliaSuite</a>
+        <a href="#" onclick="openModal('glossaryModal');return false;" id="footGlossaryLink">Glossary</a>
+        <a href="#" onclick="openModal('methodModal');return false;" id="footMethodLink">Methodology &amp; References</a>
+        <a href="#" onclick="openModal('standardsModal');return false;" id="footStandardsLink">Standards</a>
+        <a href="#" onclick="openModal('termsModal');return false;" id="footTermsLink">Terms of Use</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-section-label" id="footContact">Contact</div>
+      <div style="line-height:1.7;color:var(--muted);font-size:11px;">
+        Support &amp; Feedback<br>
+        <a href="mailto:rateliniainalioka@gmail.com" style="color:var(--accent);text-decoration:none;">rateliniainalioka@gmail.com</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom" id="footCopy">&copy; 2026 ReliaSuite Professional &nbsp;&middot;&nbsp; All rights reserved</div>
+</footer>
+
+<!-- Footer Modals -->
+<div class="modal-overlay" id="aboutModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="aboutTitle">About ReliaSuite Professional</span>
+      <button class="modal-close" onclick="closeModal('aboutModal')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:15px;font-weight:600;color:var(--accent);">A professional reliability engineering platform built for the field.</p>
+      <p>ReliaSuite Professional is a browser-based reliability analysis application designed specifically for oil &amp; gas and mining operations. It brings rigorous statistical reliability methods to maintenance engineers and reliability professionals who need fast, accurate, auditable results.</p>
+      <h3>Key Features</h3>
+      <ul>
+        <li>Life Data Analysis — Weibull, Lognormal, Exponential, Mixed Weibull</li>
+        <li>Reliability Growth — Crow-AMSAA NHPP, Crow Extended</li>
+        <li>Degradation Analysis — Linear, Power, Wiener, Gamma Process models</li>
+        <li>Preventive Maintenance &amp; FFI Optimization (Barlow-Hunter)</li>
+        <li>Spare Parts Forecasting (Poisson / Binomial / Normal)</li>
+        <li>Report generation for every analysis type</li>
+        <li>Multi-Asset / Fleet Analysis with tagging</li>
+        <li>Portfolio Dashboard with KPI rollup</li>
+      </ul>
+      <h3>Target Audience</h3>
+      <p>Designed for reliability engineers, maintenance planners, and asset managers in heavy industry sectors including oil &amp; gas, mining, and power generation.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="glossaryModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="glossaryTitle">Glossary</span>
+      <button class="modal-close" onclick="closeModal('glossaryModal')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <h3>R(t) — Reliability Function</h3>
+      <p>The probability that an item performs its required function without failure under stated conditions for a specified time interval t. Also called the survival function.</p>
+      <h3>F(t) — Cumulative Distribution Function (Failure CDF)</h3>
+      <p>The probability that a failure occurs by time t. F(t) = 1 − R(t).</p>
+      <h3>h(t) — Hazard Rate / Failure Rate</h3>
+      <p>The instantaneous rate of failure at time t given survival to t. Also called the hazard function or force of mortality.</p>
+      <h3>MTBF — Mean Time Between Failures</h3>
+      <p>The average time between successive failures of a repairable system. Equal to the integral of R(t) for a non-repairable item.</p>
+      <h3>MTTR — Mean Time To Repair</h3>
+      <p>The average time required to repair a failed component and return it to operational status.</p>
+      <h3>Weibull Distribution</h3>
+      <p>A flexible two-parameter (or three-parameter) lifetime distribution. The shape parameter β distinguishes infant mortality (β&lt;1), random failures (β≈1), and wear-out (β&gt;1).</p>
+      <h3>Crow-AMSAA (NHPP Power Law)</h3>
+      <p>A Non-Homogeneous Poisson Process model used for reliability growth analysis of repairable systems under test or in service.</p>
+      <h3>Degradation Analysis</h3>
+      <p>A method to estimate time-to-failure from degradation measurements (e.g. vibration, corrosion, wear) when direct failure data is scarce. Includes linear, power, Wiener stochastic, and Gamma process models.</p>
+      <h3>RUL — Remaining Useful Life</h3>
+      <p>The expected time remaining before a degrading item reaches a predefined failure threshold.</p>
+      <h3>FFI — Failure Finding Interval</h3>
+      <p>The optimal inspection interval for hidden failures (protective devices, stand-by equipment) calculated to achieve a target unavailability.</p>
+      <h3>Confidence Bounds</h3>
+      <p>Statistical intervals reflecting uncertainty in parameter estimates. ReliaSuite supports Fisher Matrix and Likelihood Ratio bounds.</p>
+      <h3>β (Beta) — Shape Parameter</h3>
+      <p>Weibull shape parameter controlling the failure rate behavior over time. β&lt;1: decreasing rate (infant mortality); β=1: constant rate; β&gt;1: increasing rate (wear-out).</p>
+      <h3>η (Eta) — Scale Parameter / Characteristic Life</h3>
+      <p>Weibull scale parameter representing the age at which 63.2% of the population has failed.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="methodModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="methodTitle">Methodology &amp; References</span>
+      <button class="modal-close" onclick="closeModal('methodModal')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <h3>Statistical Methods</h3>
+      <p>ReliaSuite implements Maximum Likelihood Estimation (MLE) and Rank Regression (RRX/RRY) following methods documented in ReliaSoft's Life Data Analysis Reference and the textbooks referenced below.</p>
+      <h3>Probability Plotting</h3>
+      <p>Johnson adjusted ranks (Bernard's approximation with suspension adjustment per ReliaSoft Eq. 8.2) are used to correctly account for censored data in all probability plots.</p>
+      <h3>Confidence Bounds</h3>
+      <p>Fisher Matrix bounds follow ReliaSoft Equations 519, 533, 536, 538, 563. Likelihood Ratio bounds use profile likelihood contours. Crow confidence bounds follow Crow (1990) as documented in ReliaSoft's RGA Reference.</p>
+      <h3>Key References</h3>
+      <ul>
+        <li>ReliaSoft Corporation. <em>Life Data Analysis Reference.</em> Tucson, AZ: ReliaSoft Publishing.</li>
+        <li>ReliaSoft Corporation. <em>System Analysis Reference.</em></li>
+        <li>ReliaSoft Corporation. <em>Reliability Growth Reference.</em></li>
+        <li>Abernethy, R.B. <em>The New Weibull Handbook.</em> 5th ed., 2006.</li>
+        <li>Nelson, W. <em>Accelerated Testing.</em> Wiley, 1990.</li>
+        <li>Crow, L.H. "Evaluating the Reliability of a New System During Development Testing." <em>Proceedings Annual Reliability and Maintainability Symposium,</em> 1974.</li>
+        <li>IEC 60300-3-1: Dependability management — Part 3-1: Application guide — Analysis techniques for dependability.</li>
+        <li>MIL-HDBK-189C: Reliability Growth Management.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="standardsModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="standardsTitle">Standards</span>
+      <button class="modal-close" onclick="closeModal('standardsModal')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <h3>International Standards</h3>
+      <ul>
+        <li><strong>IEC 60300-3-1</strong> — Dependability management: Analysis techniques for dependability</li>
+        <li><strong>IEC 60812</strong> — Failure Mode and Effects Analysis (FMEA)</li>
+        <li><strong>IEC 61649</strong> — Weibull analysis</li>
+        <li><strong>IEC 61710</strong> — Power law model — Goodness-of-fit tests and estimation methods</li>
+        <li><strong>ISO 14224</strong> — Collection and exchange of reliability and maintenance data for equipment (oil &amp; gas)</li>
+        <li><strong>ISO 55000</strong> — Asset management</li>
+      </ul>
+      <h3>Defence &amp; Aerospace</h3>
+      <ul>
+        <li><strong>MIL-HDBK-189C</strong> — Reliability Growth Management</li>
+        <li><strong>MIL-HDBK-338B</strong> — Electronic Reliability Design Handbook</li>
+      </ul>
+      <h3>Mining &amp; Oil/Gas Industry</h3>
+      <ul>
+        <li><strong>ISO 14224</strong> — Petroleum, petrochemical and natural gas industries — Collection and exchange of reliability and maintenance data for equipment</li>
+        <li><strong>OREDA</strong> — Offshore Reliability Data Handbook</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="termsModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="termsTitle">Terms of Use</span>
+      <button class="modal-close" onclick="closeModal('termsModal')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <h3>License</h3>
+      <p>ReliaSuite Professional is commercial software. Use is restricted to licensed subscribers. Redistribution, reverse engineering, or resale is prohibited.</p>
+      <h3>Disclaimer</h3>
+      <p>ReliaSuite Professional provides statistical analysis tools for informational and engineering support purposes. Results should be reviewed by qualified reliability engineers before use in operational or safety-critical decisions. The software authors accept no liability for decisions made based on analysis outputs.</p>
+      <h3>Data Privacy</h3>
+      <p>Analysis data entered into ReliaSuite is processed locally in your browser. Session data may be stored temporarily in browser localStorage for session continuity. No analysis data is transmitted to external servers.</p>
+      <h3>Contact</h3>
+      <p>For licensing inquiries: <a href="mailto:rateliniainalioka@gmail.com" style="color:var(--accent)">rateliniainalioka@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- SUPPORT MODAL -->
+<div class="modal-overlay" id="supportModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">💬 Support</span>
+      <button class="modal-close" onclick="closeModal('supportModal')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div id="supportNewTicket">
+        <p style="font-size:12px;color:var(--muted2);margin-bottom:14px">A question, a bug, need help? Write to us, we'll reply here or by email.</p>
+        <div style="margin-bottom:12px">
+          <label style="display:block;font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-family:'JetBrains Mono',monospace">Subject</label>
+          <input type="text" id="ticketSubject" placeholder="E.g: Access issue, billing question..."
+            style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:'Syne',sans-serif">
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="display:block;font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-family:'JetBrains Mono',monospace">Message</label>
+          <textarea id="ticketMessage" rows="5" placeholder="Describe your issue or question..."
+            style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:'Syne',sans-serif;resize:vertical"></textarea>
+        </div>
+        <div id="ticketMsg" style="display:none;font-size:12px;padding:8px 12px;border-radius:7px;margin-bottom:10px"></div>
+        <button class="btn-logout" style="width:100%;justify-content:center;background:var(--accent);border-color:var(--accent);color:white" onclick="submitTicket()" id="ticketSubmitBtn">Send</button>
+      </div>
+
+      <div style="margin-top:22px;border-top:1px solid var(--border);padding-top:16px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;font-family:'JetBrains Mono',monospace">My previous messages</div>
+        <div id="ticketHistory" style="display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:12px;color:var(--muted2)">Loading...</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -451,283 +544,700 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const supabase = createClient('https://kquwgqcxauymzkgfcxpm.supabase.co','sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx');
 
-// Access matrix
-const ACCESS = {
-  lda:['trial','essentiel','professionnel','entreprise','ultimate'],
-  rm: ['trial','essentiel','professionnel','entreprise','ultimate'],
-  pp: ['trial','essentiel','professionnel','entreprise','ultimate'],
-  cb: ['trial','essentiel','professionnel','entreprise','ultimate'],
-  ar: ['essentiel','entreprise','ultimate'],
-  da: ['professionnel','entreprise','ultimate'],
-  pm: ['entreprise','ultimate'],
-  sp: ['entreprise','ultimate'],
-  ma: ['ultimate'],
-  rg: ['ultimate'],
-  ms: ['ultimate'],
+// ── "Remember me" enforcement ──────────────────────────────────
+// Same two-marker check as index.html/payment.html. dashboard.html is
+// directly bookmarkable, so without this a "don't remember me" choice
+// could be silently bypassed by opening a saved bookmark straight to
+// this page after closing the browser — Supabase's own default
+// persistence would still find the old session in localStorage, since
+// nothing here would have signed it out.
+const REMEMBER_MARKER = 'rsp_remember_pref';
+const SESSION_ALIVE_MARKER = 'rsp_session_alive';
+const _enforceRememberChoice = (async function enforceRememberChoice() {
+  const wantedRemember = localStorage.getItem(REMEMBER_MARKER);
+  const sessionAlive = sessionStorage.getItem(SESSION_ALIVE_MARKER);
+  if (wantedRemember === '0' && !sessionAlive) {
+    await supabase.auth.signOut();
+  }
+})();
+
+let currentUser = null;
+
+// ── Automatic logout after 1h of inactivity ──────────────
+const IDLE_LIMIT_MS = 60 * 60 * 1000; // 1 hour
+const IDLE_KEY = 'rsp_last_activity';
+
+function markActivity() {
+  localStorage.setItem(IDLE_KEY, Date.now().toString());
+}
+
+async function checkIdle() {
+  const last = parseInt(localStorage.getItem(IDLE_KEY), 10);
+  if (last && (Date.now() - last) > IDLE_LIMIT_MS) {
+    await supabase.auth.signOut();
+    localStorage.removeItem('rsp_session_token');
+    localStorage.removeItem(IDLE_KEY);
+    window.location.href = 'index.html?idle=1';
+    return true;
+  }
+  markActivity();
+  return false;
+}
+
+function initIdleLogout() {
+  ['mousemove','mousedown','keydown','scroll','touchstart','click'].forEach(evt => {
+    document.addEventListener(evt, markActivity, { passive: true });
+  });
+  checkIdle();                    // check immediately on load
+  setInterval(checkIdle, 60000);  // then every minute
+}
+
+// ── Paddle: direct checkout from the dashboard (bypassing payment.html) ──
+const PADDLE_TOKEN = 'live_4a6671ddf9b19f023a90ce0cb36';
+// Canonical tier vocabulary ONLY, from here down — this is the exact
+// same set of values profiles.plan stores and verify_user_plan() checks.
+// The dashboard's OWN internal codes (professional/enterprise/ultimate,
+// used elsewhere in this file for the ACCESS matrix) are deliberately
+// NOT used in this checkout flow anymore: 'professional' means a
+// DIFFERENT tier in each vocabulary, and mixing them here was the exact
+// bug that made "Upgrade" always charge $50 regardless of the tier it
+// was supposed to be offering.
+const CANONICAL_TIERS  = ['trial','essential','professional','ultimate'];
+const CANONICAL_LABELS = { essential:'Essential', professional:'Professional', ultimate:'Ultimate' };
+
+// Fallback only — used if the live fetch from paddle_prices fails
+// (network hiccup, RLS misconfigured, etc.) so "Upgrade" still works.
+// The real source of truth is always the paddle_prices table (managed
+// from admin.html's Prices tab) whenever it's reachable. Ultimate has
+// no annual price (matches payment.html — same business rule).
+const FALLBACK_PRICES = {
+  essential_monthly:    { priceId: 'pri_01ktp3xx307qepx6f6xk2sqzpp', amount: 30,  currency: 'USD' },
+  essential_annual:     { priceId: 'pri_01ktp46y44cs7ayt5h7cxt0qgb', amount: 300, currency: 'USD' },
+  professional_monthly: { priceId: 'pri_01ktnhwg7zwyvrhearx3nxacbr', amount: 50,  currency: 'USD' },
+  professional_annual:  { priceId: 'pri_01ktnkerfqfnp2sqnvv2k4t9yw', amount: 500, currency: 'USD' },
+  ultimate_monthly:     { priceId: 'pri_01ktnkndn91851hx3hd8znxp2s', amount: 450, currency: 'USD' },
+};
+let PRICES = FALLBACK_PRICES;
+
+async function loadLivePrices() {
+  try {
+    const { getActivePrices } = await import('./plan.js');
+    const live = await getActivePrices();
+    if (live && Object.keys(live).length) {
+      // Live values win; fallback fills in anything missing so a
+      // partially-synced table can't blank out a plan's price.
+      PRICES = { ...FALLBACK_PRICES, ...live };
+    }
+  } catch (e) {
+    console.error('Failed to load live prices, using fallback:', e.message);
+  }
+}
+loadLivePrices();
+
+function initPaddle() {
+  if (typeof Paddle === 'undefined') { setTimeout(initPaddle, 100); return; }
+  Paddle.Initialize({
+    token: PADDLE_TOKEN,
+    eventCallback: async (e) => {
+      if (e.name === 'checkout.completed') {
+        const plan  = e.data?.customData?.plan;
+        const cycle = e.data?.customData?.billing_cycle || 'monthly';
+        if (plan && currentUser) {
+          const expiresAt = new Date();
+          if (cycle === 'yearly') expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+          else expiresAt.setMonth(expiresAt.getMonth() + 1);
+          const { error } = await supabase.rpc('confirm_plan_purchase', {
+            p_user_id: currentUser.id, p_plan: plan, p_expires_at: expiresAt.toISOString()
+          });
+          if (error) console.error('confirm_plan_purchase error:', error.message);
+          showPurchaseSuccess(plan, expiresAt);
+        } else {
+          location.reload();
+        }
+      }
+    }
+  });
+}
+
+// Same "you're all set" pattern used in session-guard.js for the
+// expired-session renewal flow — the session here is still active, so
+// unlike that flow there's no urgency and no forced redirect, just a
+// clear confirmation before refreshing the page to reflect the new plan.
+function showPurchaseSuccess(plan, expiresAt) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+  const box = document.createElement('div');
+  box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', 'Purchase successful');
+  box.style.cssText = 'position:relative;background:var(--card,#131c2e);border:1px solid var(--border,#1e2d45);border-radius:16px;padding:40px 48px;max-width:420px;width:90%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5)';
+  const dateStr = expiresAt.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  box.innerHTML = `
+    <div style="font-size:48px;margin-bottom:16px">✅</div>
+    <h2 style="margin:0 0 12px;font-size:20px;font-weight:700;color:var(--text,#f0f4ff)">You're all set</h2>
+    <p style="margin:0 0 24px;font-size:14px;color:var(--muted2,#94a3b8);line-height:1.6">
+      <strong style="color:var(--text,#f0f4ff)">${CANONICAL_LABELS[plan] || plan}</strong> is active until <strong style="color:var(--text,#f0f4ff)">${dateStr}</strong>.
+    </p>
+    <button id="purchaseSuccessBtn" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#0f62fe,#4589ff);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer">Continue</button>`;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  document.getElementById('purchaseSuccessBtn')?.focus();
+  document.getElementById('purchaseSuccessBtn').addEventListener('click', () => location.reload());
+}
+initPaddle();
+
+// canonicalPlan MUST already be one of 'essential'/'professional'/'ultimate'
+// — every caller in this file resolves to a canonical value before
+// calling this, so there's no ambiguous translation happening in here.
+// cycle: 'monthly' | 'yearly' — Ultimate ignores this and always checks
+// out monthly, since it has no annual price (same rule as payment.html).
+window.openPaddleCheckout = async function(canonicalPlan, cycle) {
+  const effectiveCycle = (canonicalPlan === 'ultimate') ? 'monthly' : (cycle || 'monthly');
+  const priceKey = canonicalPlan + '_' + (effectiveCycle === 'yearly' ? 'annual' : 'monthly');
+  const priceEntry = PRICES[priceKey];
+  if (!priceEntry || !priceEntry.priceId) { window.location.href = 'mailto:contact@reliabilitysuite.pro?subject=Ultimate Plan'; return; }
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'index.html?login=1'; return; }
+  currentUser = session.user;
+  const checkoutParams = {
+    items: [{ priceId: priceEntry.priceId, quantity: 1 }],
+    settings: { theme: 'dark', locale: (lang === 'en' ? 'en' : 'fr') },
+    customData: { supabase_user_id: session.user.id, plan: canonicalPlan, billing_cycle: effectiveCycle }
+  };
+  if (session.user.email) checkoutParams.customer = { email: session.user.email };
+  Paddle.Checkout.open(checkoutParams);
 };
 
-const PLAN_MAX_USERS = { trial:1, essentiel:1, professionnel:1, entreprise:10, ultimate:999 };
+// ── Upgrade → shows every tier ABOVE the user's current one, with its
+//    real price, and lets them pick. Downgrade is never offered: tiers
+//    at or below the current rank simply aren't in the list. A
+//    Monthly/Annual toggle switches which price is shown and which one
+//    gets charged; Ultimate has no annual price so it always shows/
+//    charges monthly regardless of the toggle (same rule as
+//    payment.html). Each card also links to payment.html for the full
+//    feature breakdown, since this modal only has room for the price. ──
+let upgradeCycle = 'monthly';
 
+window.setUpgradeCycle = function(cycle) {
+  upgradeCycle = cycle;
+  const onStyle  = 'background:#0f62fe;color:#fff';
+  const offStyle = 'background:transparent;color:var(--muted,#94a3b8)';
+  document.getElementById('upgSelMonthlyBtn').style.cssText =
+    'flex:1;padding:8px 10px;border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;' + (cycle === 'monthly' ? onStyle : offStyle);
+  document.getElementById('upgSelAnnualBtn').style.cssText =
+    'flex:1;padding:8px 10px;border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;' + (cycle === 'yearly' ? onStyle : offStyle);
+  renderUpgradeCards();
+};
+
+function renderUpgradeCards() {
+  const currentCanonical = (window._rawPlan || 'trial').toLowerCase();
+  const currentRank = CANONICAL_TIERS.indexOf(currentCanonical);
+  const available = CANONICAL_TIERS.filter((_, i) => i > Math.max(currentRank, 0));
+  const t = T[lang] || T.en;
+
+  if (available.length === 0) {
+    document.getElementById('upgSelCards').innerHTML =
+      `<div style="text-align:center;padding:20px;color:var(--muted,#94a3b8);font-size:13px">${t.upgSelTop || "You're already on the top plan."}</div>`;
+    return;
+  }
+
+  document.getElementById('upgSelCards').innerHTML = available.map(tier => {
+    // Ultimate has no annual price — always show/charge monthly for it.
+    const cycle = (tier === 'ultimate') ? 'monthly' : upgradeCycle;
+    const priceKey = tier + '_' + (cycle === 'yearly' ? 'annual' : 'monthly');
+    const entry = PRICES[priceKey];
+    const amount = entry ? Math.round(cycle === 'yearly' ? entry.amount / 12 : entry.amount) : '—';
+    const periodLabel = t.perMonth || 'month';
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface,rgba(255,255,255,.03));border:1px solid var(--border,#1e2d45);border-radius:10px">
+        <div>
+          <div style="font-weight:700;font-size:14px">${CANONICAL_LABELS[tier]}</div>
+          <div style="font-size:12px;color:var(--muted,#94a3b8)">$${amount}/${periodLabel}</div>
+          <a href="payment.html?plan=${tier}" style="font-size:11px;color:#4589ff;text-decoration:none">More info →</a>
+        </div>
+        <button onclick="closeUpgradeSelect();openPaddleCheckout('${tier}','${cycle}')" style="padding:9px 18px;background:linear-gradient(135deg,#0f62fe,#4589ff);color:#fff;border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer">${t.upgSelChoose || 'Choose'}</button>
+      </div>`;
+  }).join('');
+}
+
+window.goUpgrade = function() {
+  const currentCanonical = (window._rawPlan || 'trial').toLowerCase();
+  const t = T[lang] || T.en;
+  document.getElementById('upgSelTitle').textContent = t.upgSelTitle || 'Choose your plan';
+  document.getElementById('upgSelCurrent').textContent =
+    (t.upgSelCurrent || 'Your current plan: {plan}').replace('{plan}',
+      CANONICAL_LABELS[currentCanonical] || 'Trial');
+
+  setUpgradeCycle('monthly'); // resets the toggle each time the modal opens, and renders the cards
+  document.getElementById('upgradeSelectOverlay').style.display = 'flex';
+};
+
+window.closeUpgradeSelect = function() {
+  document.getElementById('upgradeSelectOverlay').style.display = 'none';
+};
+
+/* ── V4 Package mapping ─────────────────────────────────────────
+   Supabase plan column may store old names (essentiel/professionnel/
+   entreprise) or new v4 code values (professional/enterprise/ultimate).
+   Normalize everything to v4 internal codes. ── */
+function normalizePlan(raw) {
+  const map = {
+    'trial':'trial',
+    // Old French DB values (pre-migration existing rows)
+    'essentiel':'professional', 'professionnel':'enterprise', 'entreprise':'ultimate',
+    // New canonical DB values (English — matches plan.js / verify_user_plan()).
+    // NOTE: 'professional' means a DIFFERENT tier in each vocabulary — the
+    // canonical (DB) 'professional' is the MIDDLE paid tier, while this
+    // file's own internal 'professional' code means the LOWEST paid tier.
+    // Do not shortcut this as a pass-through.
+    'essential':'professional', 'professional':'enterprise', 'ultimate':'ultimate',
+  };
+  return map[(raw||'').toLowerCase()] || 'trial';
+}
+
+/* ── Access matrix (v4 internal codes) ──
+   LDA = Life_Data_Analysis.html  (Professional+)
+   RGA = Reliability_Growth_Analysis.html (Enterprise+)
+   DA  = Degradation_Analysis.html (Ultimate) */
+const ACCESS = {
+  lda: ['trial','professional','enterprise','ultimate'],
+  rg:  ['trial','enterprise','ultimate'],
+  da:  ['trial','ultimate'],
+};
+
+/* Analyses count per plan */
+const ANALYSIS_COUNT = {
+  trial: 1, professional: 1, enterprise: 2, ultimate: 3, expired: 0,
+};
+
+/* HTML files to open per tool */
+const TOOL_FILES = {
+  lda: 'Life_Data_Analysis.html',
+  rg:  'Reliability_Growth_Analysis.html',
+  da:  'Degradation_Analysis.html',
+};
+
+/* ── i18n ── */
 const T = {
-  fr: {
-    pageTitle:'Dashboard', logoutBtn:'Déconnexion',
-    stL1:'Analyses effectuées', stL2:'Temps restant', stL3:'Plan actif', stL4:'Utilisateurs',
-    stU1:'analyses', stU2:'h restantes', stU4:'/ max',
-    secTools:'Outils disponibles',
-    tn1:'Life Data Analysis', td1:'Weibull · Lognormal · Exponentielle', tt1:'Tous plans',
-    tn2:'Reliability Metrics', td2:'MTBF · R(t) · F(t) · h(t)', tt2:'Tous plans',
-    tn3:'Probability Plots', td3:'Validation des distributions statistiques', tt3:'Tous plans',
-    tn4:'Confidence Bounds', td4:'Intervalles de confiance sur les estimations', tt4:'Tous plans',
-    tn5:'Advanced Reporting', td5:'PDF · Excel · Templates pro', tt5:'Essentiel+',
-    tn6:'Degradation Analysis', td6:'Modélisation de la dégradation progressive', tt6:'Professionnel+',
-    tn7:'Preventive Maintenance', td7:'Optimisation des intervalles de maintenance', tt7:'Entreprise+',
-    tn8:'Spare Parts Forecasting', td8:'Prévision des besoins en pièces de rechange', tt8:'Entreprise+',
-    tn9:'Multi-Asset / Fleet', td9:"Analyse de flottes d'équipements", tt9:'Ultimate',
-    tn10:'Reliability Growth', td10:'Crow-AMSAA · Amélioration continue', tt10:'Ultimate',
-    tn11:'Portfolio / Multi-Site', td11:'Dashboard consolidé multi-sites', tt11:'Ultimate',
-    'tn-up':'Passer à Pro', 'td-up':'Débloquer tous les modules d\'analyse',
-    expTitle:'Essai expiré', expBody:'Votre essai gratuit de 3h est terminé. Choisissez un plan pour continuer.',
-    expUpgrade:'Choisir un plan', expLogout:'Se déconnecter',
-    upgradeBtn:'Upgrader →',
-    trialActive:'⏱ %H% restantes sur votre essai',
-    trialExpired:'⚠️ Essai expiré',
-    planLabels:{ trial:'Trial 3h', essentiel:'Essentiel', professionnel:'Professionnel', entreprise:'Entreprise', ultimate:'Ultimate' },
-    planIcons:{ trial:'🔬', essentiel:'📊', professionnel:'🚀', entreprise:'🏢', ultimate:'👑' },
-    timeUnlimited:'∞', timeUnlimitedUnit:'illimité',
-    lockMsg:'Nécessite le plan ',
-  },
   en: {
     pageTitle:'Dashboard', logoutBtn:'Sign out',
-    stL1:'Analyses done', stL2:'Time remaining', stL3:'Active plan', stL4:'Users',
-    stU1:'analyses', stU2:'h left', stU4:'/ max',
-    secTools:'Available tools',
-    tn1:'Life Data Analysis', td1:'Weibull · Lognormal · Exponential', tt1:'All plans',
-    tn2:'Reliability Metrics', td2:'MTBF · R(t) · F(t) · h(t)', tt2:'All plans',
-    tn3:'Probability Plots', td3:'Statistical distribution validation', tt3:'All plans',
-    tn4:'Confidence Bounds', td4:'Confidence intervals on estimates', tt4:'All plans',
-    tn5:'Advanced Reporting', td5:'PDF · Excel · Pro templates', tt5:'Essential+',
-    tn6:'Degradation Analysis', td6:'Progressive degradation modeling', tt6:'Professional+',
-    tn7:'Preventive Maintenance', td7:'Maintenance interval optimization', tt7:'Enterprise+',
-    tn8:'Spare Parts Forecasting', td8:'Spare parts demand forecasting', tt8:'Enterprise+',
-    tn9:'Multi-Asset / Fleet', td9:'Fleet equipment analysis', tt9:'Ultimate',
-    tn10:'Reliability Growth', td10:'Crow-AMSAA · Continuous improvement', tt10:'Ultimate',
-    tn11:'Portfolio / Multi-Site', td11:'Consolidated multi-site dashboard', tt11:'Ultimate',
-    'tn-up':'Upgrade to Pro', 'td-up':'Unlock all analysis modules',
-    expTitle:'Trial expired', expBody:'Your 3h free trial is over. Choose a plan to continue.',
+    stL1:'Available analyses', stL2:'Time remaining', stL3:'Active package', stL4:'Users',
+    stU1:'analyses', stU2:'left', stU4:'/ max',
+    secTools:'Available tools', secPkg:'Packages',
+    upgSelTitle:'Choose your plan', upgSelCurrent:'Your current plan: {plan}',
+    upgSelTop:"You're already on the top plan.", upgSelChoose:'Choose', perMonth:'month',
+    tn1:'Life Data Analysis', td1:'Weibull · Lognormal · Exponential', tt1:'Essential+',
+    tn2:'Reliability Growth', td2:'Crow-AMSAA · Continuous improvement', tt2:'Professional+',
+    tn3:'Degradation Analysis', td3:'Progressive degradation modeling', tt3:'Ultimate',
+    expTitle:'Trial expired', expBody:'Your free trial is over. Choose a plan to continue.',
     expUpgrade:'Choose a plan', expLogout:'Sign out',
     upgradeBtn:'Upgrade →',
-    trialActive:'⏱ %H% left on your trial',
-    trialExpired:'⚠️ Trial expired',
-    planLabels:{ trial:'Trial 3h', essentiel:'Essential', professionnel:'Professional', entreprise:'Enterprise', ultimate:'Ultimate' },
-    planIcons:{ trial:'🔬', essentiel:'📊', professionnel:'🚀', entreprise:'🏢', ultimate:'👑' },
+    trialActive:'⏱ %H% left on your trial', trialExpired:'⚠️ Trial expired',
+    planLabels:{ trial:'Trial', professional:'Essential', enterprise:'Professional', ultimate:'Ultimate', expired:'Expired' },
+    planIcons:{ trial:'🔬', professional:'📊', enterprise:'🚀', ultimate:'👑', expired:'⏱️' },
     timeUnlimited:'∞', timeUnlimitedUnit:'unlimited',
-    lockMsg:'Requires the ',
+    lockMsg:'Requires plan ',
+    upgradeLabel:'Buy', currentLabel:'Current plan',
+    pkgHeaders:{ professional:'Essential', enterprise:'Professional', ultimate:'Ultimate' },
+    // Framed around capability, not organization size — an individual
+    // engineer should read Ultimate as "more power available to me",
+    // not "not for me, that's for companies". Avoid words like "team"
+    // or "enterprise" that make someone self-select out.
+    // Ultimate's tagline is deliberately the strongest of the three —
+    // it's the tier we most want someone to choose, and "portfolio
+    // command" alone doesn't justify a 9x price jump from Professional.
+    // Reframing it around catching failures before they cost money
+    // gives a reason that scales with the price, not just the feature count.
+    pkgSubs:{ professional:'Build your reliability foundation', enterprise:'Prove your improvements are working', ultimate:'Catch failures before they become statistics' },
+    // Each feature is [name, one-line benefit]. Benefits name what
+    // changes about the engineer's day, not what the tool technically
+    // does — "prove your fix worked" instead of "Crow-AMSAA modeling".
+    // pkgGroups slices this list into labeled sections so the table
+    // reads as "what you get and why", not a flat spec sheet.
+    // Order within a group is narrative, not alphabetical — the most
+    // compelling reason to want that tier leads.
+    pkgFeatures:[
+      ['Life Data Analysis', 'Know exactly how and when your equipment fails'],
+      ['Quick Calculation Pad', 'Get a reliability number in seconds, no full analysis needed'],
+      ['Maintenance Strategy Optimization', 'Turn failure data into the maintenance interval that pays off'],
+      ['Reliability Growth Analysis', 'Prove your improvement program is working, from first test to production'],
+      ['Top-N Ranking Dashboard', 'See your worst-performing assets instantly, stop guessing where to focus'],
+      ['Spare Parts Forecasting', 'Stop overstocking and stockouts with demand tied to real failure data'],
+      ['Report Generation', 'Turn analysis into reports stakeholders actually read'],
+      ['Degradation Analysis', 'See wear-out coming before it becomes an unplanned failure'],
+      ['Multi-Asset / Fleet Tags', 'One dashboard for every asset you are responsible for'],
+      ['Portfolio Dashboard', 'Every site, every business unit, one view'],
+      ['Spare Parts Reports', 'Procurement-ready inventory reports, no extra work'],
+    ],
+    pkgGroups:[
+      { title:'Core analysis', count:3 },
+      { title:'Growth &amp; fleet visibility', count:4 },
+      { title:'Catch problems before they cost you', count:4 },
+    ],
+    pkgMatrix:{
+      professional:[1,1,1,0,0,0,0,0,0,0,0],
+      enterprise:  [1,1,1,1,1,1,1,0,0,0,0],
+      ultimate:    [1,1,1,1,1,1,1,1,1,1,1],
+    },
+    footAbout:'About', footContact:'Contact',
+    footAboutLink:'About ReliaSuite', footGlossaryLink:'Glossary',
+    footMethodLink:'Methodology &amp; References', footStandardsLink:'Standards',
+    footTermsLink:'Terms of Use',
+    footCopy:'© 2026 ReliaSuite Professional · All rights reserved',
+    aboutTitle:'About ReliaSuite Professional',
+    glossaryTitle:'Glossary', methodTitle:'Methodology & References',
+    standardsTitle:'Standards', termsTitle:'Terms of Use',
   }
 };
 
-let lang='fr', userPlan='trial', currentUser=null;
+let lang='en', userPlan='trial';
 
 window.setLang = function(l) {
   lang=l;
-  document.getElementById('lFR').classList.toggle('active',l==='fr');
-  document.getElementById('lEN').classList.toggle('active',l==='en');
   applyLang();
+  if (window._profile) setPlanUI(userPlan, window._profile);
 };
 
 function applyLang() {
-  const t=T[lang];
-  const ids=['pageTitle','logoutBtn','stL1','stL2','stL3','stL4','stU1','stU2','stU4',
-    'secTools','expTitle','expBody','expUpgrade','expLogout','upgradeBtn',
-    'tn1','td1','tt1','tn2','td2','tt2','tn3','td3','tt3','tn4','td4','tt4',
-    'tn5','td5','tt5','tn6','td6','tt6','tn7','td7','tt7','tn8','td8','tt8',
-    'tn9','td9','tt9','tn10','td10','tt10','tn11','td11','tt11','tn-up','td-up'];
-  ids.forEach(id=>{ const el=document.getElementById(id); if(el&&t[id]) el.textContent=t[id]; });
+  const t = T[lang];
+  const simple = ['pageTitle','logoutBtn','stL1','stL2','stL3','stL4','stU1','stU2','stU4',
+    'secTools','secPkg','expTitle','expBody','expUpgrade','expLogout','upgradeBtn',
+    'tn1','td1','tt1','tn2','td2','tt2','tn3','td3','tt3',
+    'footAbout','footContact','footCopy',
+    'aboutTitle','glossaryTitle','methodTitle','standardsTitle','termsTitle'];
+  simple.forEach(id => {
+    const el = document.getElementById(id);
+    if(el && t[id] !== undefined) el.innerHTML = t[id];
+  });
+  // Footer links (innerHTML for &amp; entities)
+  ['footAboutLink','footGlossaryLink','footMethodLink','footStandardsLink','footTermsLink'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el && t[id]) el.innerHTML = t[id];
+  });
+  // Rebuild package table with new lang
+  buildPackageTable();
+}
+
+/* ── Smart remaining-time formatting ──
+   <=1min -> seconds ("45s"); <=1h -> minutes ("12mn");
+   <=1day -> hours ("5h"); >1day -> days, 1 decimal ("3.2 days"). */
+function smartTimeLeft(ms) {
+  ms = Math.max(0, ms);
+  const sec = ms / 1000;
+  if (sec <= 60) return `${Math.round(sec)}s`;
+  const min = ms / 60000;
+  if (min <= 60) return `${Math.round(min)}mn`;
+  const hr = ms / 3600000;
+  if (hr <= 24) return `${Math.round(hr)}h`;
+  const days = ms / 86400000;
+  return `${days.toFixed(1)} days`;
 }
 
 function setPlanUI(plan, profile) {
   const t = T[lang];
   userPlan = plan;
+
+  // Header badge
   const badge = document.getElementById('planBadge');
-  const planClasses = { trial:'pb-trial', essentiel:'pb-essentiel', professionnel:'pb-pro', entreprise:'pb-ent', ultimate:'pb-ult' };
-  badge.className = 'plan-badge ' + (planClasses[plan]||'pb-trial');
-  badge.textContent = t.planIcons[plan]+' '+(t.planLabels[plan]||plan);
+  const badgeClass = { trial:'pb-trial', professional:'pb-essential', enterprise:'pb-professional', ultimate:'pb-ultimate', expired:'pb-trial' };
+  badge.className = 'plan-badge ' + (badgeClass[plan]||'pb-trial');
+  badge.textContent = (t.planIcons[plan]||'') + ' ' + (t.planLabels[plan]||plan);
 
   // Stats
-  const maxU = PLAN_MAX_USERS[plan]||1;
-  document.getElementById('stV4').innerHTML = `1 <span id="stU4">/ ${maxU}</span>`;
-  document.getElementById('stV3').textContent = t.planIcons[plan]+' '+(t.planLabels[plan]||plan);
+  const maxU = {trial:1,professional:1,enterprise:10,ultimate:999}[plan]||1;
+  document.getElementById('stV4').innerHTML = `1 <span>/ ${maxU===999?'∞':maxU}</span>`;
+  document.getElementById('stV3').textContent = (t.planIcons[plan]||'') + ' ' + (t.planLabels[plan]||plan);
 
-  if (plan === 'trial') {
-    const elapsed = (Date.now()-new Date(profile.trial_started_at))/3600000;
-    const left = Math.max(0, 3-elapsed);
-    const pct = (left/3*100).toFixed(0);
-    document.getElementById('stV2').innerHTML = `${left.toFixed(1)} <span>${t.stU2}</span>`;
+  // Available analyses — count per v4 matrix
+  const count = ANALYSIS_COUNT[plan] || 1;
+  document.getElementById('stV1').innerHTML = `${count} <span id="stU1">${t.stU1}</span>`;
+
+  // Time remaining
+  if(plan === 'trial') {
+    const remainMs = profile.plan_expires_at ? (new Date(profile.plan_expires_at) - Date.now()) : 0;
+    const totalMs = (profile.plan_expires_at && profile.plan_started_at)
+      ? (new Date(profile.plan_expires_at) - new Date(profile.plan_started_at))
+      : (3 * 3600000); // fallback only, if either date is somehow missing
+    const left = Math.max(0, remainMs / 3600000);
+    document.getElementById('stV2').innerHTML = `${smartTimeLeft(remainMs)} <span>${t.stU2}</span>`;
     const banner = document.getElementById('trialBanner');
     banner.classList.add('show');
-    if (elapsed>=3) {
+    if(left <= 0) {
       banner.classList.add('expired');
       document.getElementById('trialTxt').textContent = t.trialExpired;
-      document.getElementById('trialBar').style.width='0%';
+      document.getElementById('trialBar').style.width = '0%';
       document.getElementById('expOverlay').classList.add('show');
     } else {
-      document.getElementById('trialTxt').textContent = t.trialActive.replace('%H%', left.toFixed(1));
-      document.getElementById('trialBar').style.width = pct+'%';
+      document.getElementById('trialTxt').textContent = t.trialActive.replace('%H%', smartTimeLeft(remainMs));
+      document.getElementById('trialBar').style.width = (Math.max(0, remainMs) / totalMs * 100).toFixed(0)+'%';
     }
-    document.getElementById('pageSub').textContent = `${t.planLabels.trial} — ${left.toFixed(1)}h ${t.stU2}`;
+    document.getElementById('pageSub').textContent = `${t.planLabels.trial} — ${smartTimeLeft(remainMs)} ${t.stU2}`;
+  } else if(plan === 'expired') {
+    // Paid plan expired (not renewed) — lock everything, offer renewal
+    document.getElementById('stV2').innerHTML = `0 <span>${t.stU2}</span>`;
+    document.getElementById('pageSub').textContent = '⏱️ Subscription expired';
+    document.getElementById('expTitle').textContent = 'Subscription expired';
+    document.getElementById('expBody').textContent =
+      `Your ${t.planLabels[normalizePlan(window._rawPlan)]||window._rawPlan} plan has expired. Renew it to continue.`;
+    document.getElementById('expUpgrade').textContent = 'Renew my plan';
+    document.getElementById('expUpgrade').onclick = () => location.href = `payment.html?plan=${window._rawPlan}`;
+    document.getElementById('expOverlay').classList.add('show');
   } else {
     document.getElementById('stV2').innerHTML = `${t.timeUnlimited} <span>${t.timeUnlimitedUnit}</span>`;
     document.getElementById('pageSub').textContent = `${t.planIcons[plan]} ${t.planLabels[plan]}`;
-    // Hide upgrade card if paid plan
-    if (['essentiel','professionnel','entreprise','ultimate'].includes(plan)) {
-      const uc = document.getElementById('tc-upgrade');
-      if(uc) uc.style.display='none';
-    }
   }
 
-  // Apply access to tool cards
-  const toolMap = {
-    'tc-lda':'lda','tc-rm':'rm','tc-pp':'pp','tc-cb':'cb',
-    'tc-ar':'ar','tc-da':'da','tc-pm':'pm','tc-sp':'sp',
-    'tc-ma':'ma','tc-rg':'rg','tc-ms':'ms'
-  };
-
-  Object.entries(toolMap).forEach(([cardId, feature]) => {
-    const card = document.getElementById(cardId);
-    const dot  = document.getElementById('dot-'+feature);
-    const allowed = ACCESS[feature]||[];
-    if (!allowed.includes(plan)) {
-      card.classList.add('locked');
-      if(dot){ dot.className='tool-access-dot dot-locked'; }
-      // Add lock badge if not present
-      if(!card.querySelector('.tool-lock-badge')) {
-        const lb = document.createElement('div');
-        lb.className='tool-lock-badge';
-        lb.innerHTML='🔒 '+getMinPlanLabel(feature);
-        card.querySelector('.tool-visual').appendChild(lb);
-      }
-    } else {
-      card.classList.remove('locked');
-      if(dot){ dot.className='tool-access-dot dot-active'; }
+  // Tool cards visibility / lock
+  const tools = ['lda','rg','da'];
+  tools.forEach(key => {
+    const card = document.getElementById('tc-'+key);
+    const dot  = document.getElementById('dot-'+key);
+    const allowed = ACCESS[key]||[];
+    const isLocked = !allowed.includes(plan);
+    card.classList.toggle('locked', isLocked);
+    if(dot) dot.className = 'tool-access-dot ' + (isLocked ? 'dot-locked' : 'dot-active');
+    // Remove old lock badge if any
+    card.querySelectorAll('.tool-lock-badge').forEach(b=>b.remove());
+    if(isLocked) {
+      const minPlan = (['trial','professional','enterprise','ultimate']).find(p=>allowed.includes(p))||'ultimate';
+      const lb = document.createElement('div');
+      lb.className = 'tool-lock-badge';
+      lb.innerHTML = '🔒 ' + (T[lang].planLabels[minPlan]||minPlan);
+      card.querySelector('.tool-visual').appendChild(lb);
     }
   });
+
+  buildPackageTable();
 }
 
-function getMinPlanLabel(feature) {
-  const order=['trial','essentiel','professionnel','entreprise','ultimate'];
-  const allowed=ACCESS[feature]||[];
-  const min = order.find(p=>allowed.includes(p))||'ultimate';
-  return T[lang].planLabels[min]||min;
-}
-
-window.openApp = function() {
-  if(userPlan==='trial'){
-    const profile = window._profile;
-    if(profile){
-      const elapsed=(Date.now()-new Date(profile.trial_started_at))/3600000;
-      if(elapsed>=3){ document.getElementById('expOverlay').classList.add('show'); return; }
-    }
-  }
-  window.location.href='relia.html';
+let pkgAnnual = false;
+window.togglePkgBilling = function() {
+  pkgAnnual = !pkgAnnual;
+  document.getElementById('pkgToggle').classList.toggle('on', pkgAnnual);
+  buildPackageTable();
 };
 
-window.openTool = function(feature) {
-  const allowed=ACCESS[feature]||[];
-  if(!allowed.includes(userPlan)){
-    window.location.href='payment.html'; return;
+function buildPackageTable() {
+  const t = T[lang];
+  const plans = ['professional','enterprise','ultimate'];
+  const features = t.pkgFeatures;
+  const matrix = t.pkgMatrix;
+  // This table's columns use the dashboard's own internal codes (they
+  // index directly into t.pkgHeaders/pkgSubs/pkgMatrix, which are
+  // already keyed that way) — but Paddle/profiles.plan need the
+  // canonical name, and 'professional' means a DIFFERENT tier in each
+  // vocabulary. Translate right at the point of purchase, not before.
+  const toCanonical = { professional:'essential', enterprise:'professional', ultimate:'ultimate' };
+  const rankOrder = ['trial','professional','enterprise','ultimate'];
+  const currentRank = rankOrder.indexOf(userPlan);
+
+  let html = '';
+
+  // Header row
+  html += `<div class="pkg-col-header" style="padding:16px 14px;">Feature</div>`;
+  plans.forEach(p => {
+    const isCurrent = p === userPlan;
+    html += `<div class="pkg-col-header${isCurrent?' current':''}">
+      <div class="pkg-name">${t.pkgHeaders[p]||p}</div>
+      <div class="pkg-sub">${t.pkgSubs[p]||''}</div>
+    </div>`;
+  });
+
+  // Feature rows, sliced into labeled groups so the table reads as
+  // "what you get and why", not a flat spec sheet.
+  let idx = 0;
+  (t.pkgGroups || []).forEach(group => {
+    html += `<div class="pkg-group-header">${group.title}</div>`;
+    for (let n = 0; n < group.count; n++, idx++) {
+      const [name, desc] = features[idx];
+      html += `<div class="pkg-cell"><div class="pkg-feat-name">${name}</div><div class="pkg-feat-desc">${desc}</div></div>`;
+      plans.forEach(p => {
+        const isCurrent = p === userPlan;
+        const has = matrix[p][idx];
+        html += `<div class="pkg-cell${isCurrent?' current-col':''}">
+          ${has ? '<span class="pkg-tick">✓</span>' : '<span class="pkg-dash">—</span>'}
+        </div>`;
+      });
+    }
+  });
+
+  // Footer row — upgrade only: a tier ranked at or below the current
+  // one shows neither "current" nor a buy button, since buying it
+  // would be a downgrade.
+  html += `<div class="pkg-footer-cell"></div>`;
+  plans.forEach(p => {
+    const isCurrent = p === userPlan;
+    const isBelowOrEqual = rankOrder.indexOf(p) <= currentRank;
+    html += `<div class="pkg-footer-cell${isCurrent?' current-col':''}">`;
+    if(isCurrent) {
+      html += `<button class="btn-current">${t.currentLabel}</button>`;
+    } else if(isBelowOrEqual) {
+      html += '';
+    } else {
+      const cycle = (p === 'ultimate') ? 'monthly' : (pkgAnnual ? 'yearly' : 'monthly');
+      html += `<button class="btn-upgrade" onclick="openPaddleCheckout('${toCanonical[p]}','${cycle}')">${t.upgradeLabel}</button>`;
+    }
+    html += `</div>`;
+  });
+
+  document.getElementById('pkgGrid').innerHTML = html;
+}
+
+window.openTool = async function(key) {
+  const allowed = ACCESS[key]||[];
+  if(!allowed.includes(userPlan)) {
+    // Find minimum required plan
+    const order = ['trial','professional','enterprise','ultimate'];
+    const min = order.find(p=>allowed.includes(p))||'ultimate';
+    location.href = `payment.html?reason=feature_locked&required=${min}`;
+    return;
   }
-  window.location.href='relia.html';
+  if(userPlan==='trial') {
+    const p = window._profile;
+    if(p && p.plan_expires_at && new Date(p.plan_expires_at) <= new Date()){ document.getElementById('expOverlay').classList.add('show'); return; }
+  }
+
+  // Re-verify server-side right before opening (plan may have changed since
+  // page load) — this is purely a "don't bother navigating" UX shortcut.
+  // The analysis app itself independently re-queries plan.js by id on load,
+  // so it remains the actual enforcement point regardless of what happens
+  // here.
+  const { getPlan } = await import('./plan.js');
+  const verifiedPlan = await getPlan(currentUser.id);
+  if (!verifiedPlan) {
+    // Plan expired between page load and click → stay on the dashboard,
+    // which will now show the correct expired state on reload.
+    location.reload();
+    return;
+  }
+
+  // No package or expiration is ever sent in the URL — the analysis app
+  // reads the plan and expiration live from the database by id.
+  location.href = `${TOOL_FILES[key]}?id=${currentUser.id}`;
 };
 
 window.doLogout = async function() {
   await supabase.auth.signOut();
-  window.location.href='login.html';
+  location.href = 'index.html';
 };
 
-// ── Init ──────────────────────────────────────────────────────
+window.openModal = function(id) {
+  document.getElementById(id).classList.add('open');
+};
+window.closeModal = function(id) {
+  document.getElementById(id).classList.remove('open');
+};
+
+// ── SUPPORT TICKETS ─────────────────────────────────────────
+function ticketStatusLabel(status) {
+  if (status === 'answered') return '✅ Answered';
+  if (status === 'closed')   return '🔒 Closed';
+  return '⏳ Pending';
+}
+
+window.loadTicketHistory = async function() {
+  const box = document.getElementById('ticketHistory');
+  if (!currentUser) { box.innerHTML = '<div style="font-size:12px;color:var(--muted2)">Log in to see your messages.</div>'; return; }
+
+  const { data, error } = await supabase.from('support_tickets')
+    .select('*').eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  if (error || !data || data.length === 0) {
+    box.innerHTML = '<div style="font-size:12px;color:var(--muted2)">No messages yet.</div>';
+    return;
+  }
+
+  box.innerHTML = data.map(t => `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px">
+      <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:6px">
+        <strong style="font-size:12px">${t.subject}</strong>
+        <span style="font-size:10px;color:var(--muted2);white-space:nowrap">${ticketStatusLabel(t.status)}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted2);margin-bottom:${t.admin_reply ? '8px' : '0'}">${t.message}</div>
+      ${t.admin_reply ? `<div style="border-top:1px dashed var(--border);padding-top:8px;margin-top:6px">
+        <div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:4px">Team reply:</div>
+        <div style="font-size:12px">${t.admin_reply}</div>
+      </div>` : ''}
+    </div>`).join('');
+};
+
+window.submitTicket = async function() {
+  const subject = document.getElementById('ticketSubject').value.trim();
+  const message = document.getElementById('ticketMessage').value.trim();
+  const msgBox  = document.getElementById('ticketMsg');
+  const btn     = document.getElementById('ticketSubmitBtn');
+
+  if (!subject || !message) {
+    msgBox.style.display = 'block';
+    msgBox.style.background = 'rgba(239,68,68,.1)'; msgBox.style.color = '#f87171';
+    msgBox.textContent = 'Please fill in the subject and message.';
+    return;
+  }
+  if (!currentUser) { window.location.href = 'index.html?login=1'; return; }
+
+  btn.disabled = true; btn.textContent = 'Sending...';
+  const { error } = await supabase.from('support_tickets').insert({
+    user_id: currentUser.id, email: currentUser.email, subject, message
+  });
+  btn.disabled = false; btn.textContent = 'Send';
+
+  msgBox.style.display = 'block';
+  if (error) {
+    msgBox.style.background = 'rgba(239,68,68,.1)'; msgBox.style.color = '#f87171';
+    msgBox.textContent = 'Error: ' + error.message;
+  } else {
+    msgBox.style.background = 'rgba(16,185,129,.1)'; msgBox.style.color = '#6ee7b7';
+    msgBox.textContent = '✅ Message sent! We\'ll reply here or by email.';
+    document.getElementById('ticketSubject').value = '';
+    document.getElementById('ticketMessage').value = '';
+    loadTicketHistory();
+  }
+};
+
+// Close on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if(e.target===ov) ov.classList.remove('open'); });
+});
+
+// ── Init ──
+await _enforceRememberChoice;
 const { data:{ session } } = await supabase.auth.getSession();
-if(!session){ window.location.href='login.html'; }
+if(!session){ window.location.href = 'index.html?login=1'; }
 else {
-  currentUser=session.user;
-  document.getElementById('userEmail').textContent=currentUser.email;
+  currentUser = session.user;
+  document.getElementById('userEmail').textContent = currentUser.email;
+  initIdleLogout();
 
-  const { data:profile } = await supabase.from('profiles').select('plan,trial_started_at').eq('id',currentUser.id).single();
-  window._profile=profile;
+  const { data:profile } = await supabase
+    .from('profiles')
+    .select('plan,plan_started_at,plan_expires_at,is_admin')
+    .eq('id',currentUser.id)
+    .single();
+  window._profile = profile;
+  if (profile?.is_admin) {
+    document.getElementById('adminBtn').style.display = '';
+  }
 
-  setPlanUI(profile?.plan||'trial', profile||{trial_started_at:new Date().toISOString()});
+  const rawPlan = profile?.plan || 'trial';
+  window._rawPlan = rawPlan;
+
+  // Server-side verification (source of truth): is the plan actually active?
+  const { data: verifiedPlan } = await supabase.rpc('verify_user_plan', { p_user_id: currentUser.id });
+
+  let plan;
+  if (rawPlan !== 'trial' && !verifiedPlan) {
+    // Paid plan expired (not renewed) → lock everything
+    plan = 'expired';
+  } else {
+    plan = normalizePlan(rawPlan);
+  }
+
   applyLang();
+  setPlanUI(plan, profile || {plan_started_at:new Date().toISOString()});
 
-  const ls=document.getElementById('ls');
-  ls.classList.add('hide'); setTimeout(()=>ls.remove(),500);
+  const ls = document.getElementById('ls');
+  ls.classList.add('hide');
+  setTimeout(()=>ls.remove(), 500);
 }
 </script>
 </body>
 </html>
-<!-- plan.js gère l'ouverture de relia.html -->
-
-// Mapping tool card → access type
-const TOOL_TYPES = {
-  lda: 'life_data',
-  rm:  'reliability_metrics',
-  pp:  'probability_plots',
-  cb:  'confidence_bounds',
-  ar:  'advanced_reporting',
-  da:  'degradation',
-  pm:  'preventive_maint',
-  sp:  'spare_parts',
-  ma:  'multi_asset',
-  rg:  'reliability_growth',
-  ms:  'portfolio_multisite',
-};
-
-window.openTool = function(toolKey) {
-  const plan    = window.userPlan || 'trial';
-  const type    = TOOL_TYPES[toolKey] || 'life_data';
-  const allowed = ACCESS_TYPES[type] || [];
-
-  if (!allowed.includes(plan)) {
-    // Pas accès → pricing
-    const min = ['trial','essentiel','professionnel','entreprise','ultimate']
-                  .find(p => allowed.includes(p)) || 'ultimate';
-    window.location.href = `payment.html?reason=feature_locked&required=${min}&type=${type}`;
-    return;
-  }
-
-  // Accès OK → ouvre relia.html avec params
-  window.location.href = `relia.html?access=${plan}&type=${type}`;
-};
-
-window.openApp = async function() {
-  const { default: _ } = await import('./plan.js');
-};
-
-window.openTool = async function(feature) {
-  const plan = window.RSP_PLAN || 'trial';
-  const ACCESS = {
-    lda:['trial','essentiel','professionnel','entreprise','ultimate'],
-    rm: ['trial','essentiel','professionnel','entreprise','ultimate'],
-    pp: ['trial','essentiel','professionnel','entreprise','ultimate'],
-    cb: ['trial','essentiel','professionnel','entreprise','ultimate'],
-    ar: ['essentiel','entreprise','ultimate'],
-    da: ['professionnel','entreprise','ultimate'],
-    pm: ['entreprise','ultimate'],
-    sp: ['entreprise','ultimate'],
-    ma: ['ultimate'],
-    rg: ['ultimate'],
-    ms: ['ultimate'],
-  };
-  const allowed = ACCESS[feature] || [];
-  if (!allowed.includes(plan)) {
-    window.location.href = 'payment.html?reason=feature_locked';
-    return;
-  }
-  const { default: _ } = await import('./plan.js');
-};
-
-// Expose plan globalement pour openTool
-supabase.auth.getSession().then(({ data:{ session } }) => {
-  if (session) {
-    supabase.from('profiles').select('plan').eq('id', session.user.id).single()
-      .then(({ data }) => { window.userPlan = data?.plan || 'trial'; });
-  }
-});
-</script>

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Reliability Suite Pro</title>
@@ -19,9 +20,11 @@ body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); m
 .header { background:var(--card); border-bottom:1px solid var(--border); padding:0 28px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
 .header::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--rose),var(--warning),var(--accent2)); }
 .brand { display:flex; align-items:center; gap:10px; }
-.brand-icon { width:32px; height:32px; background:linear-gradient(135deg,var(--rose),var(--warning)); border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.brand-icon { width:32px; height:32px; background:#0ea5e9; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:16px; }
 .brand-name { font-size:14px; font-weight:700; }
 .brand-name span { color:var(--rose); }
+.brand-name em { font-style:normal; color:var(--accent); }
+.brand-sub { font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--muted2); letter-spacing:.08em; text-transform:uppercase; margin-top:2px; }
 .admin-badge { padding:3px 10px; background:rgba(244,63,94,.15); border:1px solid rgba(244,63,94,.3); border-radius:20px; font-size:10px; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--rose); letter-spacing:.08em; }
 .header-right { display:flex; align-items:center; gap:10px; }
 .logout-btn { padding:7px 14px; background:transparent; border:1px solid var(--border); border-radius:7px; color:var(--muted); font-size:12px; font-family:'Syne',sans-serif; font-weight:600; cursor:pointer; transition:all .2s; }
@@ -80,9 +83,8 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
 /* Plan badges */
 .plan-pill { display:inline-block; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.07em; }
 .pill-trial    { background:rgba(245,158,11,.12); color:#fbbf24; border:1px solid rgba(245,158,11,.25); }
-.pill-essentiel{ background:rgba(14,165,233,.12); color:var(--accent); border:1px solid rgba(14,165,233,.25); }
-.pill-professionnel{ background:rgba(16,185,129,.12); color:var(--accent2); border:1px solid rgba(16,185,129,.25); }
-.pill-entreprise{ background:rgba(139,92,246,.12); color:var(--purple); border:1px solid rgba(139,92,246,.25); }
+.pill-essential{ background:rgba(14,165,233,.12); color:var(--accent); border:1px solid rgba(14,165,233,.25); }
+.pill-professional{ background:rgba(16,185,129,.12); color:var(--accent2); border:1px solid rgba(16,185,129,.25); }
 .pill-ultimate { background:rgba(244,63,94,.12); color:var(--rose); border:1px solid rgba(244,63,94,.25); }
 .pill-expired  { background:rgba(239,68,68,.12); color:#fca5a5; border:1px solid rgba(239,68,68,.25); }
 
@@ -100,6 +102,7 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
 @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
 .modal h3 { font-size:18px; font-weight:800; margin-bottom:6px; }
 .modal-sub { color:var(--muted); font-size:12px; font-family:'JetBrains Mono',monospace; margin-bottom:24px; }
+.modal-msg { font-size:12px; font-family:'JetBrains Mono',monospace; margin:-8px 0 16px; padding:8px 12px; border-radius:8px; }
 .modal-field { margin-bottom:16px; }
 .modal-field label { display:block; font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-bottom:7px; }
 .modal-field select, .modal-field input {
@@ -151,26 +154,126 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
 <!-- Edit Plan Modal -->
 <div class="modal-overlay" id="editModal">
   <div class="modal">
-    <h3>✏️ Modifier le plan</h3>
-    <div class="modal-sub" id="editModalEmail">utilisateur@email.com</div>
+    <h3>✏️ Edit plan</h3>
+    <div class="modal-sub" id="editModalEmail">user@email.com</div>
     <input type="hidden" id="editUserId">
     <div class="modal-field">
       <label>Plan</label>
       <select id="editPlan">
         <option value="trial">🔬 Trial</option>
-        <option value="essentiel">📊 Essentiel</option>
-        <option value="professionnel">🚀 Professionnel</option>
-        <option value="entreprise">🏢 Entreprise</option>
+        <option value="essential">📊 Essential</option>
+        <option value="professional">🚀 Professional</option>
         <option value="ultimate">👑 Ultimate</option>
       </select>
     </div>
     <div class="modal-field">
-      <label>Date d'expiration (optionnel)</label>
-      <input type="datetime-local" id="editExpires" placeholder="Laisser vide = illimité">
+      <label>Expiration date (optional)</label>
+      <input type="datetime-local" id="editExpires" placeholder="Leave blank = unlimited">
+    </div>
+    <div class="modal-field">
+      <label>Extend trial (days)</label>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="refresh-btn" onclick="extendTrial(1)">+1 day</button>
+        <button type="button" class="refresh-btn" onclick="extendTrial(3)">+3 days</button>
+        <button type="button" class="refresh-btn" onclick="extendTrial(7)">+7 days</button>
+      </div>
     </div>
     <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeModal()">Annuler</button>
-      <button class="modal-save" onclick="savePlan()">💾 Sauvegarder</button>
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-save" onclick="savePlan()">💾 Save</button>
+    </div>
+    <button class="refresh-btn" style="width:100%;margin-top:10px;color:var(--rose);border-color:rgba(244,63,94,.3)" onclick="deleteUserFromModal()">🗑️ Permanently delete this user</button>
+  </div>
+</div>
+
+<!-- Add/Edit Price Modal -->
+<div class="modal-overlay" id="priceModal">
+  <div class="modal">
+    <h3 id="priceModalTitle">💲 Add price</h3>
+    <div class="modal-sub">Paddle product pricing</div>
+    <input type="hidden" id="priceId">
+    <div class="modal-field">
+      <label>Plan</label>
+      <select id="priceplan">
+        <option value="essential">📊 Essential</option>
+        <option value="professional">🚀 Professional</option>
+        <option value="ultimate">👑 Ultimate</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Billing cycle</label>
+      <select id="priceCycle">
+        <option value="monthly">🔄 Monthly</option>
+        <option value="yearly">📅 Yearly</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Amount</label>
+      <input type="number" id="priceAmount" min="0" step="0.01" placeholder="30.00">
+    </div>
+    <div class="modal-field">
+      <label>Currency</label>
+      <input type="text" id="priceCurrency" value="USD" maxlength="3" style="text-transform:uppercase">
+    </div>
+    <div class="modal-field">
+      <label>Paddle Price ID</label>
+      <input type="text" id="pricePaddleId" placeholder="pri_01hxxxxxxxxxxxxxxxxxxxxxxx" readonly style="opacity:.7">
+      <div style="font-size:10px;color:var(--muted2);margin-top:5px;font-family:'JetBrains Mono',monospace">Managed automatically — filled in after saving (created or updated in Paddle).</div>
+    </div>
+    <div class="modal-field">
+      <label>Paddle Product ID (optional)</label>
+      <input type="text" id="priceProductId" placeholder="pro_01hxxxxxxxxxxxxxxxxxxxxxxx">
+      <div style="font-size:10px;color:var(--muted2);margin-top:5px;font-family:'JetBrains Mono',monospace">Leave blank for a new price: a Paddle product will be created automatically.</div>
+    </div>
+    <div class="modal-field" style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="priceActive" checked style="width:auto">
+      <label style="margin:0;text-transform:none;font-size:12px;color:var(--muted2)">Active (visible / usable at checkout)</label>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closePriceModal()">Cancel</button>
+      <button class="modal-save" onclick="savePrice()">💾 Save</button>
+    </div>
+    <button class="refresh-btn" id="priceDeleteBtn" style="width:100%;margin-top:10px;color:var(--rose);border-color:rgba(244,63,94,.3)" onclick="deletePriceFromModal()">🗑️ Delete this price</button>
+  </div>
+</div>
+
+<!-- Password Confirmation Modal -->
+<div class="modal-overlay" id="pwdConfirmModal">
+  <div class="modal">
+    <h3>🔐 Confirm your password</h3>
+    <div class="modal-sub">This action is sensitive — please confirm it's really you.</div>
+    <div class="modal-field">
+      <label>Admin password</label>
+      <input type="password" id="pwdConfirmInput" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="modal-msg" id="pwdConfirmMsg" style="display:none"></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="_pwdConfirmResolve(false)">Cancel</button>
+      <button class="modal-save" id="pwdConfirmBtn" onclick="_pwdConfirmSubmit()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Entry re-authentication — shown every time admin.html loads, even
+     with an already-valid admin session. No cancel option: this gate
+     blocks the whole page until the password is confirmed, since it's
+     what stands between a session left open on a shared machine and
+     full admin access. -->
+<div class="modal-overlay show" id="entryAuthOverlay" style="z-index:100000">
+  <div class="modal">
+    <h3>🛡️ Admin confirmation</h3>
+    <div class="modal-sub">Please confirm your password to access this page.</div>
+    <div class="modal-field">
+      <label>Email</label>
+      <input type="email" id="entryAuthEmail" disabled style="opacity:.6">
+    </div>
+    <div class="modal-field">
+      <label>Password</label>
+      <input type="password" id="entryAuthPassword" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="modal-msg" id="entryAuthMsg" style="display:none"></div>
+    <div class="modal-btns" style="grid-template-columns:1fr">
+      <button class="modal-save" id="entryAuthBtn" onclick="_entryAuthSubmit()">Confirm</button>
     </div>
   </div>
 </div>
@@ -178,13 +281,14 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
 <!-- Header -->
 <div class="header">
   <div class="brand">
-    <div class="brand-icon">🛡️</div>
-    <div class="brand-name">Reliability <span>Admin</span></div>
+    <div class="brand-icon"><svg viewBox="0 0 16 16" width="60%" height="60%"><rect x="1" y="11" width="2" height="3" fill="white"/><rect x="4" y="8" width="2" height="6" fill="white"/><rect x="7" y="3" width="2" height="11" fill="white"/><rect x="10" y="6" width="2" height="8" fill="white"/><rect x="13" y="10" width="2" height="4" fill="white"/><path d="M1 12C3 12 5 3 8 3C11 3 12 9 15 11" fill="none" stroke="white" stroke-width="1" stroke-linecap="round"/></svg></div>
+    <div><div class="brand-name">Reliability <em>Suite Pro</em></div><div class="brand-sub">Reliability Analysis Platform</div></div>
     <span class="admin-badge">ADMIN</span>
   </div>
   <div class="header-right">
     <span id="adminEmail" style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted)"></span>
-    <button class="logout-btn" onclick="doLogout()">Déconnexion</button>
+    <button class="logout-btn" style="background:transparent;border:1px solid var(--border);color:var(--muted)" onclick="location.href='dashboard.html'">← Dashboard</button>
+    <button class="logout-btn" onclick="doLogout()">Logout</button>
   </div>
 </div>
 
@@ -193,23 +297,37 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
   <!-- Sidebar -->
   <div class="sidebar">
     <div style="padding:16px 20px 8px">
-      <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace">Connecté en tant qu'admin</div>
+      <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace">Logged in as admin</div>
     </div>
     <div class="nav-section">Navigation</div>
     <div class="nav-item active" onclick="showView('viewOverview')">
-      <span class="icon">📊</span> Vue d'ensemble
+      <span class="icon">📊</span> Overview
     </div>
     <div class="nav-item" onclick="showView('viewUsers')">
-      <span class="icon">👥</span> Utilisateurs
+      <span class="icon">👥</span> Users
       <span class="nav-badge" id="nbUsers">0</span>
     </div>
     <div class="nav-item" onclick="showView('viewPayments')">
-      <span class="icon">💳</span> Paiements
+      <span class="icon">💳</span> Payments
       <span class="nav-badge" id="nbPayments">0</span>
     </div>
+    <div class="nav-item" onclick="showView('viewPrices')">
+      <span class="icon">💲</span> Prices
+      <span class="nav-badge" id="nbPrices">0</span>
+    </div>
     <div class="nav-item" onclick="showView('viewSessions')">
-      <span class="icon">🔐</span> Sessions actives
+      <span class="icon">🔐</span> Active sessions
       <span class="nav-badge" id="nbSessions">0</span>
+    </div>
+    <div class="nav-item" onclick="showView('viewSupport')">
+      <span class="icon">💬</span> Support
+      <span class="nav-badge" id="nbTickets">0</span>
+    </div>
+    <div class="nav-item" onclick="showView('viewSettings')">
+      <span class="icon">⚙️</span> Settings
+    </div>
+    <div class="nav-item" onclick="showView('viewDevTools')">
+      <span class="icon">🧪</span> Dev Tools
     </div>
   </div>
 
@@ -220,31 +338,31 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
     <div class="view active" id="viewOverview">
       <div class="page-header">
         <div>
-          <div class="page-title">Vue d'ensemble</div>
-          <div class="page-sub">Statistiques en temps réel</div>
+          <div class="page-title">Overview</div>
+          <div class="page-sub">Real-time statistics</div>
         </div>
-        <button class="refresh-btn" onclick="loadAll()">🔄 Actualiser</button>
+        <button class="refresh-btn" onclick="loadAll()">🔄 Refresh</button>
       </div>
 
       <div class="stats-row">
         <div class="stat-card blue">
-          <div class="stat-lbl">Total utilisateurs</div>
+          <div class="stat-lbl">Total users</div>
           <div class="stat-val" id="statTotal">— <span></span></div>
         </div>
         <div class="stat-card yellow">
-          <div class="stat-lbl">Trials actifs</div>
+          <div class="stat-lbl">Active trials</div>
           <div class="stat-val" id="statTrials">— <span></span></div>
         </div>
         <div class="stat-card green">
-          <div class="stat-lbl">Abonnés payants</div>
+          <div class="stat-lbl">Paying subscribers</div>
           <div class="stat-val" id="statPaid">— <span></span></div>
         </div>
         <div class="stat-card rose">
-          <div class="stat-lbl">Trials expirés</div>
+          <div class="stat-lbl">Expired trials</div>
           <div class="stat-val" id="statExpired">— <span></span></div>
         </div>
         <div class="stat-card purple">
-          <div class="stat-lbl">Sessions actives</div>
+          <div class="stat-lbl">Active sessions</div>
           <div class="stat-val" id="statSessions">— <span></span></div>
         </div>
       </div>
@@ -252,14 +370,14 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
       <!-- Plans breakdown -->
       <div class="table-card">
         <div class="table-header">
-          <div class="table-title">📈 Répartition des plans</div>
+          <div class="table-title">📈 Plan breakdown</div>
         </div>
         <table>
           <thead>
             <tr>
               <th>Plan</th>
-              <th>Nombre d'utilisateurs</th>
-              <th>Revenu mensuel estimé</th>
+              <th>Number of users</th>
+              <th>Estimated monthly revenue</th>
             </tr>
           </thead>
           <tbody id="plansBreakdown">
@@ -271,16 +389,16 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
       <!-- Recent payments -->
       <div class="table-card">
         <div class="table-header">
-          <div class="table-title">💰 Paiements récents</div>
+          <div class="table-title">💰 Recent payments</div>
         </div>
         <table>
           <thead>
             <tr>
               <th>Email</th>
               <th>Plan</th>
-              <th>Montant</th>
+              <th>Amount</th>
               <th>Date</th>
-              <th>Statut</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody id="recentPayments">
@@ -294,34 +412,174 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
     <div class="view" id="viewUsers">
       <div class="page-header">
         <div>
-          <div class="page-title">Utilisateurs</div>
-          <div class="page-sub">Gérer les plans et accès</div>
+          <div class="page-title">Users</div>
+          <div class="page-sub">Manage plans and access</div>
         </div>
-        <button class="refresh-btn" onclick="loadUsers()">🔄 Actualiser</button>
+        <button class="refresh-btn" onclick="loadUsers()">🔄 Refresh</button>
       </div>
 
       <div class="table-card">
         <div class="table-header">
-          <div class="table-title">👥 Tous les utilisateurs</div>
+          <div class="table-title">👥 All users</div>
           <div class="table-actions">
             <input type="text" class="search-input" id="searchUsers"
-              placeholder="Rechercher par email..." oninput="filterUsers()">
+              placeholder="Search by email..." oninput="filterUsers()">
+            <button class="refresh-btn" onclick="exportUsersCSV()">⬇️ Export CSV</button>
           </div>
         </div>
         <table>
           <thead>
             <tr>
               <th>Email</th>
-              <th>Plan actif</th>
-              <th>Trial démarré</th>
-              <th>Expiration</th>
+              <th>Active plan</th>
+              <th>Start Date</th>
+              <th>Expiration date</th>
+              <th>Remaining date</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="usersTable">
-            <tr><td colspan="5" class="empty"><div class="icon">⏳</div>Chargement...</td></tr>
+            <tr><td colspan="6" class="empty"><div class="icon">⏳</div>Chargement...</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: SUPPORT ══ -->
+    <div class="view" id="viewSupport">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Support</div>
+          <div class="page-sub">User messages</div>
+        </div>
+        <button class="refresh-btn" onclick="loadTickets()">🔄 Refresh</button>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">📨 All tickets</div>
+          <div class="table-actions">
+            <select id="ticketFilter" onchange="renderTickets()" style="padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;font-family:'JetBrains Mono',monospace">
+              <option value="all">All</option>
+              <option value="open" selected>Pending</option>
+              <option value="answered">Answered</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+        </div>
+        <div id="ticketsList" style="padding:16px 20px;display:flex;flex-direction:column;gap:14px">
+          <div class="empty"><div class="icon">⏳</div>Chargement...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: SETTINGS ══ -->
+    <div class="view" id="viewSettings">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Settings</div>
+          <div class="page-sub">Application configuration</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">🛡️ Administrators</div>
+        </div>
+        <div style="padding:18px 20px">
+          <div id="adminEmailsList" style="font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted2);line-height:1.6"></div>
+          <div style="display:flex;gap:8px;margin-top:16px">
+            <input type="email" id="newAdminEmail" placeholder="email@example.com" style="flex:1;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px">
+            <button class="modal-save" style="padding:9px 18px;white-space:nowrap" onclick="addAdmin()">+ Add</button>
+          </div>
+          <div style="margin-top:14px;padding:12px 14px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:8px;font-size:11px;font-family:'JetBrains Mono',monospace;color:#fbbf24;line-height:1.7">
+            ⚠️ Access to this page is decided by the account's <strong>is_admin</strong> column (checked at login), not a hardcoded list. The email must already match an existing account. Adding or removing an admin requires re-confirming your password.
+          </div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">🧩 Technical configuration</div>
+        </div>
+        <table>
+          <tbody>
+            <tr>
+              <td class="main">Default trial duration</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <input type="number" id="settingTrialDays" min="1" max="168" style="width:70px;padding:6px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px">
+                  <span style="color:var(--muted2);font-size:12px">hours</span>
+                  <button class="action-btn btn-edit" onclick="saveTrialDuration()">💾 Save</button>
+                  <span id="settingSavedMsg" style="font-size:11px;color:var(--accent2);display:none">✓ Saved</span>
+                </div>
+                <div style="font-size:10px;color:var(--muted2);margin-top:6px;font-family:'JetBrains Mono',monospace">Applies to all <strong>new</strong> signups. Does not affect trials already in progress (use "Extend trial" per user for that).</div>
+              </td>
+            </tr>
+            <tr><td class="main">Database</td><td>Supabase (PostgreSQL)</td></tr>
+            <tr><td class="main">Payments</td><td>Paddle (live mode)</td></tr>
+            <tr><td class="main">Hosting</td><td>GitHub Pages</td></tr>
+            <tr><td class="main">Single session</td><td>Enabled (auto-logout if logged in elsewhere)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title" style="color:#fca5a5">⚠️ Danger zone</div>
+        </div>
+        <div style="padding:18px 20px; display:flex; gap:10px; flex-wrap:wrap">
+          <button class="refresh-btn" style="color:var(--rose);border-color:rgba(244,63,94,.3)" onclick="killAllSessions()">⚡ Kill all sessions</button>
+          <button class="refresh-btn" style="color:var(--rose);border-color:rgba(244,63,94,.3)" onclick="exportUsersCSV()">⬇️ Full users export</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: DEV TOOLS ══ -->
+    <div class="view" id="viewDevTools">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Dev Tools</div>
+          <div class="page-sub">Test in-development analysis tools safely</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div style="padding:18px 20px">
+          <div style="padding:12px 14px;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.2);border-radius:8px;font-size:11px;font-family:'JetBrains Mono',monospace;color:#7dd3fc;line-height:1.7">
+            🛡️ These links open files inside a separate <strong>dev/</strong> folder (e.g. <strong>dev/Life_Data_Analysis_dev.html</strong>), never the live files at the site root that customers actually use. As long as a dev build is only ever uploaded into <strong>dev/</strong> — never to the root, never overwriting the stable file of the same name — there is no way testing here can affect production. Each link opens in a new tab so your admin session stays open here.
+          </div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">🧪 Known dev builds</div>
+        </div>
+        <div style="padding:18px 20px; display:flex; gap:10px; flex-wrap:wrap">
+          <a class="refresh-btn" href="dev/Life_Data_Analysis_dev.html?id=49cd8ecd-aa62-4ae5-9345-2eb77f4c9e22" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">📊 Life Data Analysis <span style="color:#f59e0b">(dev)</span></a>
+          <a class="refresh-btn" href="dev/Reliability_Growth_Analysis_dev.html?id=49cd8ecd-aa62-4ae5-9345-2eb77f4c9e22" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">📈 Reliability Growth Analysis <span style="color:#f59e0b">(dev)</span></a>
+          <a class="refresh-btn" href="dev/Degradation_Analysis_dev.html?id=49cd8ecd-aa62-4ae5-9345-2eb77f4c9e22" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">📉 Degradation Analysis <span style="color:#f59e0b">(dev)</span></a>
+        </div>
+        <div style="padding:0 20px 16px;font-size:10px;color:var(--muted2);font-family:'JetBrains Mono',monospace">
+          These links always point to the fixed filenames above — if that file hasn't been uploaded yet, the link will 404. That's expected and harmless; upload the corresponding _dev.html file to enable it.
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">🔗 Test any other file</div>
+        </div>
+        <div style="padding:18px 20px">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input type="text" id="devToolCustomFile" placeholder="e.g. Life_Data_Analysis_experimental.html"
+              style="flex:1;min-width:260px;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px">
+            <button class="modal-save" style="padding:9px 18px;white-space:nowrap" onclick="openDevToolCustomFile()">🚀 Open</button>
+          </div>
+          <div style="margin-top:8px;font-size:10px;color:var(--muted2);font-family:'JetBrains Mono',monospace">
+            Just the filename — <strong>dev/</strong> is added automatically, same as the buttons above. For anything that isn't one of the three above: a second dev variant, an experimental one-off, etc. Opens in a new tab. No code change needed to use this.
+          </div>
+        </div>
       </div>
     </div>
 
@@ -329,20 +587,20 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
     <div class="view" id="viewPayments">
       <div class="page-header">
         <div>
-          <div class="page-title">Paiements</div>
-          <div class="page-sub">Historique des transactions Paddle</div>
+          <div class="page-title">Payments</div>
+          <div class="page-sub">Paddle transaction history</div>
         </div>
-        <button class="refresh-btn" onclick="loadPayments()">🔄 Actualiser</button>
+        <button class="refresh-btn" onclick="loadPayments()">🔄 Refresh</button>
       </div>
 
       <!-- Revenue stats -->
       <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
         <div class="stat-card green">
-          <div class="stat-lbl">Revenu total</div>
+          <div class="stat-lbl">Total revenue</div>
           <div class="stat-val" id="revTotal">— <span>USD</span></div>
         </div>
         <div class="stat-card blue">
-          <div class="stat-lbl">Ce mois</div>
+          <div class="stat-lbl">This month</div>
           <div class="stat-val" id="revMonth">— <span>USD</span></div>
         </div>
         <div class="stat-card yellow">
@@ -353,7 +611,10 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
 
       <div class="table-card">
         <div class="table-header">
-          <div class="table-title">💳 Toutes les transactions</div>
+          <div class="table-title">💳 All transactions</div>
+          <div class="table-actions">
+            <button class="refresh-btn" onclick="exportPaymentsCSV()">⬇️ Export CSV</button>
+          </div>
         </div>
         <table>
           <thead>
@@ -361,15 +622,56 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
               <th>Email</th>
               <th>Plan</th>
               <th>Cycle</th>
-              <th>Montant</th>
+              <th>Amount</th>
               <th>Date</th>
-              <th>Statut</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="paymentsTable">
-            <tr><td colspan="6" class="empty"><div class="icon">⏳</div>Chargement...</td></tr>
+            <tr><td colspan="7" class="empty"><div class="icon">⏳</div>Chargement...</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: PRICES ══ -->
+    <div class="view" id="viewPrices">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Prices</div>
+          <div class="page-sub">Paddle products &amp; pricing</div>
+        </div>
+        <button class="refresh-btn" onclick="loadPrices()">🔄 Refresh</button>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">💲 Plan prices</div>
+          <div class="table-actions">
+            <button class="refresh-btn" onclick="syncFromPaddle(this)">🔄 Sync from Paddle</button>
+            <button class="modal-save" style="padding:7px 16px" onclick="openPriceModal()">+ Add price</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Cycle</th>
+              <th>Amount</th>
+              <th>Paddle Price ID</th>
+              <th>Status</th>
+              <th>Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="pricesTable">
+            <tr><td colspan="7" class="empty"><div class="icon">⏳</div>Chargement...</td></tr>
+          </tbody>
+        </table>
+        <div style="padding:14px 20px;font-size:11px;color:var(--muted2);font-family:'JetBrains Mono',monospace;border-top:1px solid var(--border)">
+          🔄 <strong>Sync from Paddle</strong> imports existing prices from your Paddle account. Adding or editing a price here also pushes it to Paddle automatically (creating/updating the Price, and the Product if needed) — no manual action is needed in the Paddle dashboard.
+        </div>
       </div>
     </div>
 
@@ -377,27 +679,27 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
     <div class="view" id="viewSessions">
       <div class="page-header">
         <div>
-          <div class="page-title">Sessions actives</div>
-          <div class="page-sub">Gérer les connexions en cours</div>
+          <div class="page-title">Active sessions</div>
+          <div class="page-sub">Manage current connections</div>
         </div>
-        <button class="refresh-btn" onclick="loadSessions()">🔄 Actualiser</button>
+        <button class="refresh-btn" onclick="loadSessions()">🔄 Refresh</button>
       </div>
 
       <div class="table-card">
         <div class="table-header">
-          <div class="table-title">🔐 Sessions en cours</div>
+          <div class="table-title">🔐 Current sessions</div>
           <div class="table-actions">
             <button class="refresh-btn" style="color:var(--rose);border-color:rgba(244,63,94,.3)"
-              onclick="killAllSessions()">⚡ Couper toutes les sessions</button>
+              onclick="killAllSessions()">⚡ Kill all sessions</button>
           </div>
         </div>
         <table>
           <thead>
             <tr>
-              <th>Utilisateur</th>
-              <th>Appareil</th>
-              <th>Dernière activité</th>
-              <th>Statut</th>
+              <th>User</th>
+              <th>Device</th>
+              <th>Last active</th>
+              <th>Status</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -414,37 +716,55 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// ⚠️ Utilise la clé SERVICE ROLE pour l'admin (accès complet)
-// Cette page ne doit JAMAIS être accessible au public !
+// ⚠️ Uses the SERVICE ROLE key for admin (full access)
+// This page must NEVER be publicly accessible!
 const SUPABASE_URL  = 'https://kquwgqcxauymzkgfcxpm.supabase.co';
 const SUPABASE_KEY  = 'sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx';
 
-// ⚠️ REMPLACE PAR TON EMAIL ADMIN — seul cet email peut accéder
-const ADMIN_EMAIL = {'grandrianirina@gmail.com','rateliniainalioka@gmail.com'};
-
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const PLAN_ICONS  = { trial:'🔬', essentiel:'📊', professionnel:'🚀', entreprise:'🏢', ultimate:'👑' };
-const PLAN_PRICES = { essentiel:30, professionnel:50, entreprise:450, ultimate:0 };
+const PLAN_ICONS  = { trial:'🔬', essential:'📊', professional:'🚀', ultimate:'👑' };
+const PLAN_PRICES = { essential:30, professional:50, ultimate:450 };
+const PLAN_DISPLAY = { trial:'trial', essential:'essential', professional:'professional', ultimate:'ultimate' };
 
 let allUsers = [];
+let allPayments = [];
+let allPrices = [];
+let currentAdminEmail = '';
+
+// price lookup used by the Overview MRR estimate; falls back to the
+// original hardcoded PLAN_PRICES constant if a row hasn't been added yet
+function priceFor(plan, cycle = 'monthly') {
+  const row = allPrices.find(p => p.plan === plan && p.billing_cycle === cycle && p.is_active);
+  return row ? Number(row.amount) : (PLAN_PRICES[plan] || 0);
+}
 
 // ── Auth guard ────────────────────────────────────────────────
+// Who can access admin.html is now decided entirely by profiles.is_admin
+// (checked live against the database), not a hardcoded email list here.
+// To promote/demote an admin, use the "Administrators" panel below —
+// it edits that column directly, so login itself governs access.
 const { data: { session } } = await supabase.auth.getSession();
 
 async function initAdmin() {
-  if (!session || session.user.email !== ADMIN_EMAIL) {
+  const isAdmin = session
+    ? (await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single()).data?.is_admin
+    : false;
+
+  if (!session || !isAdmin) {
     document.body.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:'JetBrains Mono',monospace;color:#fca5a5">
         <div style="font-size:48px">🔒</div>
-        <div style="font-size:18px;font-weight:700">Accès refusé</div>
-        <div style="font-size:13px;color:#64748b">Réservé aux administrateurs</div>
-        <a href="login.html" style="margin-top:8px;padding:10px 24px;background:#0ea5e9;color:white;border-radius:8px;text-decoration:none;font-size:13px">Se connecter</a>
+        <div style="font-size:18px;font-weight:700">Access denied</div>
+        <div style="font-size:13px;color:#64748b">Restricted to administrators</div>
+        <a href="index.html?login=1" style="margin-top:8px;padding:10px 24px;background:#0ea5e9;color:white;border-radius:8px;text-decoration:none;font-size:13px">Log in</a>
       </div>`;
     return;
   }
 
+  currentAdminEmail = session.user.email;
   document.getElementById('adminEmail').textContent = session.user.email;
+  document.getElementById('entryAuthEmail').value = session.user.email;
 
 // ── Toast ─────────────────────────────────────────────────────
 function showToast(msg, type = 'success') {
@@ -459,25 +779,222 @@ window.showView = function(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const map = { viewOverview:0, viewUsers:1, viewPayments:2, viewSessions:3 };
+  const map = { viewOverview:0, viewUsers:1, viewPayments:2, viewPrices:3, viewSessions:4, viewSupport:5, viewSettings:6, viewDevTools:7 };
   document.querySelectorAll('.nav-item')[map[id]]?.classList.add('active');
   if (id==='viewUsers')    loadUsers();
   if (id==='viewPayments') loadPayments();
+  if (id==='viewPrices')   loadPrices();
   if (id==='viewSessions') loadSessions();
+  if (id==='viewSupport')  loadTickets();
+  if (id==='viewSettings') loadSettings();
 };
 
+window.openDevToolCustomFile = function() {
+  const input = document.getElementById('devToolCustomFile');
+  let name = (input?.value || '').trim();
+  if (!name) { alert('Enter a filename first, e.g. Life_Data_Analysis_experimental.html'); return; }
+  // Convenience: don't require the .html extension, or the dev/ prefix, to be typed.
+  if (!/\.html?$/i.test(name)) name += '.html';
+  if (!name.startsWith('dev/')) name = 'dev/' + name;
+  window.open(name, '_blank', 'noopener');
+};
+
+function loadSettings() {
+  loadAdminsList();
+
+  supabase.from('app_settings').select('value').eq('key','trial_duration_days').single()
+    .then(({ data, error }) => {
+      document.getElementById('settingTrialDays').value = error ? 3 : (data?.value || 3);
+    });
+}
+
+async function loadAdminsList() {
+  const { data: admins, error } = await supabase
+    .from('profiles').select('id,email').eq('is_admin', true).order('email');
+
+  if (error) {
+    document.getElementById('adminEmailsList').innerHTML = `<span style="color:#f87171">Error: ${error.message}</span>`;
+    return;
+  }
+
+  document.getElementById('adminEmailsList').innerHTML = (admins || []).map(a => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span>🛡️ ${a.email}</span>
+      ${a.email === currentAdminEmail
+        ? `<span style="font-size:10px;color:var(--muted2)">(you)</span>`
+        : `<button class="action-btn btn-ban" style="padding:3px 10px;font-size:11px" onclick="removeAdmin('${a.id}','${a.email}')">Remove</button>`}
+    </div>`).join('') || '<span style="color:var(--muted2)">No administrators</span>';
+}
+
+window.addAdmin = async function() {
+  const input = document.getElementById('newAdminEmail');
+  const email = input.value.trim().toLowerCase();
+  if (!email) return;
+
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
+  const { data: profile, error: findErr } = await supabase
+    .from('profiles').select('id,is_admin').eq('email', email).maybeSingle();
+
+  if (findErr || !profile) {
+    showToast(`❌ No account found for ${email}`, 'error');
+    return;
+  }
+  if (profile.is_admin) {
+    showToast(`${email} is already an administrator`, 'error');
+    return;
+  }
+
+  const { error } = await supabase.from('profiles').update({ is_admin: true }).eq('id', profile.id);
+  if (error) { showToast('❌ Error: ' + error.message, 'error'); return; }
+
+  input.value = '';
+  showToast(`✅ ${email} is now an administrator`);
+  loadAdminsList();
+};
+
+window.removeAdmin = async function(userId, email) {
+  if (email === currentAdminEmail) { showToast('You cannot remove your own admin rights.', 'error'); return; }
+  if (!confirm(`Remove admin rights from ${email}?`)) return;
+
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
+  const { error } = await supabase.from('profiles').update({ is_admin: false }).eq('id', userId);
+  if (error) { showToast('❌ Error: ' + error.message, 'error'); return; }
+
+  showToast(`✅ Admin rights removed for ${email}`);
+  loadAdminsList();
+};
+
+window.saveTrialDuration = async function() {
+  const val = parseInt(document.getElementById('settingTrialDays').value, 10);
+  if (!val || val < 1) { showToast('❌ Invalid value', 'error'); return; }
+
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  const { error } = await supabase.from('app_settings')
+    .upsert({ key:'trial_duration_days', value:String(val), updated_at:new Date().toISOString(), updated_by:session?.user?.email }, { onConflict:'key' });
+
+  if (error) {
+    showToast('❌ Error: ' + error.message, 'error');
+  } else {
+    showToast(`✅ Default trial duration: ${val} hours`);
+    const msg = document.getElementById('settingSavedMsg');
+    msg.style.display = 'inline'; setTimeout(()=>msg.style.display='none', 2000);
+  }
+};
+
+// ── SUPPORT TICKETS ─────────────────────────────────────────
+let allTickets = [];
+
+async function loadTickets() {
+  const { data } = await supabase.from('support_tickets')
+    .select('*').order('created_at', { ascending: false });
+  allTickets = data || [];
+  const openCount = allTickets.filter(t => t.status === 'open').length;
+  const badge = document.getElementById('nbTickets');
+  if (badge) badge.textContent = openCount;
+  renderTickets();
+}
+
+window.renderTickets = function() {
+  const list   = document.getElementById('ticketsList');
+  if (!list) return;
+  const filter = document.getElementById('ticketFilter')?.value || 'all';
+  const items  = filter === 'all' ? allTickets : allTickets.filter(t => t.status === filter);
+
+  if (items.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="icon">💬</div>No tickets</div>';
+    return;
+  }
+
+  list.innerHTML = items.map(t => `
+    <div style="background:var(--surface2,var(--surface));border:1px solid var(--border);border-radius:10px;padding:16px 18px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px">
+        <div>
+          <div style="font-weight:700;font-size:13px">${t.subject}</div>
+          <div style="font-size:11px;color:var(--muted2);font-family:'JetBrains Mono',monospace;margin-top:2px">${t.email} · ${new Date(t.created_at).toLocaleString('en-US')}</div>
+        </div>
+        <span class="plan-pill ${t.status==='open'?'pill-expired':'pill-essential'}">${t.status==='open'?'⏳ Pending':t.status==='answered'?'✅ Answered':'🔒 Closed'}</span>
+      </div>
+      <div style="font-size:13px;color:var(--muted2);margin-bottom:10px;white-space:pre-wrap">${t.message}</div>
+      ${t.admin_reply ? `<div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px">
+        <div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:4px">Your reply:</div>${t.admin_reply}
+      </div>` : ''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start">
+        <textarea id="reply_${t.id}" placeholder="Write a reply (visible to the user on their dashboard)..."
+          style="flex:1;min-width:200px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;font-family:'Syne',sans-serif;resize:vertical" rows="2">${t.admin_reply || ''}</textarea>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="action-btn btn-edit" onclick="replyTicket('${t.id}')">💾 Reply</button>
+          <a class="action-btn btn-edit" style="text-align:center;text-decoration:none" href="mailto:${t.email}?subject=${encodeURIComponent('Re: '+t.subject)}&body=${encodeURIComponent('Hello,\n\n')}">✉️ By email</a>
+          ${t.status!=='closed' ? `<button class="action-btn btn-ban" onclick="closeTicket('${t.id}')">🔒 Close</button>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+};
+
+window.replyTicket = async function(ticketId) {
+  const reply = document.getElementById(`reply_${ticketId}`).value.trim();
+  if (!reply) { showToast('❌ Write a reply before sending', 'error'); return; }
+
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
+  const { error } = await supabase.from('support_tickets')
+    .update({ admin_reply: reply, status: 'answered', replied_at: new Date().toISOString() })
+    .eq('id', ticketId);
+
+  if (error) showToast('❌ Error: ' + error.message, 'error');
+  else { showToast('✅ Reply saved, visible to the user'); loadTickets(); }
+};
+
+window.closeTicket = async function(ticketId) {
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
+  const { error } = await supabase.from('support_tickets').update({ status: 'closed' }).eq('id', ticketId);
+  if (error) showToast('❌ Error: ' + error.message, 'error');
+  else { showToast('🔒 Ticket closed'); loadTickets(); }
+};
+
+// ── Ban helper: a banned user is marked with a sentinel date (epoch) ──
+function isBanned(u) {
+  if (!u.plan_expires_at) return false;
+  return new Date(u.plan_expires_at).getFullYear() < 1971;
+}
+
+// ── hasAccess() mirrors verify_user_plan()'s bypass logic (admins
+//    always have access, regardless of their own plan/expiration) —
+//    that part IS accurate to show. There is deliberately no
+//    "effectivePlan()" alongside it anymore: admin.html is a
+//    management tool, so the "Plan actif" column must show the real,
+//    raw plan value on the row (u.plan) — showing "ultimate" for an
+//    admin whose actual plan is "professional" would hide the real
+//    data from the person managing it.
+function hasAccess(u) {
+  if (u.is_admin) return true;
+  if (!u.plan_expires_at) return true; // no expiration set = unlimited
+  return new Date(u.plan_expires_at) > new Date();
+}
+
 // ── Plan pill ─────────────────────────────────────────────────
-function planPill(plan, expired = false) {
-  if (expired) return `<span class="plan-pill pill-expired">⏱ Expiré</span>`;
+function planPill(plan, expired = false, banned = false) {
+  if (banned)  return `<span class="plan-pill pill-expired">🚫 Banned</span>`;
+  if (expired) return `<span class="plan-pill pill-expired">⏱ Expired</span>`;
   const cls = `pill-${plan}`;
-  return `<span class="plan-pill ${cls}">${PLAN_ICONS[plan]||''} ${plan}</span>`;
+  return `<span class="plan-pill ${cls}">${PLAN_ICONS[plan]||''} ${PLAN_DISPLAY[plan]||plan}</span>`;
 }
 
 function statusPill(status) {
   const map = {
-    completed: '<span class="plan-pill pill-essentiel">✅ Payé</span>',
-    cancelled: '<span class="plan-pill pill-expired">❌ Annulé</span>',
-    failed:    '<span class="plan-pill pill-expired">⚠️ Échoué</span>',
+    completed: '<span class="plan-pill pill-essential">✅ Paid</span>',
+    cancelled: '<span class="plan-pill pill-expired">❌ Cancelled</span>',
+    failed:    '<span class="plan-pill pill-expired">⚠️ Failed</span>',
+    refunded:  '<span class="plan-pill pill-trial">↩️ Refunded</span>',
   };
   return map[status] || status;
 }
@@ -486,29 +1003,30 @@ function timeAgo(date) {
   if (!date) return '—';
   const d = new Date(date);
   const diff = (Date.now() - d) / 1000;
-  if (diff < 60)   return 'À l\'instant';
+  if (diff < 60)   return 'Just now';
   if (diff < 3600) return `${Math.floor(diff/60)}min`;
   if (diff < 86400)return `${Math.floor(diff/3600)}h`;
-  return d.toLocaleDateString('fr-FR');
+  return d.toLocaleDateString('en-US');
 }
 
 // ── LOAD ALL ─────────────────────────────────────────────────
 window.loadAll = async function() {
-  await Promise.all([loadOverview(), loadUsers(), loadPayments(), loadSessions()]);
+  await loadPrices(); // must resolve first: loadOverview() reads allPrices for the MRR estimate
+  await Promise.all([loadOverview(), loadUsers(), loadPayments(), loadSessions(), loadTickets()]);
 };
 
 // ── OVERVIEW ─────────────────────────────────────────────────
 async function loadOverview() {
   const { data: profiles } = await supabase
-    .from('user_access_status')
+    .from('profiles')
     .select('*');
 
   if (!profiles) return;
 
   const total   = profiles.length;
-  const trials  = profiles.filter(p => p.plan==='trial' && p.has_access).length;
-  const paid    = profiles.filter(p => ['essentiel','professionnel','entreprise','ultimate'].includes(p.active_plan)).length;
-  const expired = profiles.filter(p => !p.has_access).length;
+  const trials  = profiles.filter(p => p.plan==='trial' && hasAccess(p)).length;
+  const paid    = profiles.filter(p => ['essential','professional','ultimate'].includes(p.plan)).length;
+  const expired = profiles.filter(p => !hasAccess(p)).length;
 
   document.getElementById('statTotal').innerHTML   = `${total}`;
   document.getElementById('statTrials').innerHTML  = `${trials}`;
@@ -518,20 +1036,20 @@ async function loadOverview() {
   // Plans breakdown
   const planCount = {};
   profiles.forEach(p => {
-    const plan = p.active_plan || 'expired';
+    const plan = hasAccess(p) ? p.plan : 'expired';
     planCount[plan] = (planCount[plan] || 0) + 1;
   });
 
   const breakdownHtml = Object.entries(planCount).map(([plan, count]) => {
-    const price = PLAN_PRICES[plan] || 0;
+    const price = priceFor(plan, 'monthly');
     const mrr   = price * count;
     return `<tr>
       <td>${planPill(plan, plan==='expired')}</td>
-      <td class="main">${count} utilisateur${count>1?'s':''}</td>
-      <td class="main">${mrr > 0 ? '$'+mrr+'/mois' : '—'}</td>
+      <td class="main">${count} user${count>1?'s':''}</td>
+      <td class="main">${mrr > 0 ? '$'+mrr+'/mo' : '—'}</td>
     </tr>`;
   }).join('');
-  document.getElementById('plansBreakdown').innerHTML = breakdownHtml || '<tr><td colspan="3" class="empty">Aucun utilisateur</td></tr>';
+  document.getElementById('plansBreakdown').innerHTML = breakdownHtml || '<tr><td colspan="3" class="empty">No users</td></tr>';
 
   // Recent payments
   const { data: payments } = await supabase
@@ -546,16 +1064,31 @@ async function loadOverview() {
     <td>$${p.amount}</td>
     <td>${timeAgo(p.created_at)}</td>
     <td>${statusPill(p.status)}</td>
-  </tr>`).join('') || '<tr><td colspan="5" class="empty"><div class="icon">💳</div>Aucun paiement</td></tr>';
+  </tr>`).join('') || '<tr><td colspan="5" class="empty"><div class="icon">💳</div>No payments</td></tr>';
   document.getElementById('recentPayments').innerHTML = payHtml;
 }
 
 // ── USERS ─────────────────────────────────────────────────────
+/* ── Smart remaining-time formatting ──
+   <=1min -> seconds ("45s"); <=1h -> minutes ("12mn");
+   <=1day -> hours ("5h"); >1day -> days, 1 decimal ("3.2 days"). */
+function smartTimeLeft(ms) {
+  ms = Math.max(0, ms);
+  const sec = ms / 1000;
+  if (sec <= 60) return `${Math.round(sec)}s`;
+  const min = ms / 60000;
+  if (min <= 60) return `${Math.round(min)}mn`;
+  const hr = ms / 3600000;
+  if (hr <= 24) return `${Math.round(hr)}h`;
+  const days = ms / 86400000;
+  return `${days.toFixed(1)} days`;
+}
+
 async function loadUsers() {
   const { data } = await supabase
-    .from('user_access_status')
+    .from('profiles')
     .select('*')
-    .order('trial_started_at', { ascending: false });
+    .order('plan_started_at', { ascending: false });
 
   allUsers = data || [];
   document.getElementById('nbUsers').textContent = allUsers.length;
@@ -564,28 +1097,45 @@ async function loadUsers() {
 
 function renderUsers(users) {
   const html = users.map(u => {
-    const expired = !u.has_access;
-    const daysLeft = u.trial_days_left ? parseFloat(u.trial_days_left).toFixed(1) : null;
-    const expiresStr = u.trial_expires_at
-      ? new Date(u.trial_expires_at).toLocaleDateString('fr-FR')
-      : u.plan_expires_at
-        ? new Date(u.plan_expires_at).toLocaleDateString('fr-FR')
-        : '∞';
-    const startedStr = u.trial_started_at
-      ? new Date(u.trial_started_at).toLocaleDateString('fr-FR')
+    const banned = isBanned(u);
+    const expired = !hasAccess(u) && !banned;
+    /* plan_expires_at is now the single expiration source for every
+       plan type, trial included — no more trial_expires_at fallback,
+       since that was only ever a view-computed column. */
+    const expiryRaw = u.plan_expires_at || null;
+    const expiresStr = expiryRaw
+      ? new Date(expiryRaw).toLocaleDateString('en-US')
+      : '∞';
+    const startedStr = u.plan_started_at
+      ? new Date(u.plan_started_at).toLocaleDateString('en-US')
       : '—';
+    /* Remaining date = expiration − today, in days. Same "time left from
+       now" the trial badge used to show alone, now shown for every plan. */
+    const remainingStr = banned
+      ? '—'
+      : expiryRaw
+        ? (() => {
+            const remainMs = new Date(expiryRaw).getTime() - Date.now();
+            return remainMs > 0 ? smartTimeLeft(remainMs) : 'Expired';
+          })()
+        : '∞';
+
+    const banAction = banned
+      ? `<button class="action-btn btn-edit" onclick="unbanUser('${u.id}','${u.email}')">✅ Reactivate</button>`
+      : `<button class="action-btn btn-ban" onclick="banUser('${u.id}','${u.email}')">🚫 Block</button>`;
 
     return `<tr>
-      <td class="main">${u.email || '—'}</td>
-      <td>${planPill(u.active_plan || u.plan, expired)}</td>
+      <td class="main">${u.email || '—'}${u.is_admin ? ' <span title="Administrator — access always active, regardless of the plan/expiration shown" style="font-size:11px">🛡️</span>' : ''}</td>
+      <td>${planPill(u.plan, expired, banned)}</td>
       <td>${startedStr}</td>
-      <td>${u.active_plan==='trial' ? `${daysLeft}j restants` : expiresStr}</td>
+      <td>${banned ? '—' : expiresStr}</td>
+      <td>${remainingStr}</td>
       <td>
-        <button class="action-btn btn-edit" onclick="openEdit('${u.id}','${u.email}','${u.plan}')">✏️ Modifier</button>
-        <button class="action-btn btn-ban"  onclick="banUser('${u.id}','${u.email}')">🚫 Bloquer</button>
+        <button class="action-btn btn-edit" onclick="openEdit('${u.id}','${u.email}','${u.plan}','${expiryRaw || ''}')">✏️ Edit</button>
+        ${banAction}
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="5" class="empty"><div class="icon">👥</div>Aucun utilisateur</td></tr>';
+  }).join('') || '<tr><td colspan="6" class="empty"><div class="icon">👥</div>No users</td></tr>';
   document.getElementById('usersTable').innerHTML = html;
 }
 
@@ -602,6 +1152,7 @@ async function loadPayments() {
     .order('created_at', { ascending: false });
 
   const payments = data || [];
+  allPayments = payments;
   document.getElementById('nbPayments').textContent = payments.length;
 
   const total    = payments.filter(p=>p.status==='completed').reduce((s,p)=>s+(p.amount||0),0);
@@ -618,13 +1169,165 @@ async function loadPayments() {
   const html = payments.map(p => `<tr>
     <td class="main">${p.profiles?.email || '—'}</td>
     <td>${planPill(p.plan)}</td>
-    <td>${p.billing_cycle==='annual' ? '📅 Annuel' : '🔄 Mensuel'}</td>
+    <td>${p.billing_cycle==='annual' ? '📅 Annual' : '🔄 Monthly'}</td>
     <td>$${p.amount}</td>
-    <td>${new Date(p.created_at).toLocaleDateString('fr-FR')}</td>
+    <td>${new Date(p.created_at).toLocaleDateString('en-US')}</td>
     <td>${statusPill(p.status)}</td>
-  </tr>`).join('') || '<tr><td colspan="6" class="empty"><div class="icon">💳</div>Aucun paiement</td></tr>';
+    <td>${p.status==='completed'
+      ? `<button class="action-btn btn-kick" onclick="refundPayment('${p.id}','${p.user_id}','${p.profiles?.email||''}')">↩️ Refund</button>`
+      : '—'}</td>
+  </tr>`).join('') || '<tr><td colspan="7" class="empty"><div class="icon">💳</div>No payments</td></tr>';
   document.getElementById('paymentsTable').innerHTML = html;
 }
+
+// ── PRICES ───────────────────────────────────────────────────
+async function loadPrices() {
+  const { data, error } = await supabase
+    .from('paddle_prices')
+    .select('*')
+    .order('plan')
+    .order('billing_cycle');
+
+  if (error) {
+    // Table might not exist yet if the migration hasn't been run
+    document.getElementById('pricesTable') && (document.getElementById('pricesTable').innerHTML =
+      `<tr><td colspan="7" class="empty"><div class="icon">⚠️</div>${error.message}</td></tr>`);
+    return;
+  }
+
+  allPrices = data || [];
+  const badge = document.getElementById('nbPrices');
+  if (badge) badge.textContent = allPrices.length;
+  renderPrices();
+}
+
+function renderPrices() {
+  const tbody = document.getElementById('pricesTable');
+  if (!tbody) return;
+
+  const html = allPrices.map(p => `<tr>
+    <td>${planPill(p.plan)}</td>
+    <td>${p.billing_cycle === 'yearly' ? '📅 Yearly' : '🔄 Monthly'}</td>
+    <td class="main">${Number(p.amount).toFixed(2)} ${p.currency}</td>
+    <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">${p.paddle_price_id || '<span style="color:var(--muted)">— not set —</span>'}</td>
+    <td>${p.is_active
+      ? '<span class="plan-pill pill-professional">🟢 Active</span>'
+      : '<span class="plan-pill pill-expired">⚪ Inactive</span>'}</td>
+    <td>${p.updated_at ? new Date(p.updated_at).toLocaleDateString('en-US') : '—'}</td>
+    <td>
+      <button class="action-btn btn-edit" onclick='openPriceModal(${JSON.stringify(p)})'>✏️ Edit</button>
+      <button class="action-btn ${p.is_active ? 'btn-ban' : 'btn-kick'}" onclick="togglePriceActive('${p.id}', ${!p.is_active})">${p.is_active ? '⏸ Deactivate' : '▶️ Activate'}</button>
+    </td>
+  </tr>`).join('') || '<tr><td colspan="7" class="empty"><div class="icon">💲</div>No prices yet — click "+ Add price"</td></tr>';
+  tbody.innerHTML = html;
+}
+
+window.openPriceModal = function(price) {
+  const isEdit = !!price;
+  document.getElementById('priceModalTitle').textContent = isEdit ? '✏️ Edit price' : '💲 Add price';
+  document.getElementById('priceId').value        = isEdit ? price.id : '';
+  document.getElementById('priceplan').value       = isEdit ? price.plan : 'essential';
+  document.getElementById('priceCycle').value      = isEdit ? price.billing_cycle : 'monthly';
+  document.getElementById('priceAmount').value     = isEdit ? price.amount : '';
+  document.getElementById('priceCurrency').value   = isEdit ? price.currency : 'USD';
+  document.getElementById('pricePaddleId').value   = isEdit ? (price.paddle_price_id || '') : '';
+  document.getElementById('priceProductId').value  = isEdit ? (price.paddle_product_id || '') : '';
+  document.getElementById('priceActive').checked   = isEdit ? !!price.is_active : true;
+  document.getElementById('priceDeleteBtn').style.display = isEdit ? 'block' : 'none';
+  document.getElementById('priceModal').classList.add('show');
+};
+
+window.closePriceModal = function() {
+  document.getElementById('priceModal').classList.remove('show');
+};
+
+window.savePrice = async function() {
+  const amount = parseFloat(document.getElementById('priceAmount').value);
+  if (isNaN(amount) || amount < 0) { showToast('❌ Invalid amount', 'error'); return; }
+
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
+  const id = document.getElementById('priceId').value || undefined;
+  const body = {
+    action: 'push',
+    id,
+    plan: document.getElementById('priceplan').value,
+    billing_cycle: document.getElementById('priceCycle').value,
+    amount,
+    currency: (document.getElementById('priceCurrency').value || 'USD').toUpperCase(),
+    paddle_price_id: document.getElementById('pricePaddleId').value.trim() || null,
+    paddle_product_id: document.getElementById('priceProductId').value.trim() || null,
+    is_active: document.getElementById('priceActive').checked,
+  };
+
+  const saveBtn = document.querySelector('#priceModal .modal-save');
+  saveBtn.disabled = true; saveBtn.textContent = '⏳ Syncing with Paddle...';
+
+  const { data, error } = await supabase.functions.invoke('paddle-sync', { body });
+
+  saveBtn.disabled = false; saveBtn.textContent = '💾 Save';
+
+  if (error || data?.error) {
+    showToast('❌ Error: ' + (data?.error || error.message), 'error');
+  } else {
+    showToast('✅ Price saved and synced to Paddle');
+    closePriceModal();
+    loadPrices().then(loadOverview);
+  }
+};
+
+window.togglePriceActive = async function(id, makeActive) {
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
+  const { error } = await supabase.from('paddle_prices')
+    .update({ is_active: makeActive, updated_by: currentAdminEmail })
+    .eq('id', id);
+
+  if (error) { showToast('❌ Error: ' + error.message, 'error'); return; }
+  showToast(makeActive ? '▶️ Price activated' : '⏸ Price deactivated');
+  loadPrices().then(loadOverview);
+};
+
+window.deletePriceFromModal = async function() {
+  const id = document.getElementById('priceId').value;
+  const paddle_price_id = document.getElementById('pricePaddleId').value.trim() || null;
+  if (!id) return;
+  if (!confirm('Delete this price?\n\nIf it exists in Paddle, it will be archived there too (Paddle never truly deletes a price, to avoid breaking existing subscriptions).')) return;
+
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
+  const { data, error } = await supabase.functions.invoke('paddle-sync', {
+    body: { action: 'archive', id, paddle_price_id }
+  });
+
+  if (error || data?.error) { showToast('❌ Error: ' + (data?.error || error.message), 'error'); return; }
+
+  showToast('🗑️ Price deleted (archived in Paddle)');
+  closePriceModal();
+  loadPrices().then(loadOverview);
+};
+
+// ── SYNC FROM PADDLE ────────────────────────────────────────
+window.syncFromPaddle = async function(btn) {
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Syncing...'; }
+
+  const { data, error } = await supabase.functions.invoke('paddle-sync', { body: { action: 'pull' } });
+
+  if (btn) { btn.disabled = false; btn.textContent = '🔄 Sync from Paddle'; }
+
+  if (error || data?.error) {
+    showToast('❌ Error: ' + (data?.error || error.message), 'error');
+  } else {
+    showToast(`✅ ${data.synced} price(s) synced from Paddle`);
+    loadPrices().then(loadOverview);
+  }
+};
 
 // ── SESSIONS ─────────────────────────────────────────────────
 async function loadSessions() {
@@ -642,18 +1345,31 @@ async function loadSessions() {
     <td class="main">${s.profiles?.email || s.user_id?.substring(0,8)+'...'}</td>
     <td style="font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis">${s.device_info || '—'}</td>
     <td>${timeAgo(s.last_active)}</td>
-    <td><span class="plan-pill pill-essentiel">🟢 Active</span></td>
-    <td><button class="action-btn btn-kick" onclick="killSession('${s.id}','${s.user_id}')">⚡ Déconnecter</button></td>
-  </tr>`).join('') || '<tr><td colspan="5" class="empty"><div class="icon">🔐</div>Aucune session active</td></tr>';
+    <td><span class="plan-pill pill-essential">🟢 Active</span></td>
+    <td><button class="action-btn btn-kick" onclick="killSession('${s.id}','${s.user_id}')">⚡ Disconnect</button></td>
+  </tr>`).join('') || '<tr><td colspan="5" class="empty"><div class="icon">🔐</div>No active sessions</td></tr>';
   document.getElementById('sessionsTable').innerHTML = html;
 }
 
 // ── EDIT PLAN MODAL ──────────────────────────────────────────
-window.openEdit = function(userId, email, plan) {
+/* Convert a UTC ISO/db timestamp into the local "YYYY-MM-DDTHH:mm:ss"
+   format a datetime-local input expects. The reverse of this happens
+   automatically in savePlan() below: new Date(localString).toISOString()
+   correctly reads a datetime-local value as local time and converts it
+   back to UTC when saving. */
+function toDatetimeLocalValue(isoOrDbTimestamp) {
+  if (!isoOrDbTimestamp) return '';
+  const d = new Date(isoOrDbTimestamp);
+  if (isNaN(d.getTime())) return '';
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+window.openEdit = function(userId, email, plan, expiresAt) {
   document.getElementById('editUserId').value    = userId;
   document.getElementById('editModalEmail').textContent = email;
   document.getElementById('editPlan').value      = plan;
-  document.getElementById('editExpires').value   = '';
+  document.getElementById('editExpires').value   = toDatetimeLocalValue(expiresAt);
   document.getElementById('editModal').classList.add('show');
 };
 
@@ -661,7 +1377,94 @@ window.closeModal = function() {
   document.getElementById('editModal').classList.remove('show');
 };
 
+// ── Password re-confirmation for sensitive actions ──────────────
+// Re-verifies the CURRENTLY LOGGED-IN admin's own password by attempting
+// a real sign-in with it — if it succeeds, the password is correct.
+// Used before saving a plan change, blocking a user, or editing the
+// admin list, so a session left open on a shared machine can't be used
+// to silently make destructive changes.
+let _pwdConfirmResolveFn = null;
+
+function promptAdminPassword() {
+  return new Promise((resolve) => {
+    _pwdConfirmResolveFn = resolve;
+    document.getElementById('pwdConfirmInput').value = '';
+    const msgEl = document.getElementById('pwdConfirmMsg');
+    msgEl.style.display = 'none';
+    document.getElementById('pwdConfirmBtn').disabled = false;
+    document.getElementById('pwdConfirmBtn').textContent = 'Confirm';
+    document.getElementById('pwdConfirmModal').classList.add('show');
+    setTimeout(() => document.getElementById('pwdConfirmInput').focus(), 50);
+  });
+}
+
+window._pwdConfirmResolve = function(result) {
+  document.getElementById('pwdConfirmModal').classList.remove('show');
+  if (_pwdConfirmResolveFn) { _pwdConfirmResolveFn(result); _pwdConfirmResolveFn = null; }
+};
+
+window._pwdConfirmSubmit = async function() {
+  const password = document.getElementById('pwdConfirmInput').value;
+  const msgEl = document.getElementById('pwdConfirmMsg');
+  const btn = document.getElementById('pwdConfirmBtn');
+  const showErr = (text) => {
+    msgEl.textContent = text;
+    msgEl.style.display = 'block';
+    msgEl.style.background = 'rgba(244,63,94,.1)';
+    msgEl.style.color = '#fca5a5';
+  };
+  if (!password) { showErr('Please enter your password.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Verifying...';
+  const { error } = await supabase.auth.signInWithPassword({ email: currentAdminEmail, password });
+  btn.disabled = false;
+  btn.textContent = 'Confirm';
+
+  if (error) { showErr('Incorrect password.'); return; }
+  window._pwdConfirmResolve(true);
+};
+
+// ── Entry re-authentication ──
+// Shown every time this page loads, even with an already-valid admin
+// session — closing the tab or reloading always brings it back, since
+// there's no "remember this confirmation" state kept anywhere.
+window._entryAuthSubmit = async function() {
+  const password = document.getElementById('entryAuthPassword').value;
+  const msgEl = document.getElementById('entryAuthMsg');
+  const btn = document.getElementById('entryAuthBtn');
+  const showErr = (text) => {
+    msgEl.textContent = text;
+    msgEl.style.display = 'block';
+    msgEl.style.background = 'rgba(244,63,94,.1)';
+    msgEl.style.color = '#fca5a5';
+  };
+  if (!password) { showErr('Please enter your password.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Verifying...';
+  const { error } = await supabase.auth.signInWithPassword({ email: currentAdminEmail, password });
+  btn.disabled = false;
+  btn.textContent = 'Confirm';
+
+  if (error) { showErr('Incorrect password.'); return; }
+  document.getElementById('entryAuthOverlay').classList.remove('show');
+};
+
+// Allow Enter key to submit either password modal
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && document.getElementById('pwdConfirmModal')?.classList.contains('show')) {
+    window._pwdConfirmSubmit();
+  }
+  if (e.key === 'Enter' && document.getElementById('entryAuthOverlay')?.classList.contains('show')) {
+    window._entryAuthSubmit();
+  }
+});
+
 window.savePlan = async function() {
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
   const userId  = document.getElementById('editUserId').value;
   const plan    = document.getElementById('editPlan').value;
   const expires = document.getElementById('editExpires').value;
@@ -678,55 +1481,178 @@ window.savePlan = async function() {
     .eq('id', userId);
 
   if (error) {
-    showToast('❌ Erreur : ' + error.message, 'error');
+    showToast('❌ Error: ' + error.message, 'error');
   } else {
-    showToast('✅ Plan mis à jour avec succès !');
+    showToast('✅ Plan updated successfully!');
     closeModal();
     loadUsers();
     loadOverview();
   }
 };
 
-// ── BAN USER ────────────────────────────────────────────────
+// ── BAN / UNBAN USER ────────────────────────────────────────
 window.banUser = async function(userId, email) {
-  if (!confirm(`Bloquer l'utilisateur ${email} ?\n\nCela va désactiver toutes ses sessions.`)) return;
+  if (!confirm(`Block user ${email}?\n\nThis will disable all their sessions and cut off their access.`)) return;
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
 
-  // Désactiver toutes ses sessions
   await supabase.from('user_sessions')
     .update({ is_active: false })
     .eq('user_id', userId);
 
-  // Forcer plan expiré
+  // Sentinel date (epoch) to distinguish a ban from a natural expiration
   await supabase.from('profiles')
-    .update({ plan_expires_at: new Date(Date.now() - 1000).toISOString() })
+    .update({ plan_expires_at: new Date(0).toISOString() })
     .eq('id', userId);
 
-  showToast(`🚫 ${email} bloqué`);
+  showToast(`🚫 ${email} blocked`);
   loadUsers();
   loadSessions();
+  loadOverview();
+};
+
+window.unbanUser = async function(userId, email) {
+  if (!confirm(`Reactivate access for ${email}?`)) return;
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
+  await supabase.from('profiles')
+    .update({ plan_expires_at: null })
+    .eq('id', userId);
+
+  showToast(`✅ ${email} reactivated`);
+  loadUsers();
+  loadOverview();
+};
+
+// ── EXTEND TRIAL / EXPIRATION ────────────────────────────────
+// Adds `days` to whatever is currently in the expiration input —
+// purely a convenience shortcut for filling that field. Nothing is
+// written to the database here; the change only takes effect when
+// "Save" is clicked, exactly like typing a date in by hand.
+window.extendTrial = function(days) {
+  const input = document.getElementById('editExpires');
+  const base = input.value ? new Date(input.value) : new Date();
+  base.setDate(base.getDate() + days);
+  input.value = toDatetimeLocalValue(base);
+  showToast(`+${days} day${days>1?'s':''} added — click Save to confirm`);
+};
+
+// ── DELETE USER ─────────────────────────────────────────────
+window.deleteUserFromModal = async function() {
+  const userId = document.getElementById('editUserId').value;
+  const email  = document.getElementById('editModalEmail').textContent;
+  if (!userId) return;
+  if (!confirm(`⚠️ Permanently delete ${email}?\n\nThis removes their profile and cuts off their access. This action is irreversible.\n\nNote: the Supabase auth account must be deleted separately from the Supabase dashboard (service role key required).`)) return;
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
+  await supabase.from('user_sessions').update({ is_active:false }).eq('user_id', userId);
+  const { error } = await supabase.from('profiles').delete().eq('id', userId);
+
+  if (error) {
+    showToast('❌ Error: ' + error.message, 'error');
+  } else {
+    showToast(`🗑️ Profile for ${email} deleted`);
+    closeModal();
+    loadUsers();
+    loadOverview();
+  }
+};
+
+// ── REFUND PAYMENT ──────────────────────────────────────────
+window.refundPayment = async function(paymentId, userId, email) {
+  if (!confirm(`Refund the payment for ${email}?\n\nStatus will be marked "Refunded" and their plan will revert to Trial.`)) return;
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
+  const { error: e1 } = await supabase.from('payments')
+    .update({ status: 'refunded' })
+    .eq('id', paymentId);
+
+  const { error: e2 } = await supabase.from('profiles')
+    .update({ plan: 'trial', plan_expires_at: null })
+    .eq('id', userId);
+
+  if (e1 || e2) {
+    showToast('❌ Error: ' + (e1?.message || e2?.message), 'error');
+  } else {
+    showToast(`↩️ Payment refunded — ${email} reverted to Trial`);
+    loadPayments();
+    loadUsers();
+    loadOverview();
+  }
+};
+
+// ── EXPORT CSV ──────────────────────────────────────────────
+function downloadCSV(rows, headers, filename) {
+  const escape = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
+  const csv = [headers.map(escape).join(','), ...rows.map(r => r.map(escape).join(','))].join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+window.exportUsersCSV = function() {
+  const rows = allUsers.map(u => {
+    const banned = isBanned(u);
+    const expiryRaw = u.plan_expires_at || null;
+    const remaining = banned
+      ? ''
+      : expiryRaw
+        ? (() => {
+            const remainMs = new Date(expiryRaw).getTime() - Date.now();
+            return remainMs > 0 ? smartTimeLeft(remainMs) : 'Expired';
+          })()
+        : '∞';
+    return [
+      u.email, u.plan, banned ? 'Banned' : (!hasAccess(u) ? 'Expired' : 'Active'),
+      u.plan_started_at || '', expiryRaw || '', remaining
+    ];
+  });
+  downloadCSV(rows, ['Email','Plan','Status','Start Date','Expiration date','Remaining date'], `users_${new Date().toISOString().slice(0,10)}.csv`);
+};
+
+window.exportPaymentsCSV = function() {
+  const rows = allPayments.map(p => [
+    p.profiles?.email || '', p.plan, p.billing_cycle || 'monthly', p.amount, p.created_at, p.status
+  ]);
+  downloadCSV(rows, ['Email','Plan','Cycle','Amount','Date','Status'], `payments_${new Date().toISOString().slice(0,10)}.csv`);
 };
 
 // ── KILL SESSION ─────────────────────────────────────────────
 window.killSession = async function(sessionId, userId) {
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
   await supabase.from('user_sessions')
     .update({ is_active: false })
     .eq('id', sessionId);
-  showToast('⚡ Session terminée');
+  showToast('⚡ Session terminated');
   loadSessions();
 };
 
 // ── KILL ALL SESSIONS ────────────────────────────────────────
 window.killAllSessions = async function() {
-  if (!confirm('Couper TOUTES les sessions actives ?')) return;
+  if (!confirm('Kill ALL active sessions?')) return;
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
   await supabase.from('user_sessions').update({ is_active: false }).eq('is_active', true);
-  showToast('⚡ Toutes les sessions coupées');
+  showToast('⚡ All sessions killed');
   loadSessions();
 };
 
 // ── LOGOUT ──────────────────────────────────────────────────
 window.doLogout = async function() {
+  const confirmed = await promptAdminPassword();
+  if (!confirmed) return;
+
   await supabase.auth.signOut();
-  window.location.href = 'login.html';
+  window.location.href = 'index.html';
 };
 
   // ── Init ─────────────────────────────────────────────────────
@@ -736,7 +1662,7 @@ window.doLogout = async function() {
   setTimeout(() => ls.remove(), 500);
 }
 
-// Lancer
+// Start
 initAdmin();
 </script>
 </body>

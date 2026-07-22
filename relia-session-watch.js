@@ -1,7 +1,7 @@
 // ============================================================
 // relia-session-watch.js
 // Colle ce script dans relia.html pour surveiller la session
-// Si quelqu'un se connecte ailleurs → déconnexion automatique
+// If someone logs in elsewhere → automatic logout
 //
 // USAGE dans relia.html (juste avant </body>) :
 // <script type="module" src="./relia-session-watch.js"></script>
@@ -29,21 +29,21 @@ async function checkSession() {
     return;
   }
 
-  // Vérifier si la session est encore active
+  // Check whether the session is still active
   const { data: isValid } = await supabase.rpc('validate_session', {
     p_user_id: session.user.id,
     p_token:   token
   });
 
   if (!isValid) {
-    // Session révoquée → déconnecter
+    // Session revoked → log out
     await supabase.auth.signOut();
     localStorage.removeItem(SESSION_KEY);
-    alert('⚠️ Votre session a été ouverte sur un autre appareil. Vous avez été déconnecté.');
+    alert('⚠️ Your session was opened on another device. You have been logged out.');
     window.location.href = 'login.html';
   }
 }
 
-// Vérifier toutes les 2 minutes
-checkSession(); // vérification immédiate au chargement
+// Check every 2 minutes
+checkSession(); // immediate check on load
 setInterval(checkSession, 120000);

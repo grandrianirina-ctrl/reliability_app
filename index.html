@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta charset="UTF-8">
-<meta name="description" content="Reliability Suite Pro — Logiciel SaaS d'analyse de fiabilité. Weibull, MTBF, Maintenance préventive, Gestion des stocks. Essai gratuit 6 jours.">
-<meta name="keywords" content="reliability analysis, Weibull analysis, MTBF, MTTR, preventive maintenance, spare parts, reliability software, SaaS, fiabilité">
+<meta name="description" content="Reliability Suite Pro — Reliability analysis SaaS software. Weibull, MTBF, Preventive maintenance, Spare parts management. 6-day free trial.">
+<meta name="keywords" content="reliability analysis, Weibull analysis, MTBF, MTTR, preventive maintenance, spare parts, reliability software, SaaS">
 <meta name="author" content="Reliability Suite Pro">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://reliasuitepro.com/">
 <!-- Open Graph (Facebook, LinkedIn) -->
 <meta property="og:title" content="Reliability Suite Pro — Advanced Reliability Analysis">
-<meta property="og:description" content="Professional SaaS for reliability engineers. Weibull, MTBF, Preventive Maintenance, Spare Parts. Free 6-day trial.">
+<meta property="og:description" content="Professional SaaS for reliability engineers. Weibull, MTBF, Maintenance Strategy, Spare Parts. Free 6-day trial.">
 <meta property="og:url" content="https://reliasuitepro.com/">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://reliasuitepro.com/og-image.png">
@@ -31,9 +32,9 @@
   "operatingSystem": "Web",
   "offers": [
     {"@type": "Offer", "name": "Trial", "price": "0", "priceCurrency": "USD"},
-    {"@type": "Offer", "name": "Essentiel", "price": "30", "priceCurrency": "USD"},
-    {"@type": "Offer", "name": "Professionnel", "price": "50", "priceCurrency": "USD"},
-    {"@type": "Offer", "name": "Entreprise", "price": "450", "priceCurrency": "USD"}
+    {"@type": "Offer", "name": "Essential", "price": "30", "priceCurrency": "USD"},
+    {"@type": "Offer", "name": "Professional", "price": "50", "priceCurrency": "USD"},
+    {"@type": "Offer", "name": "Ultimate", "price": "450", "priceCurrency": "USD"}
   ]
 }
 </script>
@@ -56,9 +57,10 @@ body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); m
 /* TOPBAR */
 .topbar { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:16px 44px; background:rgba(10,14,26,.85); backdrop-filter:blur(14px); border-bottom:1px solid rgba(30,45,69,.5); }
 .brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); }
-.brand-icon { width:34px; height:34px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:17px; }
+.brand-icon { width:34px; height:34px; background:#0ea5e9; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:17px; }
 .brand-name { font-size:14px; font-weight:700; letter-spacing:.04em; }
 .brand-name em { font-style:normal; color:var(--accent); }
+.brand-sub { font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--muted2); letter-spacing:.08em; text-transform:uppercase; margin-top:2px; }
 .topbar-nav { display:flex; align-items:center; gap:6px; }
 .nav-link { padding:7px 14px; background:transparent; border:none; color:var(--muted2); font-size:13px; font-family:'Syne',sans-serif; font-weight:600; cursor:pointer; border-radius:6px; transition:color .2s; }
 .nav-link:hover { color:var(--text); }
@@ -124,10 +126,7 @@ body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); m
 .pov-period { font-size:10px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:12px; }
 .pov-btn { width:100%; padding:9px; border:none; border-radius:8px; font-size:12px; font-weight:700; font-family:'Syne',sans-serif; cursor:pointer; transition:opacity .2s; letter-spacing:.03em; }
 .pov-btn:hover { opacity:.85; }
-.pov-btn.blue   { background:linear-gradient(135deg,var(--accent),#0284c7); color:white; }
-.pov-btn.green  { background:linear-gradient(135deg,var(--accent2),#059669); color:white; }
-.pov-btn.purple { background:linear-gradient(135deg,var(--purple),#7c3aed); color:white; }
-.pov-btn.rose   { background:linear-gradient(135deg,#f43f5e,#e11d48); color:white; }
+.pov-btn.accent { background:linear-gradient(135deg,var(--accent),#0284c7); color:white; }
 .pov-btn.ghost  { background:transparent; border:1px solid var(--border); color:var(--text); }
 
 /* CTA BOTTOM */
@@ -151,6 +150,85 @@ footer a:hover { color:var(--accent); }
   .topbar-nav .nav-link { display:none; }
   .stats-row { gap:28px; }
 }
+
+/* LOGIN MODAL */
+.modal-overlay {
+  display:none; position:fixed; inset:0; z-index:1000;
+  background:rgba(4,7,14,.72); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center; padding:20px;
+}
+.modal-overlay.show { display:flex; }
+.modal-box {
+  position:relative; width:100%; max-width:380px;
+  background:var(--card); border:1px solid var(--border); border-radius:16px;
+  padding:32px 28px 28px; box-shadow:0 20px 60px rgba(0,0,0,.5);
+  animation:modalPop .25s ease;
+}
+@keyframes modalPop { from{opacity:0; transform:scale(.96) translateY(6px);} to{opacity:1; transform:scale(1) translateY(0);} }
+.modal-close {
+  position:absolute; top:14px; right:14px; background:none; border:none;
+  color:var(--muted); font-size:15px; cursor:pointer; padding:4px; line-height:1;
+}
+.modal-close:hover { color:var(--text); }
+.modal-tabs {
+  display:flex; background:var(--bg); border-radius:8px; padding:4px;
+  margin-bottom:22px; border:1px solid var(--border);
+}
+.modal-tab {
+  flex:1; padding:9px; text-align:center; font-size:13px; font-weight:600;
+  font-family:'Syne',sans-serif; border:none; background:transparent;
+  color:var(--muted); cursor:pointer; border-radius:6px; transition:all .2s;
+}
+.modal-tab.active { background:var(--accent); color:white; }
+.modal-field { margin-bottom:14px; }
+.modal-field label {
+  display:block; font-size:10px; font-weight:700; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.08em; font-family:'JetBrains Mono',monospace;
+  margin-bottom:6px;
+}
+.modal-field input {
+  width:100%; padding:11px 14px; background:var(--bg); border:1px solid var(--border);
+  border-radius:8px; color:var(--text); font-size:13px; font-family:'JetBrains Mono',monospace;
+  outline:none; transition:border-color .2s;
+}
+.modal-field input:focus { border-color:var(--accent); }
+.modal-input-wrap { position:relative; }
+.modal-input-wrap input { padding-right:42px; }
+.modal-eye {
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer; color:var(--muted);
+  display:flex; align-items:center; justify-content:center;
+  padding:4px; line-height:1; transition:color .2s;
+}
+.modal-eye:hover { color:var(--accent); }
+.modal-msg {
+  font-size:12px; font-family:'JetBrains Mono',monospace; margin-bottom:4px; min-height:0;
+  display:none; padding:9px 12px; border-radius:7px;
+}
+.modal-msg.show { display:block; margin-bottom:14px; }
+.modal-msg.error { background:rgba(239,68,68,.1); color:#f87171; border:1px solid rgba(239,68,68,.25); }
+.modal-msg.success { background:rgba(16,185,129,.1); color:#6ee7b7; border:1px solid rgba(16,185,129,.25); }
+.modal-submit {
+  width:100%; padding:12px; background:linear-gradient(135deg,var(--accent),#0284c7);
+  border:none; border-radius:8px; color:white; font-size:14px; font-weight:700;
+  font-family:'Syne',sans-serif; cursor:pointer; transition:opacity .2s; margin-top:4px;
+}
+.modal-submit:hover { opacity:.9; }
+.modal-submit:disabled { opacity:.5; cursor:not-allowed; }
+.modal-submit .spinner {
+  display:none; width:16px; height:16px; margin:auto;
+  border:2px solid rgba(255,255,255,.35); border-top-color:white;
+  border-radius:50%; animation:modalSpin .7s linear infinite;
+}
+.modal-submit.loading .btn-text { display:none; }
+.modal-submit.loading .spinner { display:block; }
+@keyframes modalSpin { to { transform:rotate(360deg); } }
+.modal-forgot { text-align:center; margin-top:16px; }
+.modal-forgot a { font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; text-decoration:none; }
+.modal-forgot a:hover { color:var(--accent); }
+.modal-remember { display:flex; align-items:center; gap:8px; margin:-4px 0 14px; cursor:pointer; user-select:none; }
+.modal-remember input { width:15px; height:15px; accent-color:var(--accent); cursor:pointer; }
+.modal-remember span { font-size:12px; color:var(--muted); }
 </style>
 </head>
 <body>
@@ -161,15 +239,12 @@ footer a:hover { color:var(--accent); }
 <!-- TOPBAR -->
 <div class="topbar">
   <a class="brand" href="#">
-    <div class="brand-icon">⚙️</div>
-    <div class="brand-name">Reliability <em>Suite Pro</em></div>
+    <div class="brand-icon"><svg viewBox="0 0 16 16" width="60%" height="60%"><rect x="1" y="11" width="2" height="3" fill="white"/><rect x="4" y="8" width="2" height="6" fill="white"/><rect x="7" y="3" width="2" height="11" fill="white"/><rect x="10" y="6" width="2" height="8" fill="white"/><rect x="13" y="10" width="2" height="4" fill="white"/><path d="M1 12C3 12 5 3 8 3C11 3 12 9 15 11" fill="none" stroke="white" stroke-width="1" stroke-linecap="round"/></svg></div>
+    <div><div class="brand-name">Reliability <em>Suite Pro</em></div><div class="brand-sub">Reliability Analysis Platform</div></div>
   </a>
   <div class="topbar-nav">
-    <button class="lang-btn active" id="lFR" onclick="setLang('fr')">FR</button>
-    <button class="lang-btn" id="lEN" onclick="setLang('en')">EN</button>
-    <button class="nav-link" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})" id="navFeat">Fonctionnalités</button>
-    <button class="nav-link" onclick="location.href='payment.html'" id="navPricing">Tarifs</button>
-    <button class="nav-btn-buy" onclick="location.href='payment.html'" id="navBuy">Acheter</button>
+    <button class="nav-link" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})" id="navFeat">Features</button>
+    <button class="nav-btn-buy" onclick="openLoginModal()" id="navBuy">Login</button>
     <button class="nav-btn-dash" onclick="location.href='dashboard.html'" id="navDash">Dashboard →</button>
   </div>
 </div>
@@ -178,35 +253,35 @@ footer a:hover { color:var(--accent); }
 <div class="hero">
   <div class="hero-inner">
     <div class="hero-label" id="heroLabel">⚙️ Reliability Engineering Software</div>
-    <h1 id="heroTitle">Analyse de fiabilité<br><em>professionnelle</em></h1>
-    <p class="hero-sub" id="heroSub">Weibull · MTBF · Maintenance préventive · Gestion des stocks<br>De l'essai gratuit au déploiement entreprise</p>
+    <h1 id="heroTitle">Professional<br><em>reliability analysis</em></h1>
+    <p class="hero-sub" id="heroSub">Weibull · MTBF · Maintenance Strategy · Spare Parts<br>From free trial to complete portfolio command</p>
 
     <div class="hero-btns">
-      <button class="btn-try" onclick="startTrial()" id="btnTry">🚀 Essayer gratuitement</button>
-      <button class="btn-buy" onclick="location.href='payment.html'" id="btnBuy">💳 Acheter un plan</button>
+      <button class="btn-try" onclick="startTrial()" id="btnTry">🚀 Try for free</button>
+      <button class="btn-buy" onclick="location.href='payment.html'" id="btnBuy">💳 Buy a plan</button>
     </div>
 
     <div class="trial-note">
-      <span id="trialBadge">3h GRATUIT</span>
-      <span id="trialNote">Aucune carte requise · 1 essai par appareil</span>
+      <span id="trialBadge">3h FREE</span>
+      <span id="trialNote">No card required · 1 trial per device</span>
     </div>
 
     <div class="stats-row">
       <div class="stat-item">
         <div class="stat-num">4</div>
-        <div class="stat-lbl" id="statL1">Plans disponibles</div>
+        <div class="stat-lbl" id="statL1">Available plans</div>
       </div>
       <div class="stat-item">
         <div class="stat-num">11</div>
-        <div class="stat-lbl" id="statL2">Modules d'analyse</div>
+        <div class="stat-lbl" id="statL2">Analysis modules</div>
       </div>
       <div class="stat-item">
         <div class="stat-num">3h</div>
-        <div class="stat-lbl" id="statL3">Essai gratuit</div>
+        <div class="stat-lbl" id="statL3">Free trial</div>
       </div>
       <div class="stat-item">
         <div class="stat-num">100%</div>
-        <div class="stat-lbl" id="statL4">Sécurisé</div>
+        <div class="stat-lbl" id="statL4">Secured</div>
       </div>
     </div>
   </div>
@@ -215,75 +290,75 @@ footer a:hover { color:var(--accent); }
 <!-- FEATURES -->
 <div class="section" id="features">
   <div class="section-head">
-    <h2 id="featTitle">Fonctionnalités par plan</h2>
-    <p id="featSub">Chaque plan débloque de nouvelles capacités d'analyse</p>
+    <h2 id="featTitle">Features by plan</h2>
+    <p id="featSub">Each plan unlocks new analysis capabilities</p>
   </div>
   <div class="feat-grid">
     <div class="feat-card">
       <div class="feat-card-icon">📊</div>
       <div class="feat-card-title" id="fc1t">Life Data Analysis</div>
-      <div class="feat-card-desc" id="fc1d">Weibull, Lognormal, Exponentielle. Modélisation statistique complète des défaillances.</div>
-      <span class="feat-plan-tag tag-all" id="fc1p">Tous les plans</span>
+      <div class="feat-card-desc" id="fc1d">Know exactly how and when your equipment fails, backed by real statistics.</div>
+      <span class="feat-plan-tag tag-all" id="fc1p">Essential+</span>
     </div>
     <div class="feat-card">
       <div class="feat-card-icon">⏱️</div>
       <div class="feat-card-title" id="fc2t">Reliability Metrics</div>
-      <div class="feat-card-desc" id="fc2d">MTBF, R(t), F(t), h(t). Indicateurs clés de fiabilité calculés automatiquement.</div>
-      <span class="feat-plan-tag tag-all" id="fc2p">Tous les plans</span>
+      <div class="feat-card-desc" id="fc2d">The numbers that justify your maintenance budget, calculated automatically.</div>
+      <span class="feat-plan-tag tag-all" id="fc2p">Essential+</span>
     </div>
     <div class="feat-card">
       <div class="feat-card-icon">📈</div>
       <div class="feat-card-title" id="fc3t">Probability Plots</div>
-      <div class="feat-card-desc" id="fc3d">Graphiques de probabilité pour validation des distributions et ajustement des paramètres.</div>
-      <span class="feat-plan-tag tag-all" id="fc3p">Tous les plans</span>
+      <div class="feat-card-desc" id="fc3d">Visually prove your model actually fits the failure data.</div>
+      <span class="feat-plan-tag tag-all" id="fc3p">Essential+</span>
     </div>
     <div class="feat-card">
       <div class="feat-card-icon">🎯</div>
       <div class="feat-card-title" id="fc4t">Confidence Bounds</div>
-      <div class="feat-card-desc" id="fc4d">Intervalles de confiance sur les estimations de fiabilité et paramètres Weibull.</div>
-      <span class="feat-plan-tag tag-all" id="fc4p">Tous les plans</span>
-    </div>
-    <div class="feat-card">
-      <div class="feat-card-icon">📉</div>
-      <div class="feat-card-title" id="fc5t">Degradation Analysis</div>
-      <div class="feat-card-desc" id="fc5d">Modélisation de la dégradation progressive des équipements pour prédire les défaillances.</div>
-      <span class="feat-plan-tag tag-pro" id="fc5p">Professionnel+</span>
+      <div class="feat-card-desc" id="fc4d">Know how much to trust your numbers before you act on them.</div>
+      <span class="feat-plan-tag tag-all" id="fc4p">Essential+</span>
     </div>
     <div class="feat-card">
       <div class="feat-card-icon">🔧</div>
-      <div class="feat-card-title" id="fc6t">Preventive Maintenance</div>
-      <div class="feat-card-desc" id="fc6d">Optimisation des intervalles de maintenance préventive pour minimiser coûts et arrêts.</div>
-      <span class="feat-plan-tag tag-ent" id="fc6p">Entreprise+</span>
+      <div class="feat-card-title" id="fc6t">Maintenance Strategy</div>
+      <div class="feat-card-desc" id="fc6d">Turn failure data into the maintenance interval that pays off.</div>
+      <span class="feat-plan-tag tag-all" id="fc6p">Essential+</span>
     </div>
     <div class="feat-card">
       <div class="feat-card-icon">📦</div>
       <div class="feat-card-title" id="fc7t">Spare Parts Forecasting</div>
-      <div class="feat-card-desc" id="fc7d">Prévision des besoins en pièces de rechange basée sur les données de fiabilité.</div>
-      <span class="feat-plan-tag tag-ent" id="fc7p">Entreprise+</span>
-    </div>
-    <div class="feat-card">
-      <div class="feat-card-icon">🚗</div>
-      <div class="feat-card-title" id="fc8t">Multi-Asset / Fleet</div>
-      <div class="feat-card-desc" id="fc8d">Analyse simultanée de flottes et d'actifs multiples avec comparaisons inter-équipements.</div>
-      <span class="feat-plan-tag tag-ult" id="fc8p">Ultimate</span>
+      <div class="feat-card-desc" id="fc7d">Right-size inventory against predicted failure rates.</div>
+      <span class="feat-plan-tag tag-pro" id="fc7p">Professional+</span>
     </div>
     <div class="feat-card">
       <div class="feat-card-icon">📋</div>
-      <div class="feat-card-title" id="fc9t">Advanced Reporting</div>
-      <div class="feat-card-desc" id="fc9d">Templates de rapports professionnels, export PDF & Excel, rapports automatisés.</div>
-      <span class="feat-plan-tag tag-ess" id="fc9p">Essentiel+</span>
-    </div>
-    <div class="feat-card">
-      <div class="feat-card-icon">🌐</div>
-      <div class="feat-card-title" id="fc10t">Portfolio / Multi-Site</div>
-      <div class="feat-card-desc" id="fc10d">Dashboard consolidé multi-sites. Vue portefeuille pour toute l'organisation.</div>
-      <span class="feat-plan-tag tag-ult" id="fc10p">Ultimate</span>
+      <div class="feat-card-title" id="fc9t">Report Generation</div>
+      <div class="feat-card-desc" id="fc9d">Turn analysis into reports your manager actually reads.</div>
+      <span class="feat-plan-tag tag-pro" id="fc9p">Professional+</span>
     </div>
     <div class="feat-card">
       <div class="feat-card-icon">📊</div>
       <div class="feat-card-title" id="fc11t">Reliability Growth</div>
-      <div class="feat-card-desc" id="fc11d">Analyse de la croissance de fiabilité (Crow-AMSAA) pour suivre l'amélioration des systèmes.</div>
-      <span class="feat-plan-tag tag-ult" id="fc11p">Ultimate</span>
+      <div class="feat-card-desc" id="fc11d">Follow improvement from test phase through continuous monitoring.</div>
+      <span class="feat-plan-tag tag-pro" id="fc11p">Professional+</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon">📉</div>
+      <div class="feat-card-title" id="fc5t">Degradation Analysis</div>
+      <div class="feat-card-desc" id="fc5d">See wear-out coming before it becomes an unplanned failure.</div>
+      <span class="feat-plan-tag tag-ult" id="fc5p">Ultimate</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon">🚗</div>
+      <div class="feat-card-title" id="fc8t">Multi-Asset / Fleet</div>
+      <div class="feat-card-desc" id="fc8d">Compare reliability across your entire equipment fleet.</div>
+      <span class="feat-plan-tag tag-ult" id="fc8p">Ultimate</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon">🌐</div>
+      <div class="feat-card-title" id="fc10t">Portfolio / Multi-Site</div>
+      <div class="feat-card-desc" id="fc10d">Every site you manage, one view.</div>
+      <span class="feat-plan-tag tag-ult" id="fc10p">Ultimate</span>
     </div>
   </div>
 </div>
@@ -291,44 +366,37 @@ footer a:hover { color:var(--accent); }
 <!-- PLANS OVERVIEW -->
 <div class="section">
   <div class="section-head">
-    <h2 id="plansTitle">Choisissez votre plan</h2>
-    <p id="plansSub">De l'ingénieur indépendant à la grande entreprise</p>
+    <h2 id="plansTitle">Choose your plan</h2>
+    <p id="plansSub">From your first analysis to complete portfolio command</p>
   </div>
   <div class="plans-overview">
     <div class="pov-card">
       <div class="pov-icon">🔬</div>
       <div class="pov-name" id="pn0">Trial</div>
       <div class="pov-price">0$</div>
-      <div class="pov-period" id="pp0">3 heures · 1 appareil</div>
-      <button class="pov-btn ghost" onclick="startTrial()" id="pb0">Essayer</button>
+      <div class="pov-period" id="pp0">3 hours · 1 device</div>
+      <button class="pov-btn ghost" onclick="startTrial()" id="pb0">Try now</button>
     </div>
     <div class="pov-card">
       <div class="pov-icon">📊</div>
-      <div class="pov-name" id="pn1">Essentiel</div>
-      <div class="pov-price">30$</div>
-      <div class="pov-period" id="pp1">/mois</div>
-      <button class="pov-btn blue" onclick="location.href='payment.html'" id="pb1">Choisir</button>
+      <div class="pov-name" id="pn1">Essential</div>
+      <div class="pov-price" id="prEssential">30$</div>
+      <div class="pov-period" id="pp1">/month</div>
+      <button class="pov-btn accent" onclick="location.href='payment.html'" id="pb1">Choose</button>
     </div>
     <div class="pov-card">
       <div class="pov-icon">🚀</div>
-      <div class="pov-name" id="pn2">Professionnel</div>
-      <div class="pov-price">50$</div>
-      <div class="pov-period" id="pp2">/mois</div>
-      <button class="pov-btn green" onclick="location.href='payment.html'" id="pb2">Choisir</button>
-    </div>
-    <div class="pov-card">
-      <div class="pov-icon">🏢</div>
-      <div class="pov-name" id="pn3">Entreprise</div>
-      <div class="pov-price">450$</div>
-      <div class="pov-period" id="pp3">/mois · 10 users</div>
-      <button class="pov-btn purple" onclick="location.href='payment.html'" id="pb3">Choisir</button>
+      <div class="pov-name" id="pn2">Professional</div>
+      <div class="pov-price" id="prProfessional">50$</div>
+      <div class="pov-period" id="pp2">/month</div>
+      <button class="pov-btn accent" onclick="location.href='payment.html'" id="pb2">Choose</button>
     </div>
     <div class="pov-card">
       <div class="pov-icon">👑</div>
-      <div class="pov-name" id="pn4">Ultimate</div>
-      <div class="pov-price" style="font-size:16px;padding:4px 0" id="ultPrice">Sur devis</div>
-      <div class="pov-period" id="pp4">Multi-sites illimité</div>
-      <button class="pov-btn rose" onclick="location.href='payment.html'" id="pb4">Contacter</button>
+      <div class="pov-name" id="pn3">Ultimate</div>
+      <div class="pov-price" id="prUltimate">450$</div>
+      <div class="pov-period" id="pp3">/month · 10 users</div>
+      <button class="pov-btn accent" onclick="location.href='payment.html'" id="pb3">Choose</button>
     </div>
   </div>
 </div>
@@ -337,85 +405,168 @@ footer a:hover { color:var(--accent); }
 <div class="cta-section">
   <div class="cta-bg"></div>
   <div class="cta-inner">
-    <h2 id="ctaTitle">Prêt à commencer ?</h2>
-    <p id="ctaSub">Essayez gratuitement pendant 3h sans carte bancaire.<br>Passez à un plan payant quand vous êtes prêt.</p>
+    <h2 id="ctaTitle">Ready to start?</h2>
+    <p id="ctaSub">Try free for 3 hours, no credit card required.<br>Upgrade when you're ready.</p>
     <div class="cta-btns">
-      <button class="cta-btn primary" onclick="startTrial()" id="ctaTry">🚀 Essai gratuit 3h</button>
-      <button class="cta-btn success" onclick="location.href='payment.html'" id="ctaBuy">💳 Voir les plans</button>
+      <button class="cta-btn primary" onclick="startTrial()" id="ctaTry">🚀 Free 3h trial</button>
     </div>
+  </div>
+</div>
+
+<!-- LOGIN / REGISTER MODAL -->
+<div class="modal-overlay" id="loginModalOverlay" onclick="if(event.target===this) closeLoginModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeLoginModal()">✕</button>
+    <div class="modal-tabs" id="modalTabs">
+      <button class="modal-tab active" id="modalTabLogin" onclick="setModalMode('login')">Login</button>
+      <button class="modal-tab" id="modalTabRegister" onclick="setModalMode('register')">Sign up</button>
+    </div>
+    <div class="modal-field">
+      <label>Email</label>
+      <input type="email" id="modalEmail" placeholder="you@example.com">
+    </div>
+    <div class="modal-field" id="modalPasswordField">
+      <label>Password</label>
+      <div class="modal-input-wrap">
+        <input type="password" id="modalPassword" placeholder="••••••••">
+        <button type="button" class="modal-eye" id="modalEyeBtn" onclick="toggleModalEye()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+    </div>
+    <label class="modal-remember" id="modalRememberRow">
+      <input type="checkbox" id="modalRemember" checked>
+      <span>Remember me</span>
+    </label>
+    <div class="modal-msg" id="modalMsg"></div>
+    <button class="modal-submit" id="modalSubmitBtn" onclick="handleModalAuth()">
+      <span class="btn-text" id="modalSubmitText">Log in</span>
+      <span class="spinner"></span>
+    </button>
+    <div class="modal-forgot">
+      <a href="#" onclick="setModalMode('reset');return false;" id="modalForgotLink">Forgot password?</a>
+      <a href="#" onclick="setModalMode('login');return false;" id="modalBackLink" style="display:none">← Back to login</a>
+    </div>
+  </div>
+</div>
+
+<!-- Trial info modal — shown once, right after signup, before the dashboard redirect -->
+<div class="modal-overlay" id="trialInfoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--card,#131c2e);border:1px solid var(--border,#1e2d45);border-radius:16px;padding:36px 40px;max-width:420px;width:90%;text-align:center">
+    <div style="font-size:44px;margin-bottom:14px">🔬</div>
+    <h2 style="margin:0 0 12px;font-size:19px;font-weight:700">You're on a free trial</h2>
+    <p id="trialInfoText" style="margin:0 0 22px;font-size:13.5px;color:var(--muted,#94a3b8);line-height:1.7">
+      Your trial gives you full access to every tool for a limited time, starting now.
+      Once it ends, you'll need to choose a plan to keep using the app — everything you've
+      done stays saved on your account.
+    </p>
+    <button onclick="dismissTrialInfo()" style="width:100%;padding:13px;background:linear-gradient(135deg,#0f62fe,#4589ff);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">
+      Got it, take me to the dashboard
+    </button>
   </div>
 </div>
 
 <footer>
   © 2026 Reliability Suite Pro —
-  <a href="payment.html" id="fPricing">Tarifs</a> ·
-  <a href="login.html" id="fLogin">Connexion</a> ·
+  <a href="payment.html" id="fPricing">Pricing</a> ·
+  <a href="#" onclick="openLoginModal();return false;" id="fLogin">Login</a> ·
   <a href="mailto:contact@reliabilitysuite.pro">Contact</a>
 </footer>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+// ── "Remember me" ──────────────────────────────────────────────
+// A custom Supabase storage adapter (routing session writes to
+// localStorage vs sessionStorage per-call) turned out unreliable in
+// practice — Supabase's internal session handling (auto-refresh,
+// initial restore) doesn't consistently go through a fully custom
+// storage object the way this needed. This version instead lets
+// Supabase persist the session the normal way it already knows
+// works (localStorage), and layers "don't remember me" on top using
+// two separate, plain, well-understood browser storage checks:
+//   - REMEMBER_MARKER (localStorage): the user's last choice, '1' or
+//     '0'. Survives browser restarts, same as the session itself.
+//   - SESSION_ALIVE_MARKER (sessionStorage): only present while the
+//     CURRENT browser session is still open — sessionStorage is wiped
+//     when the browser fully closes, but survives page reloads/
+//     navigation within the same session.
+// If the marker says "don't remember" but the alive-flag is gone
+// (meaning the browser was closed and reopened since), the leftover
+// session in localStorage gets signed out of before anything else
+// reads it — closing the browser is exactly what "don't remember"
+// is supposed to mean.
+const REMEMBER_MARKER = 'rsp_remember_pref';
+const SESSION_ALIVE_MARKER = 'rsp_session_alive';
+
+// ── Password visibility icons (SVG, not emoji) ──────────────────
+const EYE_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
 const supabase = createClient('https://kquwgqcxauymzkgfcxpm.supabase.co','sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx');
+
+// ── Live pricing for the homepage plan cards ──────────────────────
+// Reads the same paddle_prices table admin.html manages (via the
+// shared getActivePrices() helper in plan.js), so this page never
+// drifts from what Paddle actually charges. The hardcoded 30$/50$/
+// 450$ in the HTML above are just the last-known-good fallback shown
+// before this resolves (or if the fetch fails) — this page never
+// needs a Paddle Price ID itself, only the display amount, since
+// "Choose" just links to payment.html for the actual checkout.
+(async function loadHomepagePrices() {
+  try {
+    const { getActivePrices } = await import('./plan.js');
+    const prices = await getActivePrices();
+    if (!prices) return;
+    const set = (elId, key) => {
+      const p = prices[key];
+      const el = document.getElementById(elId);
+      if (p && el) el.textContent = `${Math.round(p.amount)}$`;
+    };
+    set('prEssential', 'essential_monthly');
+    set('prProfessional', 'professional_monthly');
+    set('prUltimate', 'ultimate_monthly');
+  } catch (e) {
+    console.error('Could not load live prices, keeping fallback display:', e.message);
+  }
+})();
+
+// Runs once, immediately, before anything else on the page checks
+// getSession() — must finish before the "already logged in" nav check
+// further down, or that check could read a session this is about to
+// sign out of.
+const _enforceRememberChoice = (async function enforceRememberChoice() {
+  const wantedRemember = localStorage.getItem(REMEMBER_MARKER);
+  const sessionAlive = sessionStorage.getItem(SESSION_ALIVE_MARKER);
+  if (wantedRemember === '0' && !sessionAlive) {
+    await supabase.auth.signOut();
+  }
+})();
 
 // ── i18n ──────────────────────────────────────────────────────
 const T = {
-  fr: {
-    heroLabel:'⚙️ Logiciel d\'ingénierie de fiabilité',
-    heroTitle:'Analyse de fiabilité<br><em>professionnelle</em>',
-    heroSub:'Weibull · MTBF · Maintenance préventive · Gestion des stocks<br>De l\'essai gratuit au déploiement entreprise',
-    btnTry:'🚀 Essayer gratuitement', btnBuy:'💳 Acheter un plan',
-    trialBadge:'3h GRATUIT', trialNote:'Aucune carte requise · 1 essai par appareil',
-    statL1:'Plans disponibles', statL2:'Modules d\'analyse', statL3:'Essai gratuit', statL4:'Sécurisé',
-    navFeat:'Fonctionnalités', navPricing:'Tarifs', navBuy:'Acheter', navDash:'Dashboard →',
-    featTitle:'Fonctionnalités par plan', featSub:'Chaque plan débloque de nouvelles capacités d\'analyse',
-    fc1t:'Life Data Analysis', fc1d:'Weibull, Lognormal, Exponentielle.', fc1p:'Tous les plans',
-    fc2t:'Reliability Metrics',  fc2d:'MTBF, R(t), F(t), h(t).', fc2p:'Tous les plans',
-    fc3t:'Probability Plots', fc3d:'Graphiques de probabilité pour validation des distributions.', fc3p:'Tous les plans',
-    fc4t:'Confidence Bounds', fc4d:'Intervalles de confiance sur les estimations.', fc4p:'Tous les plans',
-    fc5t:'Degradation Analysis', fc5d:'Modélisation de la dégradation des équipements.', fc5p:'Professionnel+',
-    fc6t:'Preventive Maintenance', fc6d:'Optimisation des intervalles de maintenance.', fc6p:'Entreprise+',
-    fc7t:'Spare Parts Forecasting', fc7d:'Prévision des besoins en pièces de rechange.', fc7p:'Entreprise+',
-    fc8t:'Multi-Asset / Fleet', fc8d:'Analyse simultanée de flottes d\'équipements.', fc8p:'Ultimate',
-    fc9t:'Advanced Reporting', fc9d:'Templates professionnels, PDF & Excel.', fc9p:'Essentiel+',
-    fc10t:'Portfolio / Multi-Site', fc10d:'Dashboard consolidé multi-sites.', fc10p:'Ultimate',
-    fc11t:'Reliability Growth', fc11d:'Analyse Crow-AMSAA de croissance de fiabilité.', fc11p:'Ultimate',
-    plansTitle:'Choisissez votre plan', plansSub:'De l\'ingénieur indépendant à la grande entreprise',
-    pn0:'Trial', pp0:'3 heures · 1 appareil', pb0:'Essayer',
-    pn1:'Essentiel', pp1:'/mois', pb1:'Choisir',
-    pn2:'Professionnel', pp2:'/mois', pb2:'Choisir',
-    pn3:'Entreprise', pp3:'/mois · 10 users', pb3:'Choisir',
-    pn4:'Ultimate', pp4:'Multi-sites illimité', pb4:'Contacter', ultPrice:'Sur devis',
-    ctaTitle:'Prêt à commencer ?',
-    ctaSub:'Essayez gratuitement pendant 3h sans carte bancaire.<br>Passez à un plan payant quand vous êtes prêt.',
-    ctaTry:'🚀 Essai gratuit 3h', ctaBuy:'💳 Voir les plans',
-    fPricing:'Tarifs', fLogin:'Connexion',
-  },
   en: {
     heroLabel:'⚙️ Reliability Engineering Software',
     heroTitle:'Professional<br><em>reliability analysis</em>',
-    heroSub:'Weibull · MTBF · Preventive Maintenance · Spare Parts<br>From free trial to enterprise deployment',
+    heroSub:'Weibull · MTBF · Maintenance Strategy · Spare Parts<br>From free trial to complete portfolio command',
     btnTry:'🚀 Try for free', btnBuy:'💳 Buy a plan',
     trialBadge:'3h FREE', trialNote:'No card required · 1 trial per device',
     statL1:'Available plans', statL2:'Analysis modules', statL3:'Free trial', statL4:'Secured',
-    navFeat:'Features', navPricing:'Pricing', navBuy:'Buy', navDash:'Dashboard →',
+    navFeat:'Features', navPricing:'Pricing', navBuy:'Login', navDash:'Dashboard →',
     featTitle:'Features by plan', featSub:'Each plan unlocks new analysis capabilities',
-    fc1t:'Life Data Analysis', fc1d:'Weibull, Lognormal, Exponential.', fc1p:'All plans',
-    fc2t:'Reliability Metrics', fc2d:'MTBF, R(t), F(t), h(t).', fc2p:'All plans',
-    fc3t:'Probability Plots', fc3d:'Probability charts for distribution validation.', fc3p:'All plans',
-    fc4t:'Confidence Bounds', fc4d:'Confidence intervals on reliability estimates.', fc4p:'All plans',
-    fc5t:'Degradation Analysis', fc5d:'Equipment degradation modeling.', fc5p:'Professional+',
-    fc6t:'Preventive Maintenance', fc6d:'Maintenance interval optimization.', fc6p:'Enterprise+',
-    fc7t:'Spare Parts Forecasting', fc7d:'Spare parts demand forecasting.', fc7p:'Enterprise+',
-    fc8t:'Multi-Asset / Fleet', fc8d:'Simultaneous fleet analysis.', fc8p:'Ultimate',
-    fc9t:'Advanced Reporting', fc9d:'Professional templates, PDF & Excel.', fc9p:'Essential+',
-    fc10t:'Portfolio / Multi-Site', fc10d:'Consolidated multi-site dashboard.', fc10p:'Ultimate',
-    fc11t:'Reliability Growth', fc11d:'Crow-AMSAA reliability growth analysis.', fc11p:'Ultimate',
-    plansTitle:'Choose your plan', plansSub:'From independent engineer to large enterprise',
+    fc1t:'Life Data Analysis', fc1d:'Know exactly how and when your equipment fails, backed by real statistics.', fc1p:'Essential+',
+    fc2t:'Reliability Metrics', fc2d:'The numbers that justify your maintenance budget, calculated automatically.', fc2p:'Essential+',
+    fc3t:'Probability Plots', fc3d:'Visually prove your model actually fits the failure data.', fc3p:'Essential+',
+    fc4t:'Confidence Bounds', fc4d:'Know how much to trust your numbers before you act on them.', fc4p:'Essential+',
+    fc5t:'Degradation Analysis', fc5d:'See wear-out coming before it becomes an unplanned failure.', fc5p:'Ultimate',
+    fc6t:'Maintenance Strategy', fc6d:'Turn failure data into the maintenance interval that pays off.', fc6p:'Essential+',
+    fc7t:'Spare Parts Forecasting', fc7d:'Right-size inventory against predicted failure rates.', fc7p:'Professional+',
+    fc8t:'Multi-Asset / Fleet', fc8d:'Compare reliability across your entire equipment fleet.', fc8p:'Ultimate',
+    fc9t:'Report Generation', fc9d:'Turn analysis into reports your manager actually reads.', fc9p:'Professional+',
+    fc10t:'Portfolio / Multi-Site', fc10d:'Every site you manage, one view.', fc10p:'Ultimate',
+    fc11t:'Reliability Growth', fc11d:'Follow improvement from test phase through continuous monitoring.', fc11p:'Professional+',
+    plansTitle:'Choose your plan', plansSub:'From your first analysis to complete portfolio command',
     pn0:'Trial', pp0:'3 hours · 1 device', pb0:'Try now',
     pn1:'Essential', pp1:'/month', pb1:'Choose',
     pn2:'Professional', pp2:'/month', pb2:'Choose',
-    pn3:'Enterprise', pp3:'/month · 10 users', pb3:'Choose',
-    pn4:'Ultimate', pp4:'Unlimited multi-site', pb4:'Contact us', ultPrice:'Custom pricing',
+    pn3:'Ultimate', pp3:'/month · 10 users', pb3:'Choose',
     ctaTitle:'Ready to start?',
     ctaSub:'Try free for 3 hours, no credit card required.<br>Upgrade when you\'re ready.',
     ctaTry:'🚀 Free 3h trial', ctaBuy:'💳 View plans',
@@ -423,11 +574,8 @@ const T = {
   }
 };
 
-let lang = 'fr';
+const lang = 'en';
 window.setLang = function(l) {
-  lang = l;
-  document.getElementById('lFR').classList.toggle('active', l==='fr');
-  document.getElementById('lEN').classList.toggle('active', l==='en');
   const t = T[l];
   const htmlIds = ['heroTitle','ctaSub'];
   Object.keys(t).forEach(id => {
@@ -437,33 +585,267 @@ window.setLang = function(l) {
     else el.textContent = t[id];
   });
 };
+setLang('en');
 
 // ── Trial / Auth ──────────────────────────────────────────────
 window.startTrial = async function() {
+  await _enforceRememberChoice;
   const { data: { session } } = await supabase.auth.getSession();
   if (session) {
-    // Déjà connecté → vérifier le plan
-    const { data: profile } = await supabase.from('profiles').select('plan,trial_started_at').eq('id', session.user.id).single();
+    // Already logged in → check the plan
+    const { data: profile } = await supabase.from('profiles').select('plan,plan_expires_at').eq('id', session.user.id).single();
     if (profile?.plan && profile.plan !== 'trial') {
-      window.location.href = 'relia.html'; return;
+      window.location.href = 'dashboard.html'; return;
     }
     if (profile?.plan === 'trial') {
-      const elapsed = (Date.now() - new Date(profile.trial_started_at)) / 3600000;
-      if (elapsed < 3) { window.location.href = 'relia.html'; return; }
+      const stillValid = profile.plan_expires_at && new Date(profile.plan_expires_at) > new Date();
+      if (stillValid) { window.location.href = 'dashboard.html'; return; }
       else { window.location.href = 'payment.html'; return; }
     }
   }
-  // Pas connecté → login avec redirect
+  // Not logged in → open the modal (signup mode, free trial)
   sessionStorage.setItem('rsp_after_login', 'trial');
-  window.location.href = 'login.html';
+  openLoginModal();
+  setModalMode('register');
 };
 
 // ── Check session → show Dashboard btn ───────────────────────
-supabase.auth.getSession().then(({ data: { session } }) => {
+_enforceRememberChoice.then(() => supabase.auth.getSession()).then(({ data: { session } }) => {
   if (session) {
     document.getElementById('navDash').style.display = 'block';
     document.getElementById('navBuy').style.display = 'none';
   }
+});
+
+// ══════════════════════════════════════════
+// LOGIN / REGISTER MODAL
+// ══════════════════════════════════════════
+let modalMode = 'login';
+
+window.openLoginModal = function() {
+  document.getElementById('loginModalOverlay').classList.add('show');
+  document.getElementById('modalEmail').value = '';
+  document.getElementById('modalPassword').value = '';
+  document.getElementById('modalPassword').type = 'password';
+  document.getElementById('modalEyeBtn').innerHTML = EYE_SVG;
+  setModalMode('login');
+};
+
+window.toggleModalEye = function() {
+  const inp = document.getElementById('modalPassword');
+  const btn = document.getElementById('modalEyeBtn');
+  if (inp.type === 'password') { inp.type = 'text';     btn.innerHTML = EYE_OFF_SVG; }
+  else                         { inp.type = 'password'; btn.innerHTML = EYE_SVG; }
+};
+
+window.closeLoginModal = function() {
+  document.getElementById('loginModalOverlay').classList.remove('show');
+};
+
+window.dismissTrialInfo = function() {
+  document.getElementById('trialInfoOverlay').style.display = 'none';
+  postAuthRedirect();
+};
+
+window.setModalMode = function(mode) {
+  modalMode = mode;
+  document.getElementById('modalTabLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('modalTabRegister').classList.toggle('active', mode === 'register');
+
+  const isReset = mode === 'reset';
+  document.getElementById('modalTabs').style.display = isReset ? 'none' : 'flex';
+  document.getElementById('modalPasswordField').style.display = isReset ? 'none' : 'block';
+  document.getElementById('modalForgotLink').style.display = (mode === 'login') ? 'inline' : 'none';
+  document.getElementById('modalBackLink').style.display = isReset ? 'inline' : 'none';
+  document.getElementById('modalRememberRow').style.display = (mode === 'login') ? 'flex' : 'none';
+
+  document.getElementById('modalSubmitText').textContent =
+    mode === 'login' ? 'Log in' : mode === 'register' ? 'Sign up' : 'Send link';
+  clearModalMsg();
+};
+
+function clearModalMsg() {
+  const el = document.getElementById('modalMsg');
+  el.className = 'modal-msg';
+}
+function showModalMsg(text, type) {
+  const el = document.getElementById('modalMsg');
+  el.textContent = text;
+  el.className = `modal-msg ${type} show`;
+}
+function setModalLoading(on) {
+  const btn = document.getElementById('modalSubmitBtn');
+  btn.classList.toggle('loading', on);
+  btn.disabled = on;
+}
+
+async function modalFingerprint() {
+  const raw = [
+    navigator.userAgent, navigator.language,
+    screen.width+'x'+screen.height, screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    navigator.hardwareConcurrency||'', navigator.platform||''
+  ].join('|');
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+  return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function modalErrText(msg) {
+  if (msg.includes('Invalid login')) return 'Incorrect email or password.';
+  if (msg.includes('already registered')) return 'This email is already registered.';
+  if (msg.includes('weak password')) return 'Password too weak (min. 6 characters).';
+  if (msg.includes('Email not confirmed')) return 'Please confirm your email before logging in.';
+  return msg;
+}
+
+async function registerModalSession(userId) {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  const token = Array.from(array).map(b => b.toString(16).padStart(2,'0')).join('');
+  localStorage.setItem('rsp_session_token', token);
+  await supabase.rpc('register_session', {
+    p_user_id:     userId,
+    p_token:       token,
+    p_device_info: `${navigator.userAgent} | ${screen.width}x${screen.height}`,
+    p_ip:          null
+  });
+}
+
+window.handleModalAuth = async function() {
+  const email    = document.getElementById('modalEmail').value.trim();
+  const password = document.getElementById('modalPassword').value;
+
+  if (modalMode === 'reset') {
+    if (!email) return showModalMsg('Please enter your email.', 'error');
+    setModalLoading(true); clearModalMsg();
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password.html'
+      });
+      if (error) throw new Error(error.message);
+      showModalMsg('✅ Email sent! Check your inbox.', 'success');
+    } catch(e) {
+      showModalMsg(e.message, 'error');
+    } finally {
+      setModalLoading(false);
+    }
+    return;
+  }
+
+  if (!email || !password) return showModalMsg('Please fill in all fields.', 'error');
+  if (password.length < 6) return showModalMsg('Password: minimum 6 characters.', 'error');
+
+  setModalLoading(true);
+  clearModalMsg();
+  try {
+    if (modalMode === 'login') {
+      const remember = document.getElementById('modalRemember').checked;
+      localStorage.setItem(REMEMBER_MARKER, remember ? '1' : '0');
+      if (remember) { sessionStorage.removeItem(SESSION_ALIVE_MARKER); }
+      else           { sessionStorage.setItem(SESSION_ALIVE_MARKER, '1'); }
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw new Error(modalErrText(error.message));
+      const userId = data.user.id;
+      const { data: diag, error: diagError } = await supabase.rpc('diagnose_user_access', { p_user_id: userId });
+
+      if (diagError) {
+        // The check itself failed (network, permissions, RPC missing) —
+        // this is NOT the same as "no access", so it gets its own
+        // message rather than being lumped in with "access expired".
+        await supabase.auth.signOut();
+        throw new Error('Unable to verify your access (network issue). Please try again.');
+      }
+
+      if (diag.status === 'no_profile') {
+        await supabase.auth.signOut();
+        throw new Error("No account is associated with this login. Contact support.");
+      }
+
+      if (diag.status === 'invalid_plan') {
+        await supabase.auth.signOut();
+        throw new Error('Your subscription has a configuration issue. Contact support.');
+      }
+
+      if (diag.status === 'expired') {
+        await supabase.auth.signOut();
+        showModalMsg('Your access has expired. Redirecting to renewal...', 'error');
+        setTimeout(() => { window.location.href = 'payment.html?reason=expired'; }, 1800);
+        return;
+      }
+
+      await registerModalSession(userId);
+
+      if (diag.is_admin && diag.own_plan_expired) {
+        // This admin's own underlying plan has expired — they still get
+        // full access (is_admin bypasses everything, unconditionally),
+        // but sending them to the normal dashboard would show unlimited
+        // access with no hint anything needs attention. Send them
+        // straight to admin.html instead, where their own account's
+        // real state is visible and fixable.
+        showModalMsg('Logged in! Redirecting to admin...', 'success');
+        setTimeout(() => { window.location.href = 'admin.html'; }, 900);
+        return;
+      }
+
+      showModalMsg('Logged in! Redirecting...', 'success');
+      setTimeout(postAuthRedirect, 900);
+    } else {
+      const fp = await modalFingerprint();
+      if (localStorage.getItem('rsp_trial_fp') === fp) throw new Error('A free trial has already been used on this device.');
+      const { data: ex } = await supabase.from('device_trials').select('fingerprint').eq('fingerprint', fp).maybeSingle();
+      if (ex) { localStorage.setItem('rsp_trial_fp', fp); throw new Error('A free trial has already been used on this device.'); }
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) throw new Error(modalErrText(error.message));
+      const userId = data.user?.id;
+      if (!userId) throw new Error('Error creating the account.');
+      const now = new Date().toISOString();
+      // Set plan_expires_at directly at signup, rather than leaving it
+      // null and relying on a fallback computed elsewhere — this is the
+      // single source of truth every other part of the app (login gate,
+      // admin panel, the analysis apps' session timer) should end up
+      // reading the exact same value from. Trial length itself now comes
+      // from app_settings (admin-configurable, in HOURS), not a hardcoded
+      // constant duplicated across every signup flow.
+      const { data: cfg } = await supabase.from('app_settings').select('value').eq('key','trial_duration_days').single();
+      const trialHours = parseInt(cfg?.value, 10) || 3;
+      const trialExpiresAt = new Date(Date.now() + trialHours * 60 * 60 * 1000).toISOString();
+      await Promise.all([
+        supabase.from('profiles').upsert({ id:userId, email, plan_started_at:now, plan_expires_at:trialExpiresAt, plan:'trial' }, { onConflict: 'id' }),
+        supabase.from('device_trials').insert({ fingerprint:fp, email })
+      ]);
+      localStorage.setItem('rsp_trial_fp', fp);
+      await registerModalSession(userId);
+      closeLoginModal();
+      document.getElementById('trialInfoText').textContent =
+        `Your trial gives you full access to every tool for ${trialHours} hours, starting now. Once it ends, you'll need to choose a plan to keep using the app — everything you've done stays saved on your account.`;
+      document.getElementById('trialInfoOverlay').style.display = 'flex';
+    }
+  } catch(e) {
+    showModalMsg(e.message, 'error');
+  } finally {
+    setModalLoading(false);
+  }
+};
+
+function postAuthRedirect() {
+  const intent = sessionStorage.getItem('rsp_after_login');
+  sessionStorage.removeItem('rsp_after_login');
+  window.location.href = 'dashboard.html';
+}
+
+// ── Auto-opens the modal if arriving from another page (?login=1) ──
+if (new URLSearchParams(window.location.search).get('login') === '1') {
+  window.addEventListener('DOMContentLoaded', () => {
+    openLoginModal();
+    window.history.replaceState({}, '', window.location.pathname);
+  });
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginModalOverlay').classList.contains('show')) {
+    window.handleModalAuth();
+  }
+  if (e.key === 'Escape') window.closeLoginModal();
 });
 </script>
 </body>

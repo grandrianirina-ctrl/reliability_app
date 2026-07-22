@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Choisir un plan — Reliability Suite Pro</title>
+<title>Choose a plan — Reliability Suite Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 <style>
@@ -20,7 +21,8 @@ body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); m
 /* TOPBAR */
 .topbar { position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between; padding:14px 36px; background:rgba(10,14,26,.92); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
 .brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); }
-.brand-icon { width:32px; height:32px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.brand-icon { width:32px; height:32px; background:#0ea5e9; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.brand-sub { font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--muted2); letter-spacing:.08em; text-transform:uppercase; margin-top:2px; }
 .brand-name { font-size:14px; font-weight:700; letter-spacing:.04em; }
 .brand-name em { font-style:normal; color:var(--accent); }
 .topbar-right { display:flex; align-items:center; gap:8px; }
@@ -48,8 +50,7 @@ body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); m
 .cards-wrap { max-width:1140px; margin:0 auto; padding:0 20px 60px; position:relative; z-index:2; }
 .sec-label { font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--muted); text-transform:uppercase; letter-spacing:.14em; margin-bottom:14px; display:flex; align-items:center; gap:10px; }
 .sec-label::after { content:''; flex:1; height:1px; background:var(--border); }
-.personal-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:14px; }
-.ent-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:40px; }
+.personal-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:40px; }
 
 /* CARD */
 .pc { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:26px 22px; position:relative; overflow:hidden; transition:transform .2s,border-color .2s; }
@@ -62,6 +63,12 @@ body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); m
 .pc.c-green::before  { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--accent2),#059669); }
 .pc.c-purple::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--purple),#7c3aed); }
 .pc.c-rose::before   { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--rose),#e11d48); }
+
+/* Recommended / current plan states */
+.pc.pc-highlight { border-color:var(--accent2); box-shadow:0 0 0 2px rgba(16,185,129,.25), 0 12px 40px rgba(16,185,129,.15); transform:translateY(-4px); }
+.pc-ribbon { position:absolute; top:14px; right:-30px; transform:rotate(40deg); background:var(--accent2); color:#04120b; font-size:9px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; padding:3px 34px; font-family:'JetBrains Mono',monospace; }
+.pc.pc-current { opacity:.7; }
+.pc-current-badge { display:inline-block; padding:3px 10px; border-radius:6px; background:rgba(148,163,184,.12); border:1px solid var(--border); color:var(--muted2); font-size:10px; font-weight:700; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
 
 .pc-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
 .pc-icon { font-size:24px; }
@@ -136,10 +143,88 @@ body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); m
 .lspin { width:34px; height:34px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
 
 @media(max-width:760px) {
-  .personal-grid,.ent-grid { grid-template-columns:1fr; }
+  .personal-grid { grid-template-columns:1fr; }
   .ult-inner { grid-template-columns:1fr; }
   .topbar { padding:12px 16px; }
 }
+/* LOGIN MODAL */
+.modal-overlay {
+  display:none; position:fixed; inset:0; z-index:1000;
+  background:rgba(4,7,14,.72); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center; padding:20px;
+}
+.modal-overlay.show { display:flex; }
+.modal-box {
+  position:relative; width:100%; max-width:380px;
+  background:var(--card); border:1px solid var(--border); border-radius:16px;
+  padding:32px 28px 28px; box-shadow:0 20px 60px rgba(0,0,0,.5);
+  animation:modalPop .25s ease;
+}
+@keyframes modalPop { from{opacity:0; transform:scale(.96) translateY(6px);} to{opacity:1; transform:scale(1) translateY(0);} }
+.modal-close {
+  position:absolute; top:14px; right:14px; background:none; border:none;
+  color:var(--muted); font-size:15px; cursor:pointer; padding:4px; line-height:1;
+}
+.modal-close:hover { color:var(--text); }
+.modal-tabs {
+  display:flex; background:var(--bg); border-radius:8px; padding:4px;
+  margin-bottom:22px; border:1px solid var(--border);
+}
+.modal-tab {
+  flex:1; padding:9px; text-align:center; font-size:13px; font-weight:600;
+  font-family:'Syne',sans-serif; border:none; background:transparent;
+  color:var(--muted); cursor:pointer; border-radius:6px; transition:all .2s;
+}
+.modal-tab.active { background:var(--accent); color:white; }
+.modal-field { margin-bottom:14px; }
+.modal-field label {
+  display:block; font-size:10px; font-weight:700; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.08em; font-family:'JetBrains Mono',monospace;
+  margin-bottom:6px;
+}
+.modal-field input {
+  width:100%; padding:11px 14px; background:var(--bg); border:1px solid var(--border);
+  border-radius:8px; color:var(--text); font-size:13px; font-family:'JetBrains Mono',monospace;
+  outline:none; transition:border-color .2s;
+}
+.modal-field input:focus { border-color:var(--accent); }
+.modal-input-wrap { position:relative; }
+.modal-input-wrap input { padding-right:42px; }
+.modal-eye {
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer; color:var(--muted);
+  display:flex; align-items:center; justify-content:center;
+  padding:4px; line-height:1; transition:color .2s;
+}
+.modal-eye:hover { color:var(--accent); }
+.modal-msg {
+  font-size:12px; font-family:'JetBrains Mono',monospace; margin-bottom:4px; min-height:0;
+  display:none; padding:9px 12px; border-radius:7px;
+}
+.modal-msg.show { display:block; margin-bottom:14px; }
+.modal-msg.error { background:rgba(239,68,68,.1); color:#f87171; border:1px solid rgba(239,68,68,.25); }
+.modal-msg.success { background:rgba(16,185,129,.1); color:#6ee7b7; border:1px solid rgba(16,185,129,.25); }
+.modal-submit {
+  width:100%; padding:12px; background:linear-gradient(135deg,var(--accent),#0284c7);
+  border:none; border-radius:8px; color:white; font-size:14px; font-weight:700;
+  font-family:'Syne',sans-serif; cursor:pointer; transition:opacity .2s; margin-top:4px;
+}
+.modal-submit:hover { opacity:.9; }
+.modal-submit:disabled { opacity:.5; cursor:not-allowed; }
+.modal-submit .spinner {
+  display:none; width:16px; height:16px; margin:auto;
+  border:2px solid rgba(255,255,255,.35); border-top-color:white;
+  border-radius:50%; animation:modalSpin .7s linear infinite;
+}
+.modal-submit.loading .btn-text { display:none; }
+.modal-submit.loading .spinner { display:block; }
+@keyframes modalSpin { to { transform:rotate(360deg); } }
+.modal-forgot { text-align:center; margin-top:16px; display:flex; flex-direction:column; gap:6px; }
+.modal-forgot a { font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; text-decoration:none; }
+.modal-forgot a:hover { color:var(--accent); }
+.modal-remember { display:flex; align-items:center; gap:8px; margin:-4px 0 14px; cursor:pointer; user-select:none; }
+.modal-remember input { width:15px; height:15px; accent-color:var(--accent); cursor:pointer; }
+.modal-remember span { font-size:12px; color:var(--muted); }
 </style>
 </head>
 <body>
@@ -150,130 +235,98 @@ body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); m
 <div class="overlay" id="sOverlay">
   <div class="scard">
     <div class="sicon">🎉</div>
-    <h2 id="sTitle">Plan activé !</h2>
-    <p id="sBody">Votre abonnement est actif. Accédez maintenant à l'application.</p>
-    <button class="go-app" onclick="location.href='relia.html'" id="sAppBtn">🚀 Ouvrir l'application</button>
-    <button class="go-dash" onclick="location.href='dashboard.html'" id="sDashBtn">Voir le Dashboard</button>
+    <h2 id="sTitle">Plan activated!</h2>
+    <p id="sBody">Your subscription is active. Access the application now.</p>
+    <button class="go-app" onclick="location.href='dashboard.html'" id="sAppBtn">🚀 Open application</button>
+    <button class="go-dash" onclick="location.href='dashboard.html'" id="sDashBtn">View Dashboard</button>
   </div>
 </div>
 
 <!-- Topbar -->
 <div class="topbar">
-  <a class="brand" href="index.html"><div class="brand-icon">⚙️</div><div class="brand-name">Reliability <em>Suite Pro</em></div></a>
+  <a class="brand" href="index.html"><div class="brand-icon"><svg viewBox="0 0 16 16" width="60%" height="60%"><rect x="1" y="11" width="2" height="3" fill="white"/><rect x="4" y="8" width="2" height="6" fill="white"/><rect x="7" y="3" width="2" height="11" fill="white"/><rect x="10" y="6" width="2" height="8" fill="white"/><rect x="13" y="10" width="2" height="4" fill="white"/><path d="M1 12C3 12 5 3 8 3C11 3 12 9 15 11" fill="none" stroke="white" stroke-width="1" stroke-linecap="round"/></svg></div><div><div class="brand-name">Reliability <em>Suite Pro</em></div><div class="brand-sub">Reliability Analysis Platform</div></div></a>
   <div class="topbar-right">
-    <button class="lang-btn active" id="lFR" onclick="setLang('fr')">FR</button>
-    <button class="lang-btn" id="lEN" onclick="setLang('en')">EN</button>
-    <button class="back-btn" onclick="history.back()" id="backBtn">← Retour</button>
+    <button class="back-btn" onclick="history.back()" id="backBtn">← Back</button>
   </div>
 </div>
 
 <!-- Hero -->
 <div class="hero">
-  <h1 id="hTitle">Choisissez votre<br><em>plan d'accès</em></h1>
-  <p id="hSub">Essai 3h gratuit · Plans personnels · Entreprise · Ultimate sur devis</p>
+  <h1 id="hTitle">Choose your<br><em>access plan</em></h1>
+  <p id="hSub">Free 3h trial · Essential · Professional · Ultimate</p>
 </div>
 
 <!-- Toggle -->
 <div class="toggle-wrap">
   <div class="toggle-inner">
-    <span id="tMo">Mensuel</span>
+    <span id="tMo">Monthly</span>
     <div class="toggle-track" id="bToggle" onclick="toggleBilling()"><div class="toggle-thumb"></div></div>
-    <span id="tAn">Annuel</span>
-    <span class="save-pill" id="tSave">économisez ~17%</span>
+    <span id="tAn">Annual</span>
+    <span class="save-pill" id="tSave">save ~17%</span>
   </div>
 </div>
 
 <div class="cards-wrap">
 
-  <!-- PERSONAL -->
-  <div class="sec-label" id="secP" style="margin-bottom:14px">👤 Plans Personnels</div>
+  <div class="sec-label" id="secP" style="margin-bottom:14px">⚙️ Our plans</div>
   <div class="personal-grid">
 
     <!-- ESSENTIEL -->
-    <div class="pc c-blue">
-      <div class="pc-header"><div class="pc-icon">📊</div><span class="pc-tag pt-blue" id="tgE">Essentiel</span></div>
-      <div class="pc-name" id="nmE">Essentiel</div>
-      <div class="pc-users" id="usE">1 utilisateur</div>
+    <div class="pc c-blue" id="pcEssentiel">
+      <div class="pc-header"><div class="pc-icon">📊</div><span class="pc-tag pt-blue" id="tgE">Essential</span></div>
+      <div class="pc-name" id="nmE">Essential</div>
+      <div class="pc-users" id="usE">1 user</div>
       <div class="pc-price" id="prE">30<sup>$</sup></div>
-      <div class="pc-period" id="peE">/mois</div>
+      <div class="pc-period" id="peE">/month</div>
       <div class="pc-savings" id="svE">&nbsp;</div>
-      <div class="pc-desc" id="dE">Analyse de fiabilité complète. Weibull, MTBF, Probability Plots, Confidence Bounds + Reporting avancé.</div>
-      <button class="buy-btn bb-blue" id="btnE" onclick="buy('essentiel')"><span class="blbl" id="lbE">Choisir Essentiel</span><div class="spin"></div></button>
-      <div class="fl" id="flE">Inclus :</div>
-      <div class="fi on"><span class="fd yb">✓</span><span id="e1">Life Data Analysis (Weibull, Lognormal, Exp)</span></div>
-      <div class="fi on"><span class="fd yb">✓</span><span id="e2">Reliability Metrics (MTBF, R(t), F(t), h(t))</span></div>
-      <div class="fi on"><span class="fd yb">✓</span><span id="e3">Probability Plots</span></div>
-      <div class="fi on"><span class="fd yb">✓</span><span id="e4">Confidence Bounds</span></div>
-      <div class="fi on"><span class="fd yb">✓</span><span id="e5">Advanced Reporting & Templates</span></div>
-      <div class="fi on"><span class="fd yb">✓</span><span id="e6">Export PDF & Excel</span></div>
-      <div class="fi"><span class="fd no">—</span><span id="e7">Degradation Analysis</span></div>
-      <div class="fi"><span class="fd no">—</span><span id="e8">Maintenance & Spare Parts</span></div>
+      <div class="pc-desc" id="dE">Full reliability analysis, no guesswork. Fit your failure data and know exactly which maintenance interval actually reduces downtime.</div>
+      <button class="buy-btn bb-blue" id="btnE" onclick="buy('essential')"><span class="blbl" id="lbE">Choose Essential</span><div class="spin"></div></button>
+      <div class="fl" id="flE">Included:</div>
+      <div class="fi on"><span class="fd yb">✓</span><span id="e1">Life Data Analysis — know exactly how your equipment fails</span></div>
+      <div class="fi on"><span class="fd yb">✓</span><span id="e2">Reliability Metrics — the numbers that justify your maintenance budget</span></div>
+      <div class="fi on"><span class="fd yb">✓</span><span id="e3">Probability Plots — visually prove your model fits the data</span></div>
+      <div class="fi on"><span class="fd yb">✓</span><span id="e4">Confidence Bounds — know how much to trust your numbers</span></div>
+      <div class="fi on"><span class="fd yb">✓</span><span id="e5">Quick Calculation Pad — an answer in seconds, no full analysis</span></div>
+      <div class="fi on"><span class="fd yb">✓</span><span id="e6">Maintenance Strategy Optimization — the interval that actually pays off</span></div>
+      <div class="fi"><span class="fd no">—</span><span id="e7">Reliability Growth Analysis — prove your fixes are working</span></div>
+      <div class="fi"><span class="fd no">—</span><span id="e8">Report Generation — reports your manager actually reads</span></div>
     </div>
 
     <!-- PROFESSIONNEL -->
-    <div class="pc c-green">
-      <div class="pc-header"><div class="pc-icon">🚀</div><span class="pc-tag pt-green" id="tgP">Professionnel</span></div>
-      <div class="pc-name" id="nmP">Professionnel</div>
-      <div class="pc-users" id="usP">1 utilisateur</div>
+    <div class="pc c-green" id="pcProfessionnel">
+      <div class="pc-header"><div class="pc-icon">🚀</div><span class="pc-tag pt-green" id="tgP">Professional</span></div>
+      <div class="pc-name" id="nmP">Professional</div>
+      <div class="pc-users" id="usP">1 user</div>
       <div class="pc-price" id="prP">50<sup>$</sup></div>
-      <div class="pc-period" id="peP">/mois</div>
+      <div class="pc-period" id="peP">/month</div>
       <div class="pc-savings" id="svP">&nbsp;</div>
-      <div class="pc-desc" id="dP">Tout Essentiel + Degradation Analysis. La solution complète pour un ingénieur de fiabilité.</div>
-      <button class="buy-btn bb-green" id="btnP" onclick="buy('professionnel')"><span class="blbl" id="lbP">Choisir Professionnel</span><div class="spin"></div></button>
-      <div class="fl" id="flP">Tout Essentiel, plus :</div>
-      <div class="fi on"><span class="fd yg">✓</span><span id="p1">Degradation Analysis</span></div>
-      <div class="fi on"><span class="fd yg">✓</span><span id="p2">Historique illimité</span></div>
-      <div class="fi on"><span class="fd yg">✓</span><span id="p3">Support prioritaire 24h</span></div>
-      <div class="fi"><span class="fd no">—</span><span id="p4">Preventive Maintenance Optimization</span></div>
-      <div class="fi"><span class="fd no">—</span><span id="p5">Spare Parts Forecasting</span></div>
-      <div class="fi"><span class="fd no">—</span><span id="p6">Multi-utilisateurs</span></div>
+      <div class="pc-desc" id="dP">Everything in Essential, plus proof your improvements are working, from first test to production. Stop reacting to failures — see them coming.</div>
+      <button class="buy-btn bb-green" id="btnP" onclick="buy('professional')"><span class="blbl" id="lbP">Choose Professional</span><div class="spin"></div></button>
+      <div class="fl" id="flP">Everything in Essential, plus:</div>
+      <div class="fi on"><span class="fd yg">✓</span><span id="p1">Reliability Growth Analysis — prove your fixes are working, test to production</span></div>
+      <div class="fi on"><span class="fd yg">✓</span><span id="p2">Top-N Ranking Dashboard — see your worst assets first, stop guessing</span></div>
+      <div class="fi on"><span class="fd yg">✓</span><span id="p3">Spare Parts Forecasting — order what the data says, not a guess</span></div>
+      <div class="fi on"><span class="fd yg">✓</span><span id="p4">Report Generation — reports your manager actually reads</span></div>
+      <div class="fi"><span class="fd no">—</span><span id="p5">Degradation Analysis — see wear-out before it becomes a failure</span></div>
+      <div class="fi"><span class="fd no">—</span><span id="p6">Multi-Asset / Fleet Analysis — compare across your whole fleet</span></div>
     </div>
 
-  </div>
-
-  <!-- ENTREPRISE / ULTIMATE -->
-  <div class="sec-label" id="secE" style="margin-bottom:14px">🏢 Plans Organisation</div>
-  <div class="ent-grid">
-
-    <!-- ENTREPRISE -->
-    <div class="pc c-purple">
-      <div class="pc-header"><div class="pc-icon">🏢</div><span class="pc-tag pt-purple" id="tgEnt">Entreprise</span></div>
-      <div class="pc-name" id="nmEnt">Entreprise</div>
-      <div class="pc-users" id="usEnt">Jusqu'à 10 utilisateurs</div>
-      <div class="pc-price">450<sup>$</sup></div>
-      <div class="pc-period" id="peEnt">/mois</div>
+    <!-- ULTIMATE (ex-Entreprise) -->
+    <div class="pc c-purple" id="pcEntreprise">
+      <div class="pc-ribbon">Best value</div>
+      <div class="pc-header"><div class="pc-icon">👑</div><span class="pc-tag pt-purple" id="tgEnt">Ultimate</span></div>
+      <div class="pc-name" id="nmEnt">Ultimate</div>
+      <div class="pc-users" id="usEnt">Up to 10 users</div>
+      <div class="pc-price" id="prEnt">450<sup>$</sup></div>
+      <div class="pc-period" id="peEnt">/month</div>
       <div class="pc-savings">&nbsp;</div>
-      <div class="pc-desc" id="dEnt">Tout Professionnel + Maintenance & Stocks + Multi-équipes. Pour les organisations.</div>
-      <button class="buy-btn bb-purple" id="btnEnt" onclick="buy('entreprise')"><span class="blbl" id="lbEnt">Choisir Entreprise</span><div class="spin"></div></button>
-      <div class="fl" id="flEnt">Tout Professionnel, plus :</div>
-      <div class="fi on"><span class="fd yp">✓</span><span id="ent1">Preventive Maintenance Optimization</span></div>
-      <div class="fi on"><span class="fd yp">✓</span><span id="ent2">Spare Parts Forecasting</span></div>
-      <div class="fi on"><span class="fd yp">✓</span><span id="ent3">10 utilisateurs simultanés</span></div>
-      <div class="fi on"><span class="fd yp">✓</span><span id="ent4">Gestion multi-équipes</span></div>
-      <div class="fi on"><span class="fd yp">✓</span><span id="ent5">Support dédié 24/7</span></div>
-      <div class="fi"><span class="fd no">—</span><span id="ent6">Multi-Asset / Fleet Analysis</span></div>
-      <div class="fi"><span class="fd no">—</span><span id="ent7">Portfolio / Multi-Site Dashboard</span></div>
-    </div>
-
-    <!-- ULTIMATE info panel -->
-    <div class="pc c-rose">
-      <div class="pc-header"><div class="pc-icon">👑</div><span class="pc-tag pt-rose" id="tgUlt">Ultimate</span></div>
-      <div class="pc-name" id="nmUlt">Ultimate</div>
-      <div class="pc-users" id="usUlt">Utilisateurs illimités · Multi-sites</div>
-      <div style="margin:12px 0 4px">
-        <span style="font-size:22px;font-weight:800" id="ultPriceTxt">Sur devis</span>
-      </div>
-      <div class="pc-period" id="peUlt">Tarif personnalisé</div>
-      <div class="pc-savings">&nbsp;</div>
-      <div class="pc-desc" id="dUlt">La solution la plus complète : Multi-Asset, Fleet Analysis, Reliability Growth, Portfolio Multi-Site. Pour les grandes organisations.</div>
-      <button class="buy-btn bb-rose" id="btnUlt" onclick="contactUltimate()"><span class="blbl" id="lbUlt">📧 Demander un devis</span><div class="spin"></div></button>
-      <div class="fl" id="flUlt">Tout Entreprise, plus :</div>
-      <div class="fi on"><span class="fd yr">✓</span><span id="u1">Multi-Asset / Fleet Analysis</span></div>
-      <div class="fi on"><span class="fd yr">✓</span><span id="u2">Reliability Growth Analysis (Crow-AMSAA)</span></div>
-      <div class="fi on"><span class="fd yr">✓</span><span id="u3">Portfolio / Multi-Site Dashboard</span></div>
-      <div class="fi on"><span class="fd yr">✓</span><span id="u4">Utilisateurs illimités</span></div>
-      <div class="fi on"><span class="fd yr">✓</span><span id="u5">Déploiement on-premise</span></div>
-      <div class="fi on"><span class="fd yr">✓</span><span id="u6">SLA garanti + support VIP</span></div>
+      <div class="pc-desc" id="dEnt">Everything in Professional, plus the power to catch wear-out before it becomes an unplanned failure — and command every site from one dashboard. Built for programs where a single missed failure costs more than a year of Ultimate.</div>
+      <button class="buy-btn bb-purple" id="btnEnt" onclick="buy('ultimate')"><span class="blbl" id="lbEnt">Choose Ultimate</span><div class="spin"></div></button>
+      <div class="fl" id="flEnt">Everything in Professional, plus:</div>
+      <div class="fi on"><span class="fd yp">✓</span><span id="ent1">Degradation Analysis — see wear-out before it becomes a failure</span></div>
+      <div class="fi on"><span class="fd yp">✓</span><span id="ent2">Multi-Asset / Fleet Analysis — compare across your whole fleet</span></div>
+      <div class="fi on"><span class="fd yp">✓</span><span id="ent3">Spare Parts Reports — procurement-ready, no extra work</span></div>
+      <div class="fi on"><span class="fd yp">✓</span><span id="ent4">Portfolio Dashboard — every site you manage, one view</span></div>
     </div>
 
   </div>
@@ -281,27 +334,115 @@ body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); m
 
 <!-- Trust -->
 <div class="trust-row">
-  <div class="trust-item"><span>🔒</span><span id="tr1">Paiement sécurisé SSL</span></div>
+  <div class="trust-item"><span>🔒</span><span id="tr1">SSL secured payment</span></div>
   <div class="trust-item"><span>💳</span><span id="tr2">Visa · Mastercard · AMEX</span></div>
-  <div class="trust-item"><span>🔄</span><span id="tr3">Annulation à tout moment</span></div>
-  <div class="trust-item"><span>📧</span><span id="tr4">Support inclus</span></div>
+  <div class="trust-item"><span>🔄</span><span id="tr3">Cancel anytime</span></div>
+  <div class="trust-item"><span>📧</span><span id="tr4">Support included</span></div>
   <div class="trust-item"><span>🌍</span><span id="tr5">Paiement mondial via Paddle</span></div>
+</div>
+
+<!-- LOGIN / REGISTER MODAL -->
+<div class="modal-overlay" id="loginModalOverlay" onclick="if(event.target===this) closeLoginModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeLoginModal()">✕</button>
+    <div class="modal-tabs" id="modalTabs">
+      <button class="modal-tab active" id="modalTabLogin" onclick="setModalMode('login')">Login</button>
+      <button class="modal-tab" id="modalTabRegister" onclick="setModalMode('register')">Sign up</button>
+    </div>
+    <div class="modal-field">
+      <label>Email</label>
+      <input type="email" id="modalEmail" placeholder="you@example.com">
+    </div>
+    <div class="modal-field" id="modalPasswordField">
+      <label>Password</label>
+      <div class="modal-input-wrap">
+        <input type="password" id="modalPassword" placeholder="••••••••">
+        <button type="button" class="modal-eye" id="modalEyeBtn" onclick="toggleModalEye()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+    </div>
+    <label class="modal-remember" id="modalRememberRow">
+      <input type="checkbox" id="modalRemember" checked>
+      <span>Remember me</span>
+    </label>
+    <div class="modal-msg" id="modalMsg"></div>
+    <button class="modal-submit" id="modalSubmitBtn" onclick="handleModalAuth()">
+      <span class="btn-text" id="modalSubmitText">Log in</span>
+      <span class="spinner"></span>
+    </button>
+    <div class="modal-forgot">
+      <a href="#" onclick="setModalMode('reset');return false;" id="modalForgotLink">Forgot password?</a>
+      <a href="#" onclick="setModalMode('login');return false;" id="modalBackLink" style="display:none">← Back to login</a>
+    </div>
+  </div>
+</div>
+
+<!-- Trial info modal — shown once, right after signup -->
+<div class="modal-overlay" id="trialInfoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--card,#131c2e);border:1px solid var(--border,#1e2d45);border-radius:16px;padding:36px 40px;max-width:420px;width:90%;text-align:center">
+    <div style="font-size:44px;margin-bottom:14px">🔬</div>
+    <h2 style="margin:0 0 12px;font-size:19px;font-weight:700">You're on a free trial</h2>
+    <p id="trialInfoText" style="margin:0 0 22px;font-size:13.5px;color:var(--muted,#94a3b8);line-height:1.7">
+      Your trial gives you full access to every tool for a limited time, starting now.
+      Once it ends, you'll need to choose a plan to keep using the app — everything you've
+      done stays saved on your account.
+    </p>
+    <button onclick="dismissTrialInfo()" style="width:100%;padding:13px;background:linear-gradient(135deg,#0f62fe,#4589ff);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">
+      Got it, continue
+    </button>
+  </div>
 </div>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+// ── "Remember me" ──────────────────────────────────────────────
+// Same mechanism as index.html — see the comment there for the full
+// reasoning. Lets Supabase persist normally (localStorage) and layers
+// "don't remember me" on top via two plain storage checks rather than
+// a fully custom storage adapter.
+const REMEMBER_MARKER = 'rsp_remember_pref';
+const SESSION_ALIVE_MARKER = 'rsp_session_alive';
+
 const supabase = createClient('https://kquwgqcxauymzkgfcxpm.supabase.co','sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx');
 
-const PADDLE_TOKEN = 'live_4a6671ddf9b19f023a90ce0cb36';
-const PRICES = {
-  essentiel_monthly:     'pri_01ktp3xx307qepx6f6xk2sqzpp',
-  essentiel_annual:      'pri_01ktp46y44cs7ayt5h7cxt0qgb',
-  professionnel_monthly: 'pri_01ktnhwg7zwyvrhearx3nxacbr',
-  professionnel_annual:  'pri_01ktnkerfqfnp2sqnvv2k4t9yw',
-  entreprise_monthly:    'pri_01ktnkndn91851hx3hd8znxp2s',
-};
+const _enforceRememberChoice = (async function enforceRememberChoice() {
+  const wantedRemember = localStorage.getItem(REMEMBER_MARKER);
+  const sessionAlive = sessionStorage.getItem(SESSION_ALIVE_MARKER);
+  if (wantedRemember === '0' && !sessionAlive) {
+    await supabase.auth.signOut();
+  }
+})();
 
-// Attendre que Paddle.js soit chargé avant d'initialiser
+const PADDLE_TOKEN = 'live_4a6671ddf9b19f023a90ce0cb36';
+
+// Fallback only — used if the live fetch from paddle_prices fails
+// (network hiccup, RLS misconfigured, etc.) so checkout still works.
+// The real source of truth is always the paddle_prices table
+// (managed from admin.html's Prices tab) whenever it's reachable.
+const FALLBACK_PRICES = {
+  essential_monthly:    { priceId: 'pri_01ktp3xx307qepx6f6xk2sqzpp', amount: 30,  currency: 'USD' },
+  essential_annual:     { priceId: 'pri_01ktp46y44cs7ayt5h7cxt0qgb', amount: 300, currency: 'USD' },
+  professional_monthly: { priceId: 'pri_01ktnhwg7zwyvrhearx3nxacbr', amount: 50,  currency: 'USD' },
+  professional_annual:  { priceId: 'pri_01ktnkerfqfnp2sqnvv2k4t9yw', amount: 500, currency: 'USD' },
+  ultimate_monthly:     { priceId: 'pri_01ktnkndn91851hx3hd8znxp2s', amount: 450, currency: 'USD' },
+};
+let PRICES = FALLBACK_PRICES;
+
+async function loadLivePrices() {
+  try {
+    const { getActivePrices } = await import('./plan.js');
+    const live = await getActivePrices();
+    if (live && Object.keys(live).length) {
+      // Live values win; fallback fills in anything missing so a
+      // partially-synced table can't blank out a plan's price.
+      PRICES = { ...FALLBACK_PRICES, ...live };
+    }
+  } catch (e) {
+    console.error('Failed to load live prices, using fallback:', e.message);
+  }
+  updatePrices();
+}
+
+// Wait for Paddle.js to load before initializing
 function initPaddle() {
   if (typeof Paddle === 'undefined') { setTimeout(initPaddle, 100); return; }
   Paddle.Initialize({
@@ -311,86 +452,267 @@ function initPaddle() {
 }
 initPaddle();
 
-let lang='fr', annual=false, user=null;
+let lang='en', annual=false, user=null;
+
+// ── Idle: auto-logout after 1h (only if logged in) ──
+const IDLE_LIMIT_MS = 60 * 60 * 1000;
+const IDLE_KEY = 'rsp_last_activity';
+
+function markActivity() {
+  localStorage.setItem(IDLE_KEY, Date.now().toString());
+}
+
+async function checkIdle() {
+  const last = parseInt(localStorage.getItem(IDLE_KEY), 10);
+  if (last && (Date.now() - last) > IDLE_LIMIT_MS) {
+    await supabase.auth.signOut();
+    localStorage.removeItem('rsp_session_token');
+    localStorage.removeItem(IDLE_KEY);
+    window.location.href = 'index.html?idle=1';
+    return true;
+  }
+  markActivity();
+  return false;
+}
+
+function initIdleLogout() {
+  ['mousemove','mousedown','keydown','scroll','touchstart','click'].forEach(evt => {
+    document.addEventListener(evt, markActivity, { passive: true });
+  });
+  checkIdle();
+  setInterval(checkIdle, 60000);
+}
+let modalMode = 'login';
+let pendingPlan = null; // plan the user wanted to buy before being prompted to log in
+
+// ══════════════════════════════════════════
+// LOGIN / REGISTER / RESET MODAL
+// ══════════════════════════════════════════
+// ── Password visibility icons (SVG, not emoji) ──────────────────
+const EYE_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+window.openLoginModal = function() {
+  document.getElementById('loginModalOverlay').classList.add('show');
+  document.getElementById('modalEmail').value = '';
+  document.getElementById('modalPassword').value = '';
+  document.getElementById('modalPassword').type = 'password';
+  document.getElementById('modalEyeBtn').innerHTML = EYE_SVG;
+  setModalMode('login');
+};
+
+window.closeLoginModal = function() {
+  document.getElementById('loginModalOverlay').classList.remove('show');
+  pendingPlan = null;
+};
+
+window.dismissTrialInfo = function() {
+  document.getElementById('trialInfoOverlay').style.display = 'none';
+  afterModalAuth();
+};
+
+window.toggleModalEye = function() {
+  const inp = document.getElementById('modalPassword');
+  const btn = document.getElementById('modalEyeBtn');
+  if (inp.type === 'password') { inp.type = 'text';     btn.innerHTML = EYE_OFF_SVG; }
+  else                         { inp.type = 'password'; btn.innerHTML = EYE_SVG; }
+};
+
+window.setModalMode = function(mode) {
+  modalMode = mode;
+  document.getElementById('modalTabLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('modalTabRegister').classList.toggle('active', mode === 'register');
+
+  const isReset = mode === 'reset';
+  document.getElementById('modalTabs').style.display = isReset ? 'none' : 'flex';
+  document.getElementById('modalPasswordField').style.display = isReset ? 'none' : 'block';
+  document.getElementById('modalForgotLink').style.display = (mode === 'login') ? 'inline' : 'none';
+  document.getElementById('modalBackLink').style.display = isReset ? 'inline' : 'none';
+  document.getElementById('modalRememberRow').style.display = (mode === 'login') ? 'flex' : 'none';
+
+  document.getElementById('modalSubmitText').textContent =
+    mode === 'login' ? 'Se connecter' : mode === 'register' ? "S'inscrire" : 'Envoyer le lien';
+  clearModalMsg();
+};
+
+function clearModalMsg() {
+  const el = document.getElementById('modalMsg');
+  el.className = 'modal-msg';
+}
+function showModalMsg(text, type) {
+  const el = document.getElementById('modalMsg');
+  el.textContent = text;
+  el.className = `modal-msg ${type} show`;
+}
+function setModalLoading(on) {
+  const btn = document.getElementById('modalSubmitBtn');
+  btn.classList.toggle('loading', on);
+  btn.disabled = on;
+}
+
+async function modalFingerprint() {
+  const raw = [
+    navigator.userAgent, navigator.language,
+    screen.width+'x'+screen.height, screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    navigator.hardwareConcurrency||'', navigator.platform||''
+  ].join('|');
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+  return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function modalErrText(msg) {
+  if (msg.includes('Invalid login')) return 'Incorrect email or password.';
+  if (msg.includes('already registered')) return 'This email is already registered.';
+  if (msg.includes('weak password')) return 'Password too weak (min. 6 characters).';
+  if (msg.includes('Email not confirmed')) return 'Please confirm your email before logging in.';
+  return msg;
+}
+
+async function registerModalSession(userId) {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  const token = Array.from(array).map(b => b.toString(16).padStart(2,'0')).join('');
+  localStorage.setItem('rsp_session_token', token);
+  await supabase.rpc('register_session', {
+    p_user_id:     userId,
+    p_token:       token,
+    p_device_info: `${navigator.userAgent} | ${screen.width}x${screen.height}`,
+    p_ip:          null
+  });
+}
+
+window.handleModalAuth = async function() {
+  const email    = document.getElementById('modalEmail').value.trim();
+  const password = document.getElementById('modalPassword').value;
+
+  if (modalMode === 'reset') {
+    if (!email) return showModalMsg('Please enter your email.', 'error');
+    setModalLoading(true); clearModalMsg();
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password.html'
+      });
+      if (error) throw new Error(error.message);
+      showModalMsg('✅ Email sent! Check your inbox.', 'success');
+    } catch(e) {
+      showModalMsg(e.message, 'error');
+    } finally {
+      setModalLoading(false);
+    }
+    return;
+  }
+
+  if (!email || !password) return showModalMsg('Please fill in all fields.', 'error');
+  if (password.length < 6) return showModalMsg('Password: minimum 6 characters.', 'error');
+
+  setModalLoading(true);
+  clearModalMsg();
+  try {
+    if (modalMode === 'login') {
+      const remember = document.getElementById('modalRemember').checked;
+      localStorage.setItem(REMEMBER_MARKER, remember ? '1' : '0');
+      if (remember) { sessionStorage.removeItem(SESSION_ALIVE_MARKER); }
+      else           { sessionStorage.setItem(SESSION_ALIVE_MARKER, '1'); }
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw new Error(modalErrText(error.message));
+      await registerModalSession(data.user.id);
+      user = data.user;
+      showModalMsg('Logged in!', 'success');
+      setTimeout(afterModalAuth, 700);
+    } else {
+      const fp = await modalFingerprint();
+      if (localStorage.getItem('rsp_trial_fp') === fp) throw new Error('A free trial has already been used on this device.');
+      const { data: ex } = await supabase.from('device_trials').select('fingerprint').eq('fingerprint', fp).maybeSingle();
+      if (ex) { localStorage.setItem('rsp_trial_fp', fp); throw new Error('A free trial has already been used on this device.'); }
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) throw new Error(modalErrText(error.message));
+      const userId = data.user?.id;
+      if (!userId) throw new Error('Error creating the account.');
+      const now = new Date().toISOString();
+      const { data: cfg } = await supabase.from('app_settings').select('value').eq('key','trial_duration_days').single();
+      const trialHours = parseInt(cfg?.value, 10) || 3;
+      const trialExpiresAt = new Date(Date.now() + trialHours * 60 * 60 * 1000).toISOString();
+      await Promise.all([
+        supabase.from('profiles').upsert({ id:userId, email, plan_started_at:now, plan_expires_at:trialExpiresAt, plan:'trial' }, { onConflict: 'id' }),
+        supabase.from('device_trials').insert({ fingerprint:fp, email })
+      ]);
+      localStorage.setItem('rsp_trial_fp', fp);
+      await registerModalSession(userId);
+      user = data.user;
+      closeLoginModal();
+      document.getElementById('trialInfoText').textContent =
+        `Your trial gives you full access to every tool for ${trialHours} hours, starting now. Once it ends, you'll need to choose a plan to keep using the app — everything you've done stays saved on your account.`;
+      document.getElementById('trialInfoOverlay').style.display = 'flex';
+    }
+  } catch(e) {
+    showModalMsg(e.message, 'error');
+  } finally {
+    setModalLoading(false);
+  }
+};
+
+// After a successful login/signup from this page: if the user had
+// clicked "Choose a plan" before being prompted to log in, continue
+// straight into the Paddle checkout for that plan.
+function afterModalAuth() {
+  const plan = pendingPlan;
+  closeLoginModal();
+  if (plan) {
+    buy(plan);
+  } else {
+    location.reload();
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginModalOverlay').classList.contains('show')) {
+    window.handleModalAuth();
+  }
+  if (e.key === 'Escape') window.closeLoginModal();
+});
+
 
 // ── i18n ──────────────────────────────────────────────────────
 const T = {
-  fr: {
-    hTitle:'Choisissez votre<br><em>plan d\'accès</em>',
-    hSub:'Essai 3h gratuit · Plans personnels · Entreprise · Ultimate sur devis',
-    tMo:'Mensuel', tAn:'Annuel', tSave:'économisez ~17%', backBtn:'← Retour',
-    secP:'👤 Plans Personnels', secE:'🏢 Plans Organisation',
-    nmE:'Essentiel', usE:'1 utilisateur', peE:'/mois',
-    dE:'Analyse de fiabilité complète. Weibull, MTBF, Probability Plots, Confidence Bounds + Reporting avancé.',
-    lbE:'Choisir Essentiel', flE:'Inclus :',
-    nmP:'Professionnel', usP:'1 utilisateur', peP:'/mois',
-    dP:'Tout Essentiel + Degradation Analysis. La solution complète pour un ingénieur de fiabilité.',
-    lbP:'Choisir Professionnel', flP:'Tout Essentiel, plus :',
-    nmEnt:'Entreprise', usEnt:"Jusqu'à 10 utilisateurs", peEnt:'/mois',
-    dEnt:'Tout Professionnel + Maintenance & Stocks + Multi-équipes.',
-    lbEnt:'Choisir Entreprise', flEnt:'Tout Professionnel, plus :',
-    nmUlt:'Ultimate', usUlt:'Utilisateurs illimités · Multi-sites', peUlt:'Tarif personnalisé',
-    ultPriceTxt:'Sur devis',
-    dUlt:'La solution la plus complète. Multi-Asset, Fleet, Reliability Growth, Portfolio Multi-Site.',
-    lbUlt:'📧 Demander un devis', flUlt:'Tout Entreprise, plus :',
-    e1:'Life Data Analysis (Weibull, Lognormal, Exp)', e2:'Reliability Metrics (MTBF, R(t), F(t), h(t))',
-    e3:'Probability Plots', e4:'Confidence Bounds', e5:'Advanced Reporting & Templates',
-    e6:'Export PDF & Excel', e7:'Degradation Analysis', e8:'Maintenance & Spare Parts',
-    p1:'Degradation Analysis', p2:'Historique illimité', p3:'Support prioritaire 24h',
-    p4:'Preventive Maintenance Optimization', p5:'Spare Parts Forecasting', p6:'Multi-utilisateurs',
-    ent1:'Preventive Maintenance Optimization', ent2:'Spare Parts Forecasting',
-    ent3:'10 utilisateurs simultanés', ent4:'Gestion multi-équipes',
-    ent5:'Support dédié 24/7', ent6:'Multi-Asset / Fleet Analysis', ent7:'Portfolio / Multi-Site Dashboard',
-    u1:'Multi-Asset / Fleet Analysis', u2:'Reliability Growth Analysis (Crow-AMSAA)',
-    u3:'Portfolio / Multi-Site Dashboard', u4:'Utilisateurs illimités',
-    u5:'Déploiement on-premise', u6:'SLA garanti + support VIP',
-    tr1:'Paiement sécurisé SSL', tr2:'Visa · Mastercard · AMEX',
-    tr3:'Annulation à tout moment', tr4:'Support inclus', tr5:'Paiement mondial via Paddle',
-    svE300:'Facturé 300$/an — économisez 60$', svP500:'Facturé 500$/an — économisez 100$',
-    sTitle:'Plan activé !', sBody:'Votre abonnement est actif. Accédez maintenant à l\'application.',
-    sAppBtn:'🚀 Ouvrir l\'application', sDashBtn:'Voir le Dashboard',
-  },
   en: {
     hTitle:'Choose your<br><em>access plan</em>',
-    hSub:'Free 3h trial · Personal plans · Enterprise · Ultimate custom pricing',
+    hSub:'Free 3h trial · Essential · Professional · Ultimate',
     tMo:'Monthly', tAn:'Annual', tSave:'save ~17%', backBtn:'← Back',
-    secP:'👤 Personal Plans', secE:'🏢 Organization Plans',
+    secP:'⚙️ Our plans',
     nmE:'Essential', usE:'1 user', peE:'/month',
-    dE:'Full reliability analysis. Weibull, MTBF, Probability Plots, Confidence Bounds + Advanced Reporting.',
+    dE:'Full reliability analysis, no guesswork. Fit your failure data and know exactly which maintenance interval actually reduces downtime.',
     lbE:'Choose Essential', flE:'Included:',
     nmP:'Professional', usP:'1 user', peP:'/month',
-    dP:'Everything in Essential + Degradation Analysis. The complete solution for a reliability engineer.',
+    dP:'Everything in Essential, plus proof your improvements are working and visibility across every asset you manage. Stop reacting to failures — see them coming.',
     lbP:'Choose Professional', flP:'Everything in Essential, plus:',
-    nmEnt:'Enterprise', usEnt:'Up to 10 users', peEnt:'/month',
-    dEnt:'Everything in Professional + Maintenance & Spare Parts + Multi-team management.',
-    lbEnt:'Choose Enterprise', flEnt:'Everything in Professional, plus:',
-    nmUlt:'Ultimate', usUlt:'Unlimited users · Multi-site', peUlt:'Custom pricing',
-    ultPriceTxt:'Custom quote',
-    dUlt:'The most complete solution. Multi-Asset, Fleet, Reliability Growth, Portfolio Multi-Site.',
-    lbUlt:'📧 Request a quote', flUlt:'Everything in Enterprise, plus:',
-    e1:'Life Data Analysis (Weibull, Lognormal, Exp)', e2:'Reliability Metrics (MTBF, R(t), F(t), h(t))',
-    e3:'Probability Plots', e4:'Confidence Bounds', e5:'Advanced Reporting & Templates',
-    e6:'PDF & Excel Export', e7:'Degradation Analysis', e8:'Maintenance & Spare Parts',
-    p1:'Degradation Analysis', p2:'Unlimited history', p3:'Priority support 24h',
-    p4:'Preventive Maintenance Optimization', p5:'Spare Parts Forecasting', p6:'Multi-user',
-    ent1:'Preventive Maintenance Optimization', ent2:'Spare Parts Forecasting',
-    ent3:'10 simultaneous users', ent4:'Multi-team management',
-    ent5:'Dedicated 24/7 support', ent6:'Multi-Asset / Fleet Analysis', ent7:'Portfolio / Multi-Site Dashboard',
-    u1:'Multi-Asset / Fleet Analysis', u2:'Reliability Growth Analysis (Crow-AMSAA)',
-    u3:'Portfolio / Multi-Site Dashboard', u4:'Unlimited users',
-    u5:'On-premise deployment', u6:'Guaranteed SLA + VIP support',
+    nmEnt:'Ultimate', usEnt:'Up to 10 users', peEnt:'/month',
+    dEnt:'Everything in Professional, plus the power to catch wear-out before it becomes an unplanned failure — and command every site from one dashboard. Built for programs where a single missed failure costs more than a year of Ultimate.',
+    lbEnt:'Choose Ultimate', flEnt:'Everything in Professional, plus:',
+    e1:'Life Data Analysis — know exactly how your equipment fails', e2:'Reliability Metrics — the numbers that justify your maintenance budget',
+    e3:'Probability Plots — visually prove your model fits the data', e4:'Confidence Bounds — know how much to trust your numbers', e5:'Quick Calculation Pad — an answer in seconds, no full analysis',
+    e6:'Maintenance Strategy Optimization — the interval that actually pays off', e7:'Reliability Growth Analysis — prove your fixes are working', e8:'Report Generation — reports your manager actually reads',
+    p1:'Reliability Growth Analysis — prove your fixes are working, test to production', p2:'Top-N Ranking Dashboard — see your worst assets first, stop guessing', p3:'Spare Parts Forecasting — order what the data says, not a guess',
+    p4:'Report Generation — reports your manager actually reads', p5:'Degradation Analysis — see wear-out before it becomes a failure', p6:'Multi-Asset / Fleet Analysis — compare across your whole fleet',
+    ent1:'Degradation Analysis — see wear-out before it becomes a failure',
+    ent2:'Multi-Asset / Fleet Analysis — compare across your whole fleet',
+    ent3:'Spare Parts Reports — procurement-ready, no extra work',
+    ent4:'Portfolio Dashboard — every site you manage, one view',
     tr1:'SSL secured payment', tr2:'Visa · Mastercard · AMEX',
     tr3:'Cancel anytime', tr4:'Support included', tr5:'Worldwide payment via Paddle',
-    svE300:'Billed $300/year — save $60', svP500:'Billed $500/year — save $100',
     sTitle:'Plan activated!', sBody:'Your subscription is active. Access the application now.',
     sAppBtn:'🚀 Open application', sDashBtn:'View Dashboard',
   }
 };
 
+// Declared here (moved up from later in the file) so setLang() can
+// safely reference it — setLang runs once immediately below, before
+// the script reaches where this used to be declared, which was
+// throwing "Cannot access before initialization".
+let currentUserPlan = null, targetPlanParam = null;
+
 window.setLang = function(l) {
   lang = l;
-  document.getElementById('lFR').classList.toggle('active',l==='fr');
-  document.getElementById('lEN').classList.toggle('active',l==='en');
   const t = T[l];
   const htmlIds = ['hTitle'];
   Object.keys(t).forEach(id => {
@@ -399,7 +721,11 @@ window.setLang = function(l) {
     htmlIds.includes(id) ? el.innerHTML=t[id] : el.textContent=t[id];
   });
   updatePrices();
+  if (currentUserPlan) markCurrentPlan(currentUserPlan);
+  if (targetPlanParam) highlightTargetPlan(targetPlanParam);
 };
+setLang('en');
+loadLivePrices(); // swaps in real amounts/price IDs once paddle_prices loads; page already usable on fallback values above
 
 window.toggleBilling = function() {
   annual = !annual;
@@ -409,52 +735,72 @@ window.toggleBilling = function() {
 
 function updatePrices() {
   const t = T[lang];
-  const mo = lang==='fr' ? '/mois' : '/month';
+
+  const setPrice = (elId, amount) => {
+    const el = document.getElementById(elId);
+    if (el) el.innerHTML = `${Math.floor(amount)}<sup>$</sup>`;
+  };
+  const setSavings = (elId, monthlyAmount, annualAmount) => {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const savings = Math.round(monthlyAmount * 12 - annualAmount);
+    el.textContent = savings > 0
+      ? `Billed $${Math.round(annualAmount)}/year — save $${savings}`
+      : '\u00a0';
+  };
+
+  const essentialMonthly    = PRICES.essential_monthly.amount;
+  const professionalMonthly = PRICES.professional_monthly.amount;
+
+  setPrice('prEnt', PRICES.ultimate_monthly.amount);
+
   if (annual) {
-    document.getElementById('prE').innerHTML = '25<sup>$</sup>';
-    document.getElementById('svE').textContent = t.svE300;
-    document.getElementById('prP').innerHTML = '41<sup>$</sup>';
-    document.getElementById('svP').textContent = t.svP500;
+    setPrice('prE', PRICES.essential_annual.amount / 12);
+    setSavings('svE', essentialMonthly, PRICES.essential_annual.amount);
+    setPrice('prP', PRICES.professional_annual.amount / 12);
+    setSavings('svP', professionalMonthly, PRICES.professional_annual.amount);
   } else {
-    document.getElementById('prE').innerHTML = '30<sup>$</sup>';
+    setPrice('prE', essentialMonthly);
     document.getElementById('svE').textContent = '\u00a0';
-    document.getElementById('prP').innerHTML = '50<sup>$</sup>';
+    setPrice('prP', professionalMonthly);
     document.getElementById('svP').textContent = '\u00a0';
   }
 }
 
 window.buy = async function(plan) {
-  if (!user) { location.href='login.html'; return; }
-  const map = { essentiel:'btnE', professionnel:'btnP', entreprise:'btnEnt' };
+  await _enforceRememberChoice;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    pendingPlan = plan;
+    openLoginModal();
+    return;
+  }
+  const map = { essential:'btnE', professional:'btnP', ultimate:'btnEnt' };
   const btn = document.getElementById(map[plan]);
   btn.classList.add('loading'); btn.disabled=true;
   const priceMap = {
-    essentiel:    annual ? PRICES.essentiel_annual    : PRICES.essentiel_monthly,
-    professionnel:annual ? PRICES.professionnel_annual: PRICES.professionnel_monthly,
-    entreprise:   PRICES.entreprise_monthly,
+    essential:    annual ? PRICES.essential_annual.priceId    : PRICES.essential_monthly.priceId,
+    professional: annual ? PRICES.professional_annual.priceId : PRICES.professional_monthly.priceId,
+    ultimate:     PRICES.ultimate_monthly.priceId, // no annual pricing for Ultimate
   };
+  // Ultimate only has a monthly rate, regardless of the annual toggle state
+  const cycle = (plan === 'ultimate') ? 'monthly' : (annual ? 'annual' : 'monthly');
   try {
-    // Vérifier que l'utilisateur est connecté
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      window.location.href = 'login.html';
-      return;
-    }
-
     const checkoutParams = {
       items: [{ priceId: priceMap[plan], quantity: 1 }],
       settings: {
         theme: 'dark',
         locale: lang,
-        successUrl: `https://reliasuitepro.com/payment.html?success=1&plan=${plan}`
+        successUrl: `https://reliasuitepro.com/payment.html?success=1&plan=${plan}&cycle=${cycle}`
       },
       customData: {
         supabase_user_id: session.user.id,
-        plan: plan
+        plan: plan,
+        billing_cycle: cycle
       }
     };
 
-    // Ajouter l'email seulement si disponible
+    // Add the email only if available
     if (session.user.email) {
       checkoutParams.customer = { email: session.user.email };
     }
@@ -465,43 +811,135 @@ Paddle.Checkout.open(checkoutParams);
 
   } catch(e) {
     console.error('Paddle checkout error:', e);
-    alert('Erreur lors de l\'ouverture du checkout. Veuillez réessayer.');
+    alert('Error opening checkout. Please try again.');
   }
   finally { btn.classList.remove('loading'); btn.disabled=false; }
 };
 
-window.contactUltimate = function() {
-  window.location.href = 'mailto:contact@reliabilitysuite.pro?subject=Ultimate Plan — Demande de devis&body=Bonjour,%0A%0AJe suis intéressé par le plan Ultimate de Reliability Suite Pro.%0A%0ANom:%0AOrganisation:%0ANombre d\'utilisateurs:%0ABesoins spécifiques:%0A%0AMerci.';
-};
+// ── Compute the expiration date from the billing cycle ──
+function computeExpiration(cycle) {
+  const d = new Date();
+  if (cycle === 'annual') d.setFullYear(d.getFullYear() + 1);
+  else                    d.setMonth(d.getMonth() + 1);
+  return d.toISOString();
+}
 
 async function onSuccess(data) {
-  const plan = data?.customData?.plan || 'essentiel';
-  if (user) await supabase.from('profiles').update({ plan }).eq('id', user.id);
+  const plan  = data?.customData?.plan || 'essential';
+  const cycle = data?.customData?.billing_cycle || 'monthly';
+  if (user) {
+    const { error } = await supabase.rpc('confirm_plan_purchase', {
+      p_user_id: user.id, p_plan: plan, p_expires_at: computeExpiration(cycle)
+    });
+    if (error) console.error('confirm_plan_purchase error:', error.message);
+  }
   document.getElementById('sOverlay').classList.add('show');
 }
 
 async function checkSuccess() {
   const p = new URLSearchParams(window.location.search);
   if (p.get('success')==='1' && user) {
-    const plan = p.get('plan') || 'essentiel';
-    await supabase.from('profiles').update({ plan }).eq('id', user.id);
+    const plan  = p.get('plan') || 'essential';
+    const cycle = p.get('cycle') || 'monthly';
+    const { error } = await supabase.rpc('confirm_plan_purchase', {
+      p_user_id: user.id, p_plan: plan, p_expires_at: computeExpiration(cycle)
+    });
+    if (error) console.error('confirm_plan_purchase error:', error.message);
     document.getElementById('sOverlay').classList.add('show');
     window.history.replaceState({},'', window.location.pathname);
   }
 }
 
-const { data:{ session } } = await supabase.auth.getSession();
-if (!session) { location.href='login.html'; }
-else {
-  user = session.user;
-  const { data:profile } = await supabase.from('profiles').select('plan').eq('id',user.id).single();
-  if (['essentiel','professionnel','entreprise','ultimate'].includes(profile?.plan)) {
-    location.href='dashboard.html';
-  }
-  await checkSuccess();
-  const ls=document.getElementById('ls');
-  ls.classList.add('hide'); setTimeout(()=>ls.remove(),500);
+// ── Maps the dashboard's internal codes (v4) to payment.html's cards ──
+// Dashboard uses professional/enterprise/ultimate as its own internal v4
+// codes for the same three paid tiers payment.html calls
+// essential/professional/ultimate — translate on the way in.
+const DASH_PLAN_MAP = { professional:'essential', enterprise:'professional' };
+function resolveTargetPlan(param) {
+  if (!param) return null;
+  const native = ['essential','professional','ultimate'];
+  if (native.includes(param)) return param;
+  if (DASH_PLAN_MAP[param]) return DASH_PLAN_MAP[param];
+  return null;
 }
+
+const CARD_IDS = { essential:'pcEssentiel', professional:'pcProfessionnel', ultimate:'pcEntreprise' };
+
+function highlightTargetPlan(param) {
+  targetPlanParam = param;
+  const target = resolveTargetPlan(param);
+  if (!target) return;
+  const card = document.getElementById(CARD_IDS[target]);
+  if (!card) return;
+  card.classList.add('pc-highlight');
+  let ribbon = card.querySelector('.pc-ribbon');
+  if (!ribbon) {
+    ribbon = document.createElement('div');
+    ribbon.className = 'pc-ribbon';
+    card.appendChild(ribbon);
+  }
+  ribbon.textContent = 'Suggested';
+  setTimeout(() => card.scrollIntoView({ behavior:'smooth', block:'center' }), 150);
+}
+
+function markCurrentPlan(currentPlan) {
+  currentUserPlan = currentPlan;
+  const btnMap = { essential:'btnE', professional:'btnP', ultimate:'btnEnt' };
+  const lblMap = { essential:'lbE', professional:'lbP', ultimate:'lbEnt' };
+  if (!currentPlan || !CARD_IDS[currentPlan]) return;
+  const card = document.getElementById(CARD_IDS[currentPlan]);
+  const btn  = document.getElementById(btnMap[currentPlan]);
+  const lbl  = document.getElementById(lblMap[currentPlan]);
+  if (card) {
+    card.classList.add('pc-current');
+    let badge = card.querySelector('.pc-current-badge');
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.className = 'pc-current-badge';
+      card.insertBefore(badge, card.firstChild);
+    }
+    badge.textContent = '✓ Your current plan';
+  }
+  if (btn) { btn.disabled = true; btn.onclick = null; btn.style.cursor = 'default'; }
+  if (lbl) lbl.textContent = 'Current plan';
+}
+
+
+await _enforceRememberChoice;
+const { data:{ session } } = await supabase.auth.getSession();
+const qs = new URLSearchParams(window.location.search);
+const wantsUpgrade = qs.has('plan');
+const isSuccess = qs.get('success') === '1';
+
+if (session) {
+  user = session.user;
+  initIdleLogout();
+  // verify_user_plan() is the server-side source of truth for whether
+  // the plan is CURRENTLY ACTIVE — unlike reading profile.plan raw,
+  // this correctly returns null for an expired paid plan (expiration
+  // lives in plan_expires_at, not by resetting the plan column itself).
+  const { getPlan } = await import('./plan.js');
+  const verifiedPlan = await getPlan(user.id);
+  const isActivePaid = ['essential','professional','ultimate'].includes(verifiedPlan);
+
+  // No auto-redirect for an already-paying customer. This page used to
+  // bounce them straight to dashboard.html on any direct/no-intent
+  // visit — which also meant there was no way to just browse pricing,
+  // check current-plan status, or verify a fix without a `?plan=`
+  // param faking "upgrade intent". Pricing pages are normally viewable
+  // any time regardless of plan status; markCurrentPlan below still
+  // shows which plan is theirs.
+  if (isActivePaid) markCurrentPlan(verifiedPlan);
+  if (wantsUpgrade) highlightTargetPlan(qs.get('plan'));
+  await checkSuccess();
+} else {
+  // Not logged in → the page remains publicly viewable.
+  // Login is only requested when clicking "Choose".
+  if (wantsUpgrade) highlightTargetPlan(qs.get('plan'));
+}
+
+const ls=document.getElementById('ls');
+ls.classList.add('hide'); setTimeout(()=>ls.remove(),500);
 </script>
 </body>
 </html>

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Connexion — Reliability Suite Pro</title>
+<title>Login — Reliability Suite Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,7 +38,7 @@ body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); m
 .brand { display:flex; align-items:center; gap:12px; margin-bottom:56px; }
 .brand-icon {
   width:44px; height:44px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  background:#0ea5e9;
   border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px;
 }
 .brand-name { font-size:16px; font-weight:700; letter-spacing:.05em; }
@@ -116,7 +117,8 @@ input::placeholder { color:var(--muted); }
 .eye-btn {
   position:absolute; right:12px; top:50%; transform:translateY(-50%);
   background:none; border:none; cursor:pointer; color:var(--muted);
-  font-size:16px; padding:4px; transition:color .2s; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  padding:4px; transition:color .2s; line-height:1;
 }
 .eye-btn:hover { color:var(--accent); }
 
@@ -225,23 +227,23 @@ input::placeholder { color:var(--muted); }
   <div class="grid-lines"></div>
   <div class="left-content">
     <div class="brand">
-      <div class="brand-icon">⚙️</div>
+      <div class="brand-icon"><svg viewBox="0 0 16 16" width="60%" height="60%"><rect x="1" y="11" width="2" height="3" fill="white"/><rect x="4" y="8" width="2" height="6" fill="white"/><rect x="7" y="3" width="2" height="11" fill="white"/><rect x="10" y="6" width="2" height="8" fill="white"/><rect x="13" y="10" width="2" height="4" fill="white"/><path d="M1 12C3 12 5 3 8 3C11 3 12 9 15 11" fill="none" stroke="white" stroke-width="1" stroke-linecap="round"/></svg></div>
       <div class="brand-name">Reliability <span>Suite Pro</span></div>
     </div>
-    <h1 id="leftTitle">Analyse de<br>fiabilité <em>avancée</em></h1>
-    <p class="left-sub" id="leftSub">Weibull · MTBF · Maintenance préventive<br>Optimisation des stocks de pièces</p>
+    <h1 id="leftTitle">Advanced<br>reliability <em>analysis</em></h1>
+    <p class="left-sub" id="leftSub">Weibull · MTBF · Preventive Maintenance<br>Spare parts inventory optimization</p>
     <div class="stat-row">
       <div class="stat">
         <div class="stat-number">24h</div>
-        <div class="stat-label" id="statL1">Essai gratuit</div>
+        <div class="stat-label" id="statL1">Free trial</div>
       </div>
       <div class="stat">
         <div class="stat-number">100%</div>
-        <div class="stat-label" id="statL2">Sécurisé</div>
+        <div class="stat-label" id="statL2">Secured</div>
       </div>
       <div class="stat">
         <div class="stat-number">∞</div>
-        <div class="stat-label" id="statL3">Analyses Pro</div>
+        <div class="stat-label" id="statL3">Pro analyses</div>
       </div>
     </div>
   </div>
@@ -249,12 +251,6 @@ input::placeholder { color:var(--muted); }
 
 <!-- RIGHT -->
 <div class="right">
-
-  <!-- Lang switcher -->
-  <div class="lang-bar">
-    <button class="lang-btn active" id="langFR" onclick="setLang('fr')">FR</button>
-    <button class="lang-btn" id="langEN" onclick="setLang('en')">EN</button>
-  </div>
 
   <div class="form-wrap">
     <div class="form-box">
@@ -264,30 +260,30 @@ input::placeholder { color:var(--muted); }
       ══════════════════════════════════════ -->
       <div class="view active" id="viewAuth">
         <div class="form-header">
-          <h2 id="formTitle">Connexion</h2>
-          <p id="formSubtitle">Accédez à votre espace</p>
+          <h2 id="formTitle">Sign in</h2>
+          <p id="formSubtitle">Access your workspace</p>
         </div>
 
         <div class="tabs">
-          <button class="tab active" id="tabLogin" onclick="setMode('login')" data-fr="Se connecter" data-en="Sign in">Se connecter</button>
-          <button class="tab" id="tabRegister" onclick="setMode('register')" data-fr="Créer un compte" data-en="Create account">Créer un compte</button>
+          <button class="tab active" id="tabLogin" onclick="setMode('login')">Sign in</button>
+          <button class="tab" id="tabRegister" onclick="setMode('register')">Create account</button>
         </div>
 
         <!-- Trial badge -->
         <div class="trial-badge" id="trialBadge" style="display:none">
-          🚀 <strong id="trialTitle">Essai gratuit 24h</strong> — <span id="trialDesc">Accès complet sans carte bancaire. Un seul essai par appareil.</span>
+          🚀 <strong id="trialTitle">Free 24h trial</strong> — <span id="trialDesc">Full access, no credit card required. One trial per device.</span>
         </div>
 
         <div class="field">
           <label id="lblEmail">Email</label>
-          <input type="email" id="email" placeholder="vous@exemple.com" autocomplete="email">
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
         </div>
 
         <div class="field">
-          <label id="lblPwd">Mot de passe</label>
+          <label id="lblPwd">Password</label>
           <div class="input-wrap">
             <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
-            <button class="eye-btn" type="button" onclick="toggleEye('password','eyeIcon1')" id="eyeIcon1">👁</button>
+            <button class="eye-btn" type="button" onclick="toggleEye('password','eyeIcon1')" id="eyeIcon1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
           <!-- Strength bar (register only) -->
           <div class="pwd-strength" id="pwdStrength">
@@ -301,11 +297,11 @@ input::placeholder { color:var(--muted); }
         </div>
 
         <div class="forgot" id="forgotWrap">
-          <button onclick="showView('viewForgot')" id="forgotBtn">Mot de passe oublié ?</button>
+          <button onclick="showView('viewForgot')" id="forgotBtn">Forgot password?</button>
         </div>
 
         <button class="btn-submit" id="submitBtn" onclick="handleAuth()">
-          <span class="btn-text" id="btnText">Se connecter</span>
+          <span class="btn-text" id="btnText">Sign in</span>
           <div class="spinner"></div>
         </button>
 
@@ -313,31 +309,31 @@ input::placeholder { color:var(--muted); }
       </div>
 
       <!-- ══════════════════════════════════════
-           VIEW 2 : MOT DE PASSE OUBLIÉ
+           VIEW 2 : FORGOT PASSWORD
       ══════════════════════════════════════ -->
       <div class="view" id="viewForgot">
 
         <button class="back-link" onclick="showView('viewAuth')">
-          ← <span id="backTxt">Retour à la connexion</span>
+          ← <span id="backTxt">Back to login</span>
         </button>
 
         <div class="form-header">
-          <h2 id="forgotTitle">Mot de passe oublié</h2>
-          <p id="forgotSubtitle">Entrez votre email pour recevoir un lien de réinitialisation</p>
+          <h2 id="forgotTitle">Forgot password</h2>
+          <p id="forgotSubtitle">Enter your email to receive a reset link</p>
         </div>
 
         <div class="reset-info">
-          <strong id="resetInfoTitle">📧 Comment ça marche ?</strong>
-          <span id="resetInfoBody">Entrez l'email de votre compte. Vous recevrez un lien sécurisé valable 1h pour créer un nouveau mot de passe.</span>
+          <strong id="resetInfoTitle">📧 How it works?</strong>
+          <span id="resetInfoBody">Enter your account email. You will receive a secure link valid for 1 hour to set a new password.</span>
         </div>
 
         <div class="field">
-          <label id="lblResetEmail">Votre email</label>
-          <input type="email" id="resetEmail" placeholder="vous@exemple.com" autocomplete="email">
+          <label id="lblResetEmail">Your email</label>
+          <input type="email" id="resetEmail" placeholder="you@example.com" autocomplete="email">
         </div>
 
         <button class="btn-submit" id="resetBtn" onclick="sendReset()">
-          <span class="btn-text" id="resetBtnTxt">Envoyer le lien</span>
+          <span class="btn-text" id="resetBtnTxt">Send reset link</span>
           <div class="spinner"></div>
         </button>
 
@@ -345,19 +341,19 @@ input::placeholder { color:var(--muted); }
       </div>
 
       <!-- ══════════════════════════════════════
-           VIEW 3 : EMAIL ENVOYÉ (succès reset)
+           VIEW 3 : EMAIL SENT (reset success)
       ══════════════════════════════════════ -->
       <div class="view" id="viewResetSent">
         <div class="success-box">
           <div class="success-icon">📬</div>
-          <h3 id="sentTitle">Email envoyé !</h3>
-          <p id="sentBody">Un lien de réinitialisation a été envoyé à <strong id="sentEmail"></strong>.<br><br>Vérifiez aussi vos spams. Le lien expire dans <strong>1 heure</strong>.</p>
-          <button class="resend-btn" onclick="resendReset()" id="resendBtn">Renvoyer l'email</button>
+          <h3 id="sentTitle">Email sent!</h3>
+          <p id="sentBody">A reset link was sent to <strong id="sentEmail"></strong>.<br><br>Check your spam folder too. The link expires in <strong>1 hour</strong>.</p>
+          <button class="resend-btn" onclick="resendReset()" id="resendBtn">Resend email</button>
           <div class="msg" id="msgResend" style="margin-top:12px"></div>
         </div>
 
         <button class="back-link" style="margin-top:28px;justify-content:center" onclick="showView('viewAuth')">
-          ← <span id="backToLogin">Retour à la connexion</span>
+          ← <span id="backToLogin">Back to login</span>
         </button>
       </div>
 
@@ -376,51 +372,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // i18n
 // ══════════════════════════════════════════
 const T = {
-  fr: {
-    pageTitle:      'Connexion — Reliability Suite Pro',
-    leftTitle:      'Analyse de<br>fiabilité <em>avancée</em>',
-    leftSub:        'Weibull · MTBF · Maintenance préventive<br>Optimisation des stocks de pièces',
-    statL1:'Essai gratuit', statL2:'Sécurisé', statL3:'Analyses Pro',
-    // tabs
-    tabLogin:'Se connecter', tabRegister:'Créer un compte',
-    // form auth
-    loginTitle:'Connexion',       loginSub:'Accédez à votre espace',
-    regTitle:'Créer un compte',   regSub:'Démarrez votre essai gratuit',
-    lblEmail:'Email', lblPwd:'Mot de passe',
-    trialTitle:'Essai gratuit 24h',
-    trialDesc:'Accès complet sans carte bancaire. Un seul essai par appareil.',
-    forgotBtn:'Mot de passe oublié ?',
-    btnLogin:'Se connecter', btnRegister:'Créer mon compte',
-    // password strength
-    pwdWeak:'Faible', pwdMed:'Moyen', pwdStrong:'Fort',
-    // forgot view
-    backTxt:'Retour à la connexion',
-    forgotTitle:'Mot de passe oublié',
-    forgotSubtitle:'Entrez votre email pour recevoir un lien de réinitialisation',
-    resetInfoTitle:'📧 Comment ça marche ?',
-    resetInfoBody:"Entrez l'email de votre compte. Vous recevrez un lien sécurisé valable 1h pour créer un nouveau mot de passe.",
-    lblResetEmail:'Votre email',
-    resetBtnTxt:'Envoyer le lien',
-    // sent view
-    sentTitle:'Email envoyé !',
-    sentBody:'Un lien de réinitialisation a été envoyé à %EMAIL%.<br><br>Vérifiez aussi vos spams. Le lien expire dans <strong>1 heure</strong>.',
-    resendBtn:'Renvoyer l\'email',
-    backToLogin:'Retour à la connexion',
-    // msgs
-    errFillAll:'Veuillez remplir tous les champs.',
-    errPwdShort:'Le mot de passe doit faire au moins 6 caractères.',
-    errNoEmail:'Entrez votre email d\'abord.',
-    successLogin:'Connexion réussie ! Redirection…',
-    successRegister:'Compte créé ! Essai 24h activé. Redirection…',
-    errTrialExpired:'Votre essai de 24h est expiré. Passez à Pro pour continuer.',
-    errDeviceTrial:'Un essai gratuit a déjà été utilisé sur cet appareil.',
-    errInvalidLogin:'Email ou mot de passe incorrect.',
-    errAlreadyReg:'Cet email est déjà utilisé.',
-    errWeakPwd:'Mot de passe trop faible (min. 6 caractères).',
-    errNotConfirmed:'Confirmez votre email avant de vous connecter.',
-    errResetGeneric:'Erreur lors de l\'envoi. Vérifiez l\'email.',
-    successResend:'Email renvoyé avec succès !',
-  },
   en: {
     pageTitle:      'Login — Reliability Suite Pro',
     leftTitle:      'Advanced<br>reliability <em>analysis</em>',
@@ -462,17 +413,16 @@ const T = {
   }
 };
 
-let lang = 'fr';
+let lang = 'en';
 let mode = 'login';
 let lastResetEmail = '';
 
 // ── Lang switch ──────────────────────────────────────────────
 window.setLang = function(l) {
   lang = l;
-  document.getElementById('langFR').classList.toggle('active', l==='fr');
-  document.getElementById('langEN').classList.toggle('active', l==='en');
   applyLang();
 };
+applyLang();
 
 function applyLang() {
   const t = T[lang];
@@ -544,11 +494,13 @@ window.setMode = function(m) {
 };
 
 // ── Eye toggle ───────────────────────────────────────────────
+const EYE_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 window.toggleEye = function(inputId, btnId) {
   const inp = document.getElementById(inputId);
   const btn = document.getElementById(btnId);
-  if (inp.type === 'password') { inp.type = 'text';     btn.textContent = '🙈'; }
-  else                         { inp.type = 'password'; btn.textContent = '👁';  }
+  if (inp.type === 'password') { inp.type = 'text';     btn.innerHTML = EYE_OFF_SVG; }
+  else                         { inp.type = 'password'; btn.innerHTML = EYE_SVG;  }
 };
 
 // ── Password strength ────────────────────────────────────────
@@ -640,7 +592,7 @@ async function doLogin(email, password) {
 
   const userId = data.user.id;
 
-  // ── Vérifier le plan côté serveur ─────────────────────────
+  // ── Verify the plan server-side ─────────────────────────
   const { data: planData } = await supabase.rpc('verify_user_plan', {
     p_user_id: userId
   });
@@ -650,7 +602,7 @@ async function doLogin(email, password) {
     throw new Error(t.errTrialExpired);
   }
 
-  // ── Enregistrer la session (désactive les autres) ─────────
+  // ── Register the session (disables others) ─────────
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
   const token = Array.from(array).map(b => b.toString(16).padStart(2,'0')).join('');
@@ -678,12 +630,13 @@ async function doRegister(email, password) {
   const userId = data.user?.id;
   if (!userId) throw new Error('Error creating account.');
   const now = new Date().toISOString();
+  const trialExpiresAt = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
   await Promise.all([
-    supabase.from('profiles').insert({ id:userId, email, trial_started_at:now, trial_used:true, device_fingerprint:fp, plan:'trial' }),
+    supabase.from('profiles').upsert({ id:userId, email, plan_started_at:now, plan_expires_at:trialExpiresAt, plan:'trial' }, { onConflict: 'id' }),
     supabase.from('device_trials').insert({ fingerprint:fp, email })
   ]);
   localStorage.setItem('rsp_trial_fp', fp);
-  // ── Enregistrer la session après inscription ─────────────
+  // ── Register the session after signup ─────────────
   const array2 = new Uint8Array(32);
   crypto.getRandomValues(array2);
   const sessionToken = Array.from(array2).map(b => b.toString(16).padStart(2,'0')).join('');

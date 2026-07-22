@@ -8,7 +8,8 @@
 
   <meta charset="UTF-8" /> 
 
-  <title>Reliability Suite — Fiabilité (R/h/PDF) + PM/FFI + Dashboard KPI (SVG)</title> 
+  <title>Reliability Suite — Fiabilité (R/h/PDF) + PM/FFI + Dashboard KPI (SVG)</title>
+  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script> 
 
   <meta name="viewport" content="width=device-width, initial-scale=1" /> 
 
@@ -276,7 +277,7 @@ td:focus {
       <div id="rsp-trial-bar" style="width:100%"></div>
     </div>
     <span id="rsp-time-label" style="font-size:12px;font-family:monospace"></span>
-    <button id="rsp-upgrade-btn" style="display:none" onclick="window.location.href='payment.html'">🚀 Upgrader</button>
+    <button id="rsp-upgrade-btn" style="display:none" onclick="goUpgradeRelia()">🚀 Upgrader</button>
   </div>
   <!-- END RSP ACCESS BANNER -->
 
@@ -310,7 +311,7 @@ td:focus {
     <div id="rsp-lock-dashboard" class="rsp-lock-overlay" style="display:none;position:relative">
       <div class="rsp-lock-icon">🔒</div>
       <div class="rsp-lock-msg" id="rsp-lock-dashboard-msg">Le Dashboard KPI nécessite le plan Essentiel</div>
-      <button class="rsp-lock-btn" onclick="window.location.href='payment.html?reason=feature_locked&required=essentiel&type=advanced_reporting'">Voir les plans →</button>
+      <button class="rsp-lock-btn" onclick="openPaddleCheckout('essentiel')">Débloquer maintenant →</button>
     </div> 
 
     <div class="card"> 
@@ -823,7 +824,7 @@ td:focus {
     <div id="rsp-lock-spare" class="rsp-lock-overlay" style="display:none;position:relative">
       <div class="rsp-lock-icon">🔒</div>
       <div class="rsp-lock-msg" id="rsp-lock-spare-msg">Spare Parts Forecasting nécessite le plan Entreprise</div>
-      <button class="rsp-lock-btn" onclick="window.location.href='payment.html?reason=feature_locked&required=entreprise&type=spare_parts'">Voir les plans →</button>
+      <button class="rsp-lock-btn" onclick="openPaddleCheckout('entreprise')">Débloquer maintenant →</button>
     </div>
 
     <div class="grid-2"> 
@@ -992,7 +993,7 @@ td:focus {
     <div id="rsp-lock-pm" class="rsp-lock-overlay" style="display:none;position:relative">
       <div class="rsp-lock-icon">🔒</div>
       <div class="rsp-lock-msg" id="rsp-lock-pm-msg">Preventive Maintenance nécessite le plan Entreprise</div>
-      <button class="rsp-lock-btn" onclick="window.location.href='payment.html?reason=feature_locked&required=entreprise&type=preventive_maint'">Voir les plans →</button>
+      <button class="rsp-lock-btn" onclick="openPaddleCheckout('entreprise')">Débloquer maintenant →</button>
     </div>
 
     <div class="grid-2"> 
@@ -6168,6 +6169,92 @@ const supabase = createClient(
   'sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx'
 );
 
+// ── Paddle : checkout direct depuis relia.html (sans passer par payment.html) ──
+const PADDLE_TOKEN = 'live_4a6671ddf9b19f023a90ce0cb36';
+const PRICES = {
+  essentiel_monthly:     'pri_01ktp3xx307qepx6f6xk2sqzpp',
+  professionnel_monthly: 'pri_01ktnhwg7zwyvrhearx3nxacbr',
+  entreprise_monthly:    'pri_01ktnkndn91851hx3hd8znxp2s',
+};
+let currentUserRef = null;
+let currentPlanRef = 'trial';
+
+// ── Déconnexion automatique après 1h d'inactivité ──────────────
+const IDLE_LIMIT_MS = 60 * 60 * 1000; // 1 heure
+const IDLE_KEY = 'rsp_last_activity';
+
+function markActivity() {
+  localStorage.setItem(IDLE_KEY, Date.now().toString());
+}
+
+async function checkIdle() {
+  const last = parseInt(localStorage.getItem(IDLE_KEY), 10);
+  if (last && (Date.now() - last) > IDLE_LIMIT_MS) {
+    await supabase.auth.signOut();
+    localStorage.removeItem('rsp_session_token');
+    localStorage.removeItem(IDLE_KEY);
+    window.location.href = 'index.html?idle=1';
+    return true;
+  }
+  markActivity();
+  return false;
+}
+
+function initIdleLogout() {
+  ['mousemove','mousedown','keydown','scroll','touchstart','click'].forEach(evt => {
+    document.addEventListener(evt, markActivity, { passive: true });
+  });
+  checkIdle();
+  setInterval(checkIdle, 60000);
+}
+
+function initPaddle() {
+  if (typeof Paddle === 'undefined') { setTimeout(initPaddle, 100); return; }
+  Paddle.Initialize({
+    token: PADDLE_TOKEN,
+    eventCallback: async (e) => {
+      if (e.name === 'checkout.completed') {
+        const plan = e.data?.customData?.plan;
+        if (plan && currentUserRef) {
+          const expiresAt = new Date();
+          expiresAt.setMonth(expiresAt.getMonth() + 1); // checkout direct relia = mensuel uniquement
+          const { error } = await supabase.rpc('confirm_plan_purchase', {
+            p_user_id: currentUserRef.id, p_plan: plan, p_expires_at: expiresAt.toISOString()
+          });
+          if (error) console.error('confirm_plan_purchase error:', error.message);
+        }
+        window.location.reload();
+      }
+    }
+  });
+}
+initPaddle();
+
+window.openPaddleCheckout = async function(plan) {
+  if (plan === 'ultimate' || !PRICES[plan + '_monthly']) {
+    window.location.href = 'mailto:contact@reliabilitysuite.pro?subject=Ultimate Plan';
+    return;
+  }
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'index.html?login=1'; return; }
+  currentUserRef = session.user;
+  const checkoutParams = {
+    items: [{ priceId: PRICES[plan + '_monthly'], quantity: 1 }],
+    settings: { theme: 'dark' },
+    customData: { supabase_user_id: session.user.id, plan }
+  };
+  if (session.user.email) checkoutParams.customer = { email: session.user.email };
+  Paddle.Checkout.open(checkoutParams);
+};
+
+// Suggère automatiquement le palier supérieur suivant depuis la bannière
+window.goUpgradeRelia = function() {
+  const order = ['trial','essentiel','professionnel','entreprise'];
+  const rank = order.indexOf(currentPlanRef);
+  const nextPlan = order[Math.min(rank + 1, order.length - 1)];
+  window.openPaddleCheckout(nextPlan);
+};
+
 // ── Matrice d'accès ───────────────────────────────────────────
 const ACCESS = {
   tabReliability: ['trial','essentiel','professionnel','entreprise','ultimate'],
@@ -6185,10 +6272,10 @@ const ANALYSIS_ACCESS = {
 
 const PLAN_LABELS = {
   trial:'Trial 3h', essentiel:'Essentiel',
-  professionnel:'Professionnel', entreprise:'Entreprise', ultimate:'Ultimate'
+  professionnel:'Professionnel', entreprise:'Ultimate', ultimate:'Ultimate'
 };
 const PLAN_ICONS = {
-  trial:'🔬', essentiel:'📊', professionnel:'🚀', entreprise:'🏢', ultimate:'👑'
+  trial:'🔬', essentiel:'📊', professionnel:'🚀', entreprise:'👑', ultimate:'👑'
 };
 const MIN_PLAN_FOR = {
   tabDashboard: 'essentiel',
@@ -6213,6 +6300,7 @@ function checkTrial(trialStartedAt) {
 
 // ── Bannière ──────────────────────────────────────────────────
 function showBanner(plan, profile) {
+  currentPlanRef = plan;
   const banner    = document.getElementById('rsp-access-banner');
   const planLabel = document.getElementById('rsp-plan-label');
   const timeLabel = document.getElementById('rsp-time-label');
@@ -6243,11 +6331,50 @@ function showBanner(plan, profile) {
     }
   } else {
     banner.className = 'paid';
-    planLabel.textContent = `${PLAN_ICONS[plan] || '✅'} ${PLAN_LABELS[plan] || plan} — Accès actif`;
-    timeLabel.textContent = '';
-    barWrap.style.display = 'none';
     upgradeBtn.style.display = ['essentiel','professionnel'].includes(plan) ? 'block' : 'none';
+    barWrap.style.display = 'none';
+
+    if (profile?.plan_expires_at) {
+      startPaidPlanTimer(plan, profile.plan_expires_at);
+    } else {
+      // Pas de date d'expiration en base = accès illimité
+      planLabel.textContent = `${PLAN_ICONS[plan] || '✅'} ${PLAN_LABELS[plan] || plan} — Accès actif (illimité)`;
+      timeLabel.textContent = '';
+    }
   }
+}
+
+// ── Timer plan payant live (compte à rebours jusqu'à plan_expires_at) ──
+function startPaidPlanTimer(plan, expiresAtISO) {
+  const tick = () => {
+    const planLabel = document.getElementById('rsp-plan-label');
+    const timeLabel = document.getElementById('rsp-time-label');
+    const expiresAt = new Date(expiresAtISO);
+    const msLeft    = expiresAt - Date.now();
+
+    if (msLeft <= 0) {
+      document.getElementById('rsp-access-banner').className = 'expired';
+      planLabel.textContent = '⚠️ Abonnement expiré — Renouvelez pour continuer';
+      timeLabel.textContent = '';
+      lockAllTabs();
+      return; // stop timer
+    }
+
+    const totalSec = Math.floor(msLeft / 1000);
+    const days  = Math.floor(totalSec / 86400);
+    const hours = Math.floor((totalSec % 86400) / 3600);
+    const mins  = Math.floor((totalSec % 3600) / 60);
+    const secs  = totalSec % 60;
+
+    const dateStr = expiresAt.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
+    planLabel.textContent = `${PLAN_ICONS[plan] || '✅'} ${PLAN_LABELS[plan] || plan} — Accès actif · expire le ${dateStr}`;
+    timeLabel.textContent = days > 0
+      ? `${days}j ${String(hours).padStart(2,'0')}h restants`
+      : `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')} restantes`;
+
+    setTimeout(tick, 1000); // refresh chaque seconde (juste pour vérifier visuellement que ça marche)
+  };
+  tick();
 }
 
 // ── Timer trial live ──────────────────────────────────────────
@@ -6335,7 +6462,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       const tabId   = this.dataset.tab;
       const minPlan = MIN_PLAN_FOR[tabId];
       if (minPlan) {
-        window.location.href = `payment.html?reason=feature_locked&required=${minPlan}&type=${tabId}`;
+        window.openPaddleCheckout(minPlan);
       } else {
         window.location.href = 'payment.html?reason=trial_expired';
       }
@@ -6352,14 +6479,14 @@ async function initAccess() {
   // 1. Auth check
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
-    window.location.href = 'login.html';
+    window.location.href = 'index.html?login=1';
     return;
   }
-
-  // 2. Profil réel
+  currentUserRef = session.user;
+  initIdleLogout();
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan, trial_started_at')
+    .select('plan, trial_started_at, plan_expires_at')
     .eq('id', session.user.id)
     .single();
 
@@ -6371,6 +6498,14 @@ async function initAccess() {
     if (!t.valid) {
       showBanner('trial', profile);
       applyTabLocks('__expired__'); // plan inexistant → tout verrouillé
+      return;
+    }
+  } else {
+    // 3bis. Plan payant : vérification serveur (source de vérité, pas juste le champ brut)
+    const { data: verifiedPlan } = await supabase.rpc('verify_user_plan', { p_user_id: session.user.id });
+    if (!verifiedPlan) {
+      // Abonnement expiré (non renouvelé) → retour au dashboard, tout verrouillé
+      window.location.href = 'dashboard.html?reason=plan_expired';
       return;
     }
   }

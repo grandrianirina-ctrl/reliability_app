@@ -1,0 +1,356 @@
+================================================================
+RELIASUITE PROFESSIONAL — PROJECT HANDOFF DOCUMENT
+Last updated: 2026-07-07
+================================================================
+This document is a handoff summary for continuing work on this
+project in a new conversation. Paste this file's content (or attach
+it) along with the accompanying latest files at the start of a new
+chat. It covers architecture, key decisions, known gaps, and recent
+changes — read it fully before making changes, since several
+design decisions here are non-obvious and easy to accidentally
+undo.
+
+================================================================
+1. WHAT THIS PROJECT IS
+================================================================
+ReliaSuite Professional — a web-based reliability engineering
+analysis platform for oil & gas / mining engineers. Built as
+single-file HTML applications (no build step, no framework —
+vanilla JS + Supabase JS client loaded from esm.sh CDN).
+
+Three analysis modules:
+  - Life Data Analysis (LDA) — Weibull, Lognormal, Exponential,
+    probability plots, confidence bounds
+  - Reliability Growth Analysis (RGA) — Crow-AMSAA, Crow Extended
+  - Degradation Analysis — progressive degradation modeling
+
+Backend: Supabase (Postgres + Auth + RLS + PostgREST). No custom
+server/webhook layer — Paddle checkout events are handled entirely
+client-side (see section 6, "known limitation" note).
+
+IMPORTANT: the developer (the person you're helping) has a
+colleague who makes parallel, uncoordinated changes to the same
+Supabase database and some of the same files. Always diff-check
+assumptions against what's actually live before assuming a file or
+schema state matches what's described here — things may have moved
+since this document was written.
+
+================================================================
+2. FILE INVENTORY
+================================================================
+  index.html          — Landing page, login/signup modal, trial signup
+  payment.html         — Pricing page, its OWN separate login/signup
+                          modal, Paddle checkout (annual/monthly)
+  dashboard.html        — Post-login hub, tool cards, package table,
+                          embedded Paddle checkout (monthly-only,
+                          separate path from payment.html)
+  admin.html            — Admin panel (user management, payments,
+                          sessions, support tickets, settings)
+  plan.js               — Shared ES module: Supabase client + RPC
+                          wrappers, imported by the 3 analysis apps
+  Life_Data_Analysis.html, Reliability_Growth_Analysis.html,
+  Degradation_Analysis.html
+                          — The 3 actual analysis tools. Split from
+                          one original master file (~22k lines each
+                          originally, since trimmed per-app)
+  login.html             — DEPRECATED. Superseded by index.html's
+                          modal. Still functional (kept in sync
+                          enough not to break), but not the active
+                          UI. Don't invest heavy effort here.
+  reset-password.html    — Password reset landing (from email link)
+  privacy.html, refund.html — Static legal pages
+  relia-session-watch.js  — Built but NOT integrated. Dead file.
+
+================================================================
+3. DATABASE — CURRENT SCHEMA STATE
+================================================================
+Authoritative SQL reference: current_state_reference.sql (attached
+with this handoff) — a single, idempotent file consolidating every
+migration into the current end-state. Prefer this over any older
+migration file if they ever conflict.
+
+--- profiles (core table) ---
+  id                      uuid, PK, references auth.users
+  email                   text
+  plan                    text — ONLY 'trial'|'essential'|'professional'|'ultimate'
+                          (constraint: profiles_plan_check)
+  plan_started_at         timestamptz — when current plan began
+  plan_expires_at         timestamptz — THE single expiration source,
+                          for every plan type including trial
+  paddle_subscription_id  text
+  paddle_customer_id      text
+  updated_at              timestamptz
+  is_admin                boolean not null default false
+
+REMOVED / RENAMED (do not reference these — they don't exist):
+  trial_started_at → renamed to plan_started_at
+  trial_duration_days (per-user column) → dropped entirely
+  trial_used, device_fingerprint → dropped (dead columns, never
+    read anywhere; real device-abuse check is device_trials table)
+
+--- app_settings (key/value, admin-editable) ---
+  key='trial_duration_days', value='3'
+  ⚠️ KEY NAME IS HISTORICAL/MISLEADING: the value is now
+  interpreted as HOURS, not days (renamed meaning, not renamed key
+  — deliberate choice, see section 5). Default trial length = 3 hours.
+
+--- user_sessions — single-session enforcement ---
+  Standard columns (user_id, session_token, device_info, ip_address,
+  created_at, last_active, is_active). Has TWO foreign keys on
+  user_id: one to auth.users (original), one to profiles (added
+  later so PostgREST could resolve admin.html's embedded
+  profiles(email) query).
+
+--- support_tickets ---
+  id, user_id (→profiles), email, subject, message,
+  status ('open'|'answered'|'closed'), admin_reply, replied_at, created_at
+
+--- device_trials ---
+  fingerprint (PK), email, used_at
+  ⚠️ Never seen the real CREATE TABLE — reconstructed only from
+  usage. If it differs from this, trust the live table over this doc.
+
+--- payments ---
+  ⚠️ NEVER SEEN THE ACTUAL CREATE TABLE. Columns known only from an
+  ERD screenshot: id, user_id, paddle_transaction_id,
+  paddle_subscription_id, plan, billing_cycle, amount, currency,
+  status, paddle_price_id, created_at.
+  A policy named "Lecture paiements personnels" was seen once in a
+  pg_policies query result — never defined by me, exact definition
+  unknown. Don't assume it exists or matches any particular shape.
+
+--- UNRESOLVED: a separate "users" table ---
+  An ERD screenshot revealed a completely separate "users" table
+  with ITS OWN overlapping columns (plan, trial_start, trial_end,
+  device_id) — never explained, never confirmed live or dead. The
+  developer was asked to run:
+    select count(*) from users;
+    select count(*) from users where trial_start is not null or trial_end is not null;
+  ...but never reported back the result. THIS IS AN OPEN THREAD —
+  ask about it if relevant, don't assume it's dead weight.
+
+--- DROPPED entirely ---
+  user_access_status (view) and get_user_plan() (function) — both
+  removed. admin.html now queries profiles directly and computes
+  access/display logic in JS instead (see hasAccess() in admin.html).
+
+================================================================
+4. KEY SQL FUNCTIONS — WHAT EACH ONE DOES AND WHO CALLS IT
+================================================================
+is_admin()
+  Returns whether the CURRENT authenticated user (auth.uid()) is an
+  admin. Checks profiles.is_admin first, falls back to a hardcoded
+  2-email list. Used throughout RLS policies and by
+  protect_profile_sensitive_fields().
+
+verify_user_plan(p_user_id)
+  THE real access gate. Called by plan.js (all 3 analysis apps) and
+  by dashboard.html. Returns the plan tier (text) or null (no access).
+  ⚠️ AS OF THE LATEST FIX: does NOT bypass for is_admin. An admin's
+  own expired plan genuinely locks them out of the 3 apps and
+  dashboard.html — this was a deliberate, explicit decision (see
+  section 5). Do not reintroduce an is_admin shortcut here without
+  being told to.
+
+get_plan_expiration(p_user_id)
+  Companion to verify_user_plan — returns the actual expiration
+  timestamp. Used by plan.js for the analysis apps' session
+  countdown timer. Same no-admin-bypass rule applies here.
+
+diagnose_user_access(p_user_id)
+  ⚠️ DIFFERENT FROM THE ABOVE TWO — this one DOES bypass for
+  is_admin, deliberately. Called ONLY by index.html's login flow.
+  Returns {status, plan, is_admin, own_plan_expired}. Login always
+  succeeds for an admin regardless of their own plan status — if
+  their own plan_expires_at is in the past, index.html redirects
+  them to admin.html instead of the normal dashboard, so they can
+  fix their own account rather than getting stuck.
+  This intentional split (bypass at login, no bypass inside the
+  apps) is the current, confirmed-correct design — don't try to
+  "unify" these two behaviors without checking with the developer
+  first, it was a deliberate late-stage decision.
+
+confirm_plan_purchase(p_user_id, p_plan, p_expires_at)
+  Called by BOTH dashboard.html's embedded Paddle checkout AND
+  payment.html's, right after a Paddle checkout.completed event.
+  Sets plan, plan_started_at (=now()), plan_expires_at. Uses a
+  transaction-local flag (app.bypass_plan_trigger) to get past the
+  protect_profile_sensitive_fields trigger, since there's no
+  server-side webhook validating this — see the known limitation
+  in section 6.
+
+protect_profile_sensitive_fields() [trigger, before update on profiles]
+  Freezes plan/plan_expires_at/plan_started_at/paddle_subscription_id/
+  is_admin against direct client writes, UNLESS: service_role,
+  is_admin() is true, or the bypass_plan_trigger flag is set
+  (confirm_plan_purchase's escape hatch).
+
+register_session / validate_session / cleanup_old_sessions
+  Single-session enforcement — unchanged since early in the project.
+
+================================================================
+5. KEY ARCHITECTURAL DECISIONS (non-obvious, easy to break)
+================================================================
+A) TWO DIFFERENT PLAN VOCABULARIES EXIST — DO NOT CONFUSE THEM
+   Canonical (what's actually stored in profiles.plan, and what
+   every SQL function speaks): trial / essential / professional / ultimate
+   Dashboard-internal (used only in some of dashboard.html's older
+   JS, e.g. the ACCESS matrix keys): trial / professional / enterprise / ultimate
+   THE WORD "professional" MEANS A DIFFERENT TIER IN EACH VOCABULARY.
+   This ambiguity caused a real, shipped bug once already (the
+   Upgrade button always charging $50 regardless of tier, because a
+   translation function's "already canonical" check accidentally
+   matched the wrong vocabulary's "professional"). If touching
+   anything price/tier-related in dashboard.html, trace very
+   carefully which vocabulary a variable is actually in before
+   assuming.
+
+B) Trial length is admin-configurable, in HOURS, currently 3
+   app_settings.trial_duration_days holds an hour count (key name
+   is historical, kept deliberately rather than renamed — flagged
+   to the developer as a minor future footgun, they accepted it).
+   Signup flows (index.html, payment.html) fetch this value live and
+   compute plan_expires_at = now() + N hours at signup time. login.html
+   (deprecated) still hardcodes 3 hours rather than reading the setting.
+
+C) is_admin bypass is deliberately SPLIT across two behaviors
+   See section 4's note on diagnose_user_access vs
+   verify_user_plan/get_plan_expiration. This was arrived at after
+   real back-and-forth with the developer and a live bug report (the
+   3 apps showing "nothing happens, no expiry modal" for an admin
+   testing trial behavior). Current final answer: login always
+   succeeds + redirects to admin.html if own plan expired; but INSIDE
+   the 3 apps and dashboard.html, an admin's real plan/expiration
+   applies exactly like a normal user. This is confirmed, tested,
+   and correct as of this document.
+
+D) "Remember me" — two-marker design, NOT a custom storage adapter
+   An earlier implementation using a custom Supabase storage adapter
+   (routing session data between localStorage/sessionStorage
+   dynamically) was built, then found unreliable and replaced. The
+   current, correct design uses two plain flags:
+     REMEMBER_MARKER (localStorage) — the user's last checkbox choice
+     SESSION_ALIVE_MARKER (sessionStorage) — only present while the
+       CURRENT browser session is still open
+   On page load, before checking for an existing session, an IIFE
+   (_enforceRememberChoice) checks: if the user chose "don't remember"
+   AND there's no sign this is the same still-open browser session,
+   sign out. This runs on index.html, payment.html, AND
+   dashboard.html (the last one because it's directly bookmarkable
+   and would otherwise bypass the check entirely).
+   Do NOT reintroduce the custom storage adapter version — it was
+   deliberately abandoned. If you see it in old context, it's dead.
+
+E) Paddle checkout — TWO valid, separate, intentional paths
+   payment.html has its own full pricing page + checkout (supports
+   annual/monthly). dashboard.html ALSO has its own embedded Paddle
+   checkout (monthly only), built by the developer's colleague,
+   bypassing payment.html entirely. THIS IS INTENTIONAL AND SHOULD
+   NOT BE MERGED OR REMOVED — the developer was explicit about this.
+   Both paths converge on the same confirm_plan_purchase() RPC.
+
+F) admin.html — every mutating action requires re-entering the
+   admin's password
+   A promptAdminPassword() modal (re-authenticates via a real
+   signInWithPassword call) gates all 13 mutating actions: savePlan,
+   banUser, unbanUser, deleteUserFromModal, addAdmin, removeAdmin,
+   saveTrialDuration, replyTicket, closeTicket, refundPayment,
+   killSession, killAllSessions, and doLogout (yes, logout too — this
+   was explicit). Non-mutating actions (CSV export, extendTrial's
+   input-filling convenience) deliberately do NOT require this.
+
+G) admin.html — admin list is DB-driven, not hardcoded
+   The old ADMIN_EMAILS hardcoded array is gone. Who can access
+   admin.html and who appears in the "Administrateurs" panel is
+   entirely driven by profiles.is_admin, editable via an
+   add/remove-admin UI inside admin.html itself (also
+   password-gated). is_admin() SQL function checks the column first,
+   with a hardcoded 2-email fallback for safety.
+
+H) admin.html display must show RAW plan values, not bypassed ones
+   A real bug: admin.html's table/stats once showed "Ultimate" for
+   ANY admin account regardless of their actual plan column (an
+   effectivePlan() helper wrongly mirrored the access-bypass logic
+   into a display context). Fixed — admin.html now always shows
+   u.plan directly. hasAccess() still correctly reflects "admins
+   always have access" for the Actif/Expiré status column, but the
+   PLAN shown is always real.
+
+================================================================
+6. KNOWN LIMITATIONS / RISKS WORTH KNOWING ABOUT
+================================================================
+- No server-side Paddle webhook. confirm_plan_purchase() trusts
+  whatever the client reports after a checkout.completed browser
+  event, with no signature verification. A technically motivated
+  user could theoretically call this RPC from the browser console
+  without having paid. Real fix would require a Paddle webhook with
+  signature verification (a serverless function), which doesn't
+  exist in this project. Flagged, not fixed.
+- payments table schema is inferred, not confirmed (section 3).
+- The separate "users" table's live/dead status is unconfirmed
+  (section 3) — this is a real open thread, not resolved.
+- device_trials table schema is inferred, not confirmed.
+- login.html is deprecated but not deleted — low priority to keep
+  fully feature-parallel with index.html/payment.html.
+- relia-session-watch.js is dead code — built but never wired in.
+
+================================================================
+7. RECENT MAJOR CHANGES (roughly chronological, most relevant last)
+================================================================
+- Full date/schema standardization migration: trial_started_at
+  renamed to plan_started_at, trial_duration_days (column) dropped,
+  user_access_status view + get_user_plan() dropped, plan_expires_at
+  unified as the single expiration source for every plan type.
+- Fixed the Upgrade button always charging $50 regardless of tier
+  (the vocabulary-collision bug described in 5A).
+- Rebuilt dashboard's upgrade flow: shows only tiers ABOVE the
+  user's current one, with correct prices — no downgrade option
+  exists in the UI at all.
+- Trial users now get full access to all 3 tools (was previously
+  only LDA — a bug in the dashboard's ACCESS matrix).
+- admin.html: password-confirmation on every mutating action, DB-
+  driven admin list, return-to-dashboard button, entry-level
+  re-auth modal (even an already-logged-in admin must re-enter
+  their password to open admin.html at all).
+- Admin login/redirect logic: admins always log in successfully;
+  if their own plan is expired, redirected straight to admin.html
+  instead of the normal dashboard.
+- Removed the is_admin bypass from verify_user_plan/
+  get_plan_expiration specifically (kept it in diagnose_user_access)
+  — see section 5C for the full reasoning.
+- Fixed admin.html showing "Ultimate" for every admin regardless of
+  real plan (section 5H).
+- "Remember me" fixed and confirmed working (two-marker design,
+  section 5D) — an earlier custom-storage-adapter version was found
+  unreliable and replaced.
+- English set as the default language on index.html, payment.html,
+  dashboard.html (was French).
+- Fixed a real ReferenceError in payment.html (currentUserPlan
+  referenced before its declaration — a temporal dead zone bug
+  introduced by the English-default change, since fixed).
+- Monkey emoji (🙈) password-visibility icons replaced with proper
+  SVG eye/eye-off icons across index.html, login.html, payment.html,
+  reset-password.html.
+- The 3 analysis apps: clickable logo/title → dashboard.html, added
+  a logout button (reuses the same native "leave site?" browser
+  warning as any other navigation, doesn't suppress it), added a
+  dev-only badge showing real trial/plan expiration countdown
+  separately from the existing idle-timeout badge.
+
+================================================================
+8. HOW TO WORK WITH THIS PROJECT GOING FORWARD
+================================================================
+- Always verify syntax (node --check on extracted <script> blocks)
+  before delivering HTML file changes — this project's files are
+  large (up to ~900KB) and easy to silently break with a bad edit.
+- When editing dates/plan logic, check current_state_reference.sql
+  first — it's the authoritative, current schema/function reference.
+- Be alert for the colleague's parallel, uncoordinated changes —
+  diff against what's actually live before assuming a file matches
+  what's described here.
+- The developer prefers direct, technically precise communication,
+  wants root causes traced and explained (not just "fixed it"), and
+  has repeatedly caught and corrected assumption-based mistakes —
+  verify against actual code/actual database output rather than
+  asserting from memory when precision matters.
+================================================================
