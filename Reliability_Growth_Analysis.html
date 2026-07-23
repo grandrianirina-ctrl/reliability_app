@@ -161,11 +161,6 @@ a { color: var(--primary); }
 }
 .tab-btn:hover { color: var(--text); background: var(--bg); }
 .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
-/* RG Plan tab: hidden by CSS — JS adds .rga-tab-visible when RGA is active.
-   Show with display:inline-block matching the native <button> default so
-   the parent nav flex container positions it identically to the other tabs. */
-#navTabRGPlan { display: none !important; }
-#navTabRGPlan.rga-tab-visible { display: inline-block !important; }
 
 .app-actions {
   display: flex;
@@ -1767,7 +1762,6 @@ select {
     <button id="navTabDashboard"   class="tab-btn"        role="tab" aria-selected="false" aria-controls="tabDashboard"   data-tab="tabDashboard"   data-pkg="ultimate">Dashboard</button>
     <button id="navTabPM"          class="tab-btn"        role="tab" aria-selected="false" aria-controls="tabPM"          data-tab="tabPM"          data-pkg="professional ultimate">Maintenance</button>
     <button id="navTabSpare"       class="tab-btn"        role="tab" aria-selected="false" aria-controls="tabSpare"       data-tab="tabSpare"       data-pkg="professional ultimate">Spare Parts</button>
-    <button id="navTabRGPlan"      class="tab-btn"        role="tab" aria-selected="false" aria-controls="tabRGPlan"      data-tab="tabRGPlan"      data-pkg="professional ultimate">RG Plan</button>
   </nav>
 
   <div class="app-actions">
@@ -2581,112 +2575,6 @@ select {
 
 
 
-<!-- ══════════════════════════════════════════════════
-     TAB: RELIABILITY GROWTH PLANNING (RGA only)
-══════════════════════════════════════════════════ -->
-<div id="tabRGPlan" class="tab-panel" role="tabpanel" aria-labelledby="navTabRGPlan">
-  <div style="display:flex;gap:0;height:100%;min-height:0;">
-
-    <!-- ── Left: inputs ── -->
-    <div style="width:280px;min-width:240px;border-right:1px solid var(--border-soft);padding:18px 16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;">
-      <div style="font-size:12px;font-weight:700;color:var(--text);letter-spacing:.04em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border-soft);">Growth Plan Inputs</div>
-
-      <!-- Initial MTBF -->
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        <label style="font-size:11px;font-weight:600;color:var(--text-2);">Initial MTBF M<sub>i</sub> <span style="color:var(--text-3);font-weight:400;">(at start of program)</span></label>
-        <input id="rgpMi" type="number" step="any" min="0.001" value="50"
-          style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:var(--font-mono);background:var(--surface);color:var(--text);width:100%;box-sizing:border-box;">
-      </div>
-
-      <!-- Goal MTBF -->
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        <label style="font-size:11px;font-weight:600;color:var(--text-2);">Goal MTBF M<sub>G</sub> <span style="color:var(--text-3);font-weight:400;">(requirement)</span></label>
-        <input id="rgpMg" type="number" step="any" min="0.001" value="200"
-          style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:var(--font-mono);background:var(--surface);color:var(--text);width:100%;box-sizing:border-box;">
-      </div>
-
-      <!-- MSR -->
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        <label style="font-size:11px;font-weight:600;color:var(--text-2);">Management Strategy Ratio <span style="color:var(--text-3);font-weight:400;">(MSR, 0–1)</span></label>
-        <input id="rgpMsr" type="number" step="0.01" min="0.01" max="0.99" value="0.95"
-          style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:var(--font-mono);background:var(--surface);color:var(--text);width:100%;box-sizing:border-box;">
-        <span style="font-size:10px;color:var(--text-3);">Fraction of failure modes that will be fixed (B modes)</span>
-      </div>
-
-      <!-- Effectiveness Factor -->
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        <label style="font-size:11px;font-weight:600;color:var(--text-2);">Effectiveness Factor <span style="color:var(--text-3);font-weight:400;">(EF, 0–1)</span></label>
-        <input id="rgpEf" type="number" step="0.01" min="0.01" max="0.99" value="0.70"
-          style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:var(--font-mono);background:var(--surface);color:var(--text);width:100%;box-sizing:border-box;">
-        <span style="font-size:10px;color:var(--text-3);">Fraction of B-mode failure intensity removed by fix (industry avg ≈ 0.70)</span>
-      </div>
-
-      <!-- GPDM -->
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        <label style="font-size:11px;font-weight:600;color:var(--text-2);">Growth Potential Design Margin <span style="color:var(--text-3);font-weight:400;">(GPDM)</span></label>
-        <input id="rgpGpdm" type="number" step="0.01" min="1.0" max="3.0" value="1.20"
-          style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:var(--font-mono);background:var(--surface);color:var(--text);width:100%;box-sizing:border-box;">
-        <span style="font-size:10px;color:var(--text-3);">Safety margin over M<sub>G</sub> — accounts for lab vs. field gap (typical 1.2)</span>
-      </div>
-
-      <!-- Time unit -->
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        <label style="font-size:11px;font-weight:600;color:var(--text-2);">Time Unit</label>
-        <input id="rgpUnit" type="text" value="Hour"
-          style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:var(--font-mono);background:var(--surface);color:var(--text);width:100%;box-sizing:border-box;">
-      </div>
-
-      <!-- Pre-fill from RGA: tag selector + button -->
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        <label style="font-size:11px;font-weight:600;color:var(--text-2);">Pre-fill Mᵢ from RGA tag</label>
-        <select id="rgpTagSelect" style="padding:5px 7px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--surface);color:var(--text);">
-          <option value="">— run Analysis first —</option>
-        </select>
-        <button id="rgpPrefill" style="padding:7px 0;background:var(--surface);border:1px solid var(--border);border-radius:7px;font-size:12px;color:var(--text-2);cursor:pointer;transition:all .15s;"
-          title="Pre-fill Mᵢ with IMTBF at first failure time of selected tag">
-          ↙ Pre-fill Mᵢ from selected tag
-        </button>
-        <span style="font-size:10px;color:var(--text-3);">Sets Mᵢ = IMTBF at first failure time of that tag</span>
-      </div>
-
-      <button id="rgpCalc" style="padding:9px 0;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:100%;transition:background .15s;">
-        Calculate Growth Plan
-      </button>
-    </div>
-
-    <!-- ── Right: results + chart ── -->
-    <div style="flex:1;display:flex;flex-direction:column;min-width:0;overflow-y:auto;">
-
-      <!-- KPI strip -->
-      <div id="rgpKpiStrip" style="display:none;padding:14px 20px 10px;border-bottom:1px solid var(--border-soft);display:flex;flex-wrap:wrap;gap:12px;">
-      </div>
-
-      <!-- Chart -->
-      <div style="padding:14px 20px 0;">
-        <div style="display:flex;align-items:center;margin-bottom:4px;gap:8px;">
-          <div style="font-size:13px;font-weight:600;color:var(--text);flex:1;">IMTBF Growth Trajectory</div>
-          <button id="btnRGPExpand" class="export-btn" title="Expand chart fullscreen" style="font-size:13px;display:none;">⛶</button>
-          <button id="btnRGPDownload" class="export-btn" title="Download chart as PNG" style="font-size:13px;display:none;">⬇</button>
-        </div>
-        <div style="font-size:11px;color:var(--text-3);font-family:var(--font-mono);margin-bottom:10px;">Expected instantaneous MTBF over test/operating time</div>
-        <div class="cj-canvas-wrap" id="rgpChartWrap" style="display:none;">
-          <canvas id="chartRGP" aria-label="RG Plan IMTBF trajectory"></canvas>
-        </div>
-      </div>
-
-      <!-- Results table -->
-      <div id="rgpResultsBox" style="display:none;padding:14px 20px;">
-        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;">Planning Parameters</div>
-        <div id="rgpResultsTable"></div>
-      </div>
-
-      <!-- Placeholder when no calc yet -->
-      <div id="rgpPlaceholder" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:13px;">
-        Enter inputs and press <strong style="margin:0 4px;">Calculate Growth Plan</strong>
-      </div>
-    </div>
-  </div>
-</div><!-- /tabRGPlan -->
 
 
 <!-- ══════════════════════════════════════════════════
@@ -3484,22 +3372,6 @@ function updateTabsForAnalysis(analysisValue) {
   if(analysisValue !== 'rga'){
     const panel = document.getElementById('crowExtPanel');
     if(panel) panel.style.display = 'none';
-  }
-
-  /* RG Plan tab: use class toggle instead of inline style.
-     CSS rule #navTabRGPlan { display:none } is the default.
-     Class .rga-tab-visible overrides it when RGA is active.
-     This is immune to applyPackage which only sets el.style.display. */
-  const rgpBtn = document.querySelector('.tab-btn[data-tab="tabRGPlan"]');
-  if(rgpBtn){
-    const isRGA = analysisValue === 'rga';
-    rgpBtn.classList.toggle('rga-tab-visible', isRGA);
-    /* Clear any leftover inline style that might interfere */
-    rgpBtn.style.display = '';
-    /* If RG Plan is currently active and we switch away from RGA, go back to Analysis */
-    if(!isRGA && document.getElementById('tabRGPlan')?.classList.contains('active')){
-      document.querySelector('[data-tab="tabReliability"]')?.click();
-    }
   }
 }
 
@@ -11413,8 +11285,6 @@ pmTagSelect.addEventListener('change', async e => {
 	activeDashFMs = new Set();    /* reset dashboard FM filter */
 	activeAnalysisFMs = new Set(); /* reset analysis FM filter */
 	cfmTableSelection.clear();    /* reset results table FM checkboxes */
-	/* Refresh RG Plan tag selector with new results */
-	if(typeof populateRGPTagSelect === 'function') populateRGPTagSelect();
 	/* Rebuild Crow Extended FM table if CE mode is active */
 	if(typeof window._ceOnAnalysisDone === 'function') window._ceOnAnalysisDone();
 	
@@ -13004,8 +12874,6 @@ applyMode(dataAnalysisuiConfig['rga']);
 (typeof reapplyFMColumnVisibility==='function' && reapplyFMColumnVisibility());
 updateTabsForAnalysis('rga');
 if(typeof _applyDataTableColumns === 'function') _applyDataTableColumns('rga');
-/* Re-enforce RG Plan tab visibility after DOMContentLoaded handlers fire
-   (some handlers may indirectly affect tab visibility) */
 document.addEventListener('DOMContentLoaded', ()=>{
   updateTabsForAnalysis('rga');
 });
@@ -14202,342 +14070,6 @@ window.toggleDataEntry = function(){
 
 })(); /* end Crow Extended IIFE */
 
-/* ══════════════════════════════════════════════════════════
-   RELIABILITY GROWTH PLANNING (RG Plan tab)
-   Crow-AMSAA continuous growth planning model.
-   Inputs: Mᵢ, M_G, MSR, EF, GPDM
-   Output: IMTBF(T) trajectory + required test time
-══════════════════════════════════════════════════════════ */
-(function(){
-  'use strict';
-
-  let _rgpChart = null;
-
-  function $(id){ return document.getElementById(id); }
-  function v(id){ return parseFloat($(id)?.value); }
-  function fmt(x,d=2){ return isNum(x)&&isFinite(x)?x.toFixed(d):'—'; }
-
-  /* ── Core growth planning formulas ── */
-  function planGrowth(Mi, Mg, msr, ef, gpdm){
-    /* λᵢ = 1/Mᵢ */
-    const li = 1/Mi;
-    /* A/B mode intensities */
-    const la = (1-msr)*li;
-    const lb = msr*li;
-    /* Growth potential */
-    const Mgp = gpdm*Mg;
-    const lgp = 1/Mgp;
-    /* λ_GP = λ_A + (1-d)λ_B  →  solve for d consistent with GPDM target
-       If user's EF/MSR/GPDM are consistent: lgp should = la+(1-ef)*lb.
-       We compute the implied required test time using the Crow planning formula:
-       IMTBF(T) = Mᵢ / (1 - d·msr·(1 - N_B(T)/N_B(∞)))
-       For continuous growth: IMTBF(T) = 1/(λ_A + λ_B·exp(-ef·h·T))  [Crow 1982]
-       Simplified planning model:
-         λ(T) = λ_GP + (λᵢ - λ_GP)·exp(-κ·T)
-         where κ is the growth rate constant
-       More precisely, the Crow planning model uses:
-         IMTBF(T) = 1/[λ_A + λ_B·(1 - ef·(1-exp(-ρT)))]
-       But without the discovery rate ρ fitted to data, we use the closed-form
-       approach: given we want IMTBF(T*)=Mg, solve for T*.
-       Using the Duane learning curve: IMTBF(T) = (T/λ)^α form isn't directly
-       applicable here without data. Instead use the planning trajectory:
-         λ(T) = λ_GP + (λᵢ - λ_GP)·exp(-κ·T)
-         IMTBF(T) = 1/λ(T)
-       Solve for κ from the condition that at T_ref (half of required test time)
-       roughly 63% of the growth should be achieved (exponential growth model).
-       Required test time: set IMTBF(T*)=Mg → solve T*:
-         λ_G = λ_GP + (λᵢ - λ_GP)·exp(-κ·T*)
-         T* = -ln((λ_G - λ_GP)/(λᵢ - λ_GP)) / κ
-       κ is the program growth rate. A typical value derived from MSR and EF:
-         κ = ef·msr·λᵢ  (proportional to rate of B-mode discovery and fix rate)
-    */
-    /* Growth potential MTBF: M_GP = GPDM × M_G (planning constraint)
-       λ_GP = λ_G / GPDM = 1/M_GP — this is the trajectory asymptote.
-       la+(1-ef)*lb is the theoretical ceiling (shown in table for info). */
-    const lG   = 1/Mg;
-    const lGP  = lG / gpdm;  // = 1/Mgp          // = 1/Mgp — trajectory asymptote
-    const lGP_theoretical = la + (1-ef)*lb;  // informational only
-
-    /* Feasibility: need Mᵢ < M_G ≤ M_GP (already checked Mg>Mi above)
-       Also need λᵢ > λ_G > λ_GP */
-    if(li <= lG){
-      return { error: `Initial MTBF Mᵢ = ${fmt(Mi)} must be less than Goal MTBF M_G = ${fmt(Mg)}.` };
-    }
-
-    /* Growth rate constant κ = ef × MSR × λᵢ */
-    const kappa = ef * msr * li;
-
-    /* Required test time T*: solve IMTBF(T*) = M_G
-       λ(T) = λ_GP + (λᵢ − λ_GP)·exp(−κ·T) = λ_G
-       T* = −ln((λ_G − λ_GP)/(λᵢ − λ_GP)) / κ  */
-    const ratio = (lG - lGP)/(li - lGP);
-    if(ratio <= 0 || ratio >= 1){
-      return { error: 'Invalid parameter combination — check that M_G > Mᵢ and parameters are consistent.' };
-    }
-    const Tstar = -Math.log(ratio)/kappa;
-
-    /* IMTBF trajectory: T from 0.01 to 1.5*T* */
-    const nPts = 300;
-    const tMax = Tstar * 1.5;
-    const tArr = Array.from({length:nPts}, (_,i)=> (i+1)*(tMax/nPts));
-    const imtbfArr = tArr.map(T => 1/(lGP + (li-lGP)*Math.exp(-kappa*T)));
-
-    return { li, la, lb, lGP, lGP_theoretical, lG, kappa, Tstar, tArr, imtbfArr, Mi, Mg, Mgp, msr, ef, gpdm };
-  }
-
-  /* ── Draw/update chart ── */
-  function drawRGPChart(result){
-    const canvas = $('chartRGP');
-    if(!canvas) return;
-
-    if(_rgpChart){ _rgpChart.destroy(); _rgpChart=null; }
-
-    const unit = $('rgpUnit')?.value || 'Hour';
-    const {tArr, imtbfArr, Tstar, Mi, Mg, Mgp} = result;
-
-    /* Annotation lines */
-    const annotations = {
-      goalLine: {
-        type:'line', yMin:Mg, yMax:Mg,
-        borderColor:'rgba(16,185,129,.7)', borderWidth:1.5, borderDash:[5,4],
-        label:{content:`M_G = ${fmt(Mg)} ${unit}`, display:true, position:'end',
-               backgroundColor:'rgba(16,185,129,.15)', color:'rgb(16,185,129)', font:{size:10}}
-      },
-      gpLine: {
-        type:'line', yMin:Mgp, yMax:Mgp,
-        borderColor:'rgba(245,158,11,.7)', borderWidth:1.5, borderDash:[3,4],
-        label:{content:`M_GP = ${fmt(Mgp,1)} ${unit}`, display:true, position:'end',
-               backgroundColor:'rgba(245,158,11,.12)', color:'rgb(245,158,11)', font:{size:10}}
-      },
-      tstarLine: {
-        type:'line', xMin:Tstar, xMax:Tstar,
-        borderColor:'rgba(99,102,241,.6)', borderWidth:1.5, borderDash:[4,4],
-        label:{content:`T* = ${fmt(Tstar,0)} ${unit}`, display:true, position:'start',
-               backgroundColor:'rgba(99,102,241,.12)', color:'rgb(99,102,241)', font:{size:10}}
-      },
-      miLine: {
-        type:'line', yMin:Mi, yMax:Mi,
-        borderColor:'rgba(148,163,184,.5)', borderWidth:1, borderDash:[2,4]
-      }
-    };
-
-    _rgpChart = new Chart(canvas, {
-      type: 'line',
-      data: {
-        datasets:[{
-          label: `IMTBF(T)`,
-          data: tArr.map((t,i)=>({x:t, y:imtbfArr[i]})),
-          borderColor: 'var(--primary, #3b82f6)',
-          borderWidth: 2.5,
-          pointRadius: 0,
-          fill: false,
-          tension: 0
-        }]
-      },
-      options:{
-        animation:false,
-        responsive:true,
-        maintainAspectRatio:true,
-        plugins:{
-          legend:{display:false},
-          annotation:{annotations}
-        },
-        scales:{
-          x:{
-            type:'linear',
-            title:{display:true, text:`Test / Operating Time (${unit})`, font:{size:11}},
-            ticks:{font:{size:10}}
-          },
-          y:{
-            type:'linear',
-            title:{display:true, text:`IMTBF (${unit})`, font:{size:11}},
-            min:0,
-            ticks:{font:{size:10}}
-          }
-        }
-      },
-      plugins:[window.ChartAnnotation ? undefined : null].filter(Boolean)
-    });
-  }
-
-  /* ── Render KPI strip ── */
-  function renderKpis(r){
-    const unit = $('rgpUnit')?.value || 'Hour';
-    const strip = $('rgpKpiStrip');
-    if(!strip) return;
-    const chip = (label, val, sub) =>
-      `<div style="background:var(--surface);border:1px solid var(--border-soft);border-radius:8px;padding:8px 14px;min-width:120px;">
-        <div style="font-size:10px;color:var(--text-3);margin-bottom:2px;">${label}</div>
-        <div style="font-size:18px;font-weight:700;color:var(--text);font-family:var(--font-mono);">${val}</div>
-        ${sub?`<div style="font-size:10px;color:var(--text-3);">${sub}</div>`:''}
-       </div>`;
-    strip.style.display = 'flex';
-    strip.innerHTML =
-      chip('Required Test Time T*', fmt(r.Tstar,0)+` ${unit}`, 'to reach M_G') +
-      chip('Growth Potential M<sub>GP</sub>', fmt(r.Mgp,1)+` ${unit}`, `= GPDM × M_G`) +
-      chip('Initial MTBF M<sub>i</sub>', fmt(r.Mi,1)+` ${unit}`, `λᵢ = ${(r.li).toFixed(5)}/h`) +
-      chip('Goal MTBF M<sub>G</sub>', fmt(r.Mg,1)+` ${unit}`, `λ_G = ${(r.lG).toFixed(5)}/h`) +
-      chip('Growth Rate κ', r.kappa.toExponential(3), 'per '+unit);
-  }
-
-  /* ── Render parameters table ── */
-  function renderTable(r){
-    const unit = $('rgpUnit')?.value || 'Hour';
-    const box = $('rgpResultsBox');
-    const tbl = $('rgpResultsTable');
-    if(!box||!tbl) return;
-    const rows = [
-      ['Initial failure intensity λᵢ', r.li.toFixed(6), `/${unit}`],
-      ['A-mode intensity λ_A (unfixed modes)', r.la.toFixed(6), `/${unit}`],
-      ['B-mode intensity λ_B (to be fixed)', r.lb.toFixed(6), `/${unit}`],
-      ['Theoretical growth potential λ_GP = λ_A+(1-EF)λ_B', r.lGP_theoretical.toFixed(6), `/${unit}`],
-      ['Growth potential MTBF M_GP = GPDM × M_G', fmt(r.Mgp,2), unit],
-      ['Goal failure intensity λ_G = 1/M_G', r.lG.toFixed(6), `/${unit}`],
-      ['Growth rate constant κ = EF × MSR × λᵢ', r.kappa.toExponential(4), `/${unit}`],
-      ['Required test time T*', fmt(r.Tstar,1), unit],
-    ];
-    tbl.innerHTML = `<div class="table-wrapper"><table>
-      <thead><tr><th>Parameter</th><th>Value</th><th>Unit</th></tr></thead>
-      <tbody>${rows.map(([p,v,u])=>`<tr><td>${p}</td><td style="font-family:var(--font-mono)">${v}</td><td style="color:var(--text-3)">${u}</td></tr>`).join('')}
-      </tbody></table></div>`;
-    box.style.display = '';
-  }
-
-  /* ── Main calculate handler ── */
-  function calculate(){
-    const Mi   = v('rgpMi');
-    const Mg   = v('rgpMg');
-    const msr  = v('rgpMsr');
-    const ef   = v('rgpEf');
-    const gpdm = v('rgpGpdm');
-
-    if(!isNum(Mi)||Mi<=0||!isNum(Mg)||Mg<=0||!isNum(msr)||!isNum(ef)||!isNum(gpdm)){
-      alert('Please fill all inputs with valid positive numbers.'); return;
-    }
-    if(Mg <= Mi){ alert('Goal MTBF must be greater than Initial MTBF.'); return; }
-    if(msr<=0||msr>=1){ alert('MSR must be between 0 and 1.'); return; }
-    if(ef<=0||ef>=1){ alert('EF must be between 0 and 1.'); return; }
-    if(gpdm<1){ alert('GPDM must be ≥ 1.'); return; }
-
-    const result = planGrowth(Mi, Mg, msr, ef, gpdm);
-
-    if(result.error){
-      alert(result.error); return;
-    }
-
-    $('rgpPlaceholder').style.display = 'none';
-    $('rgpChartWrap').style.display   = '';
-    /* Show expand/download buttons now that chart is visible */
-    const _ebtn = $('btnRGPExpand'), _dbtn = $('btnRGPDownload');
-    if(_ebtn) _ebtn.style.display = '';
-    if(_dbtn) _dbtn.style.display = '';
-
-    renderKpis(result);
-    drawRGPChart(result);
-    renderTable(result);
-  }
-
-  /* ── Populate tag selector from lastPerTag ── */
-  function populateRGPTagSelect(){
-    const sel = $('rgpTagSelect');
-    if(!sel) return;
-    const prev = sel.value;
-    sel.innerHTML = '';
-    if(!window.lastPerTag || !window.lastPerTag.size){
-      sel.innerHTML = '<option value="">— run Analysis first —</option>';
-      return;
-    }
-    let count = 0;
-    window.lastPerTag.forEach((res, tag) => {
-      if(res?.dist !== 'crowAmsaa') return;
-      const opt = document.createElement('option');
-      opt.value = tag;
-      opt.textContent = tag;
-      sel.appendChild(opt);
-      count++;
-    });
-    if(count === 0){
-      sel.innerHTML = '<option value="">— no valid RGA results —</option>';
-      return;
-    }
-    /* Restore previous selection or default to first */
-    if(prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
-  }
-
-  /* ── Pre-fill Mᵢ from selected RGA tag ── */
-  function prefillFromRGA(){
-    const sel = $('rgpTagSelect');
-    const tag = sel?.value;
-    if(!tag || !window.lastPerTag){
-      alert('No valid RGA result found. Run Analysis first.'); return;
-    }
-    const res = window.lastPerTag.get(tag);
-    if(!res || res.dist !== 'crowAmsaa'){
-      alert(`Tag "${tag}" has no valid Crow-AMSAA result.`); return;
-    }
-    const {beta, lambda} = res.params || {};
-    const ft = res.failures || res.allTimes || [];
-    if(!ft.length || !isNum(beta) || !isNum(lambda)){
-      alert('Insufficient data for this tag.'); return;
-    }
-    const tFirst = Math.min(...ft);
-    const imtbf = 1/(lambda * beta * Math.pow(tFirst, beta - 1));
-    if(!isNum(imtbf) || imtbf <= 0){
-      alert('Could not compute IMTBF for this tag.'); return;
-    }
-    const el = $('rgpMi');
-    if(el) el.value = imtbf.toFixed(2);
-    /* Also sync unit from analysis tab */
-    const unitEl = document.getElementById('relUnit');
-    const rgpUnitEl = $('rgpUnit');
-    if(unitEl && rgpUnitEl) rgpUnitEl.value = unitEl.value || 'Hour';
-  }
-
-  /* ── Wire up on DOM ready ── */
-  document.addEventListener('DOMContentLoaded', ()=>{
-    $('rgpCalc')   ?.addEventListener('click', calculate);
-    $('rgpPrefill')?.addEventListener('click', prefillFromRGA);
-    /* Populate tag selector whenever the RG Plan tab is activated */
-    document.querySelector('[data-tab="tabRGPlan"]')?.addEventListener('click', ()=>{
-      setTimeout(populateRGPTagSelect, 50);
-    });
-    /* Expand chartRGP fullscreen */
-    $('btnRGPExpand')?.addEventListener('click', ()=>{
-      const canvas = $('chartRGP');
-      if(!canvas) return;
-      const existing = document.getElementById('rgpExpandOverlay');
-      if(existing) existing.remove();
-      const ov = document.createElement('div');
-      ov.id = 'rgpExpandOverlay';
-      ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:var(--bg,#0f1520);display:flex;flex-direction:column;padding:20px;box-sizing:border-box;';
-      ov.innerHTML = '<div style="display:flex;align-items:center;margin-bottom:14px;gap:10px;"><strong style="font-size:14px;color:var(--text);flex:1">IMTBF Growth Trajectory</strong><button id="rgpExpandClose" style="padding:4px 14px;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text);cursor:pointer;">✕ Close</button></div><div style="flex:1;display:flex;align-items:center;justify-content:center;"><canvas id="chartRGPExpand"></canvas></div>';
-      document.body.appendChild(ov);
-      document.getElementById('rgpExpandClose').onclick = () => { ov.remove(); };
-      ov.addEventListener('keydown', e => { if(e.key==='Escape') ov.remove(); });
-      /* Draw a fresh copy of the chart on the overlay canvas */
-      if(_rgpChart){
-        const cfg = JSON.parse(JSON.stringify(_rgpChart.config));
-        const ec = document.getElementById('chartRGPExpand');
-        ec.width  = ov.clientWidth - 40;
-        ec.height = ov.clientHeight - 80;
-        new Chart(ec, cfg);
-      }
-    });
-    /* Download chartRGP as PNG */
-    $('btnRGPDownload')?.addEventListener('click', ()=>{
-      const canvas = $('chartRGP');
-      if(!canvas) return;
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/png');
-      a.download = 'IMTBF_Growth_Trajectory.png';
-      a.click();
-    });
-  });
-
-  /* Expose for post-analysis hook */
-  window.populateRGPTagSelect = populateRGPTagSelect;
-
-})(); /* end RG Plan IIFE */
 
 
   </script> 
@@ -14879,10 +14411,7 @@ function applyPackage(pkg) {
     el.style.display = isMultiAsset ? '' : 'none';
   });
   
-  /* ── 5. Generic data-pkg support ──
-     RG Plan now uses standard data-pkg="professional ultimate" gating like
-     every other tab — no special-case skip needed (file access already
-     guarantees only enterprise/ultimate/trial sessions get here). */
+  /* ── 5. Generic data-pkg support ── */
   document.querySelectorAll('[data-pkg]').forEach(el => {
 	const allowed = (el.dataset.pkg || '')
     .toLowerCase()
