@@ -14814,5 +14814,46 @@ window.addEventListener('beforeunload', window._beforeUnloadHandler);
 
 
 
+
+<!-- ══════════════════════════════════════════════════════
+     SITE FOOTER
+══════════════════════════════════════════════════════ -->
+<style>
+.rs-footer{background:var(--surface);border-top:2px solid var(--primary);font-size:11px;color:var(--text-3);margin-top:32px;}
+.rs-footer-inner{max-width:1200px;margin:0 auto;padding:20px 28px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;}
+.rs-footer-brand{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;letter-spacing:.02em;}
+.rs-footer-links{display:flex;flex-direction:column;gap:6px;}
+.rs-footer-links a{color:var(--text-2);text-decoration:none;transition:color .15s;font-size:11px;}
+.rs-footer-links a:hover{color:var(--primary);}
+.rs-footer-section-label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.rs-footer-bottom{border-top:1px solid var(--border);padding:8px 28px;text-align:center;font-size:10px;letter-spacing:.03em;color:var(--text-2);}
+@media(max-width:700px){ .rs-footer-inner{grid-template-columns:1fr;} }
+</style>
+<footer class="rs-footer">
+  <div class="rs-footer-inner">
+    <div>
+      <div class="rs-footer-brand">Reliability Suite Pro</div>
+      <div style="color:var(--text-2);line-height:1.7;font-size:11px;">
+        Commercial-grade reliability engineering platform for oil &amp; gas and mining professionals.
+      </div>
+    </div>
+    <div>
+      <div class="rs-footer-section-label">About</div>
+      <div class="rs-footer-links">
+        <a href="dashboard.html">About ReliaSuite</a>
+        <a href="dashboard.html">Terms of Use</a>
+      </div>
+    </div>
+    <div>
+      <div class="rs-footer-section-label">Contact</div>
+      <div style="line-height:1.7;color:var(--text-2);font-size:11px;">
+        Support &amp; Feedback<br>
+        <a href="mailto:grandrianirina@gmail.com?cc=rateliniainalioka@gmail.com" style="color:var(--primary);text-decoration:none;">Support</a>
+      </div>
+    </div>
+  </div>
+  <div class="rs-footer-bottom">&copy; 2026 ReliaSuite Professional &nbsp;&middot;&nbsp; All rights reserved</div>
+</footer>
+
 </body>
 </html>
