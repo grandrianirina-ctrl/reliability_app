@@ -326,9 +326,6 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
     <div class="nav-item" onclick="showView('viewSettings')">
       <span class="icon">⚙️</span> Settings
     </div>
-    <div class="nav-item" onclick="showView('viewDevTools')">
-      <span class="icon">🧪</span> Dev Tools
-    </div>
   </div>
 
   <!-- Main -->
@@ -535,54 +532,6 @@ tbody td.main { color:var(--text); font-family:'Syne',sans-serif; font-weight:60
       </div>
     </div>
 
-    <!-- ══ VIEW: DEV TOOLS ══ -->
-    <div class="view" id="viewDevTools">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Dev Tools</div>
-          <div class="page-sub">Test in-development analysis tools safely</div>
-        </div>
-      </div>
-
-      <div class="table-card">
-        <div style="padding:18px 20px">
-          <div style="padding:12px 14px;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.2);border-radius:8px;font-size:11px;font-family:'JetBrains Mono',monospace;color:#7dd3fc;line-height:1.7">
-            🛡️ These links open files inside a separate <strong>dev/</strong> folder (e.g. <strong>dev/Life_Data_Analysis_dev.html</strong>), never the live files at the site root that customers actually use. As long as a dev build is only ever uploaded into <strong>dev/</strong> — never to the root, never overwriting the stable file of the same name — there is no way testing here can affect production. Each link opens in a new tab so your admin session stays open here.
-          </div>
-        </div>
-      </div>
-
-      <div class="table-card">
-        <div class="table-header">
-          <div class="table-title">🧪 Known dev builds</div>
-        </div>
-        <div style="padding:18px 20px; display:flex; gap:10px; flex-wrap:wrap">
-          <a class="refresh-btn" href="dev/Life_Data_Analysis_dev.html" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">📊 Life Data Analysis <span style="color:#f59e0b">(dev)</span></a>
-          <a class="refresh-btn" href="dev/Reliability_Growth_Analysis_dev.html" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">📈 Reliability Growth Analysis <span style="color:#f59e0b">(dev)</span></a>
-          <a class="refresh-btn" href="dev/Degradation_Analysis_dev.html" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">📉 Degradation Analysis <span style="color:#f59e0b">(dev)</span></a>
-        </div>
-        <div style="padding:0 20px 16px;font-size:10px;color:var(--muted2);font-family:'JetBrains Mono',monospace">
-          These links always point to the fixed filenames above — if that file hasn't been uploaded yet, the link will 404. That's expected and harmless; upload the corresponding _dev.html file to enable it.
-        </div>
-      </div>
-
-      <div class="table-card">
-        <div class="table-header">
-          <div class="table-title">🔗 Test any other file</div>
-        </div>
-        <div style="padding:18px 20px">
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <input type="text" id="devToolCustomFile" placeholder="e.g. Life_Data_Analysis_experimental.html"
-              style="flex:1;min-width:260px;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px">
-            <button class="modal-save" style="padding:9px 18px;white-space:nowrap" onclick="openDevToolCustomFile()">🚀 Open</button>
-          </div>
-          <div style="margin-top:8px;font-size:10px;color:var(--muted2);font-family:'JetBrains Mono',monospace">
-            Just the filename — <strong>dev/</strong> is added automatically, same as the buttons above. For anything that isn't one of the three above: a second dev variant, an experimental one-off, etc. Opens in a new tab. No code change needed to use this.
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- ══ VIEW: PAYMENTS ══ -->
     <div class="view" id="viewPayments">
       <div class="page-header">
@@ -779,7 +728,7 @@ window.showView = function(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const map = { viewOverview:0, viewUsers:1, viewPayments:2, viewPrices:3, viewSessions:4, viewSupport:5, viewSettings:6, viewDevTools:7 };
+  const map = { viewOverview:0, viewUsers:1, viewPayments:2, viewPrices:3, viewSessions:4, viewSupport:5, viewSettings:6 };
   document.querySelectorAll('.nav-item')[map[id]]?.classList.add('active');
   if (id==='viewUsers')    loadUsers();
   if (id==='viewPayments') loadPayments();
@@ -787,16 +736,6 @@ window.showView = function(id) {
   if (id==='viewSessions') loadSessions();
   if (id==='viewSupport')  loadTickets();
   if (id==='viewSettings') loadSettings();
-};
-
-window.openDevToolCustomFile = function() {
-  const input = document.getElementById('devToolCustomFile');
-  let name = (input?.value || '').trim();
-  if (!name) { alert('Enter a filename first, e.g. Life_Data_Analysis_experimental.html'); return; }
-  // Convenience: don't require the .html extension, or the dev/ prefix, to be typed.
-  if (!/\.html?$/i.test(name)) name += '.html';
-  if (!name.startsWith('dev/')) name = 'dev/' + name;
-  window.open(name, '_blank', 'noopener');
 };
 
 function loadSettings() {
