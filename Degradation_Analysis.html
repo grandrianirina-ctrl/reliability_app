@@ -6324,7 +6324,7 @@ function importIntoTable(rows) {
 					td.contentEditable = "true";
 					td.dataset.row = r;
 					td.dataset.col = c;
-					/* Must match createSheet()/addRow()/_restoreSheetFromText():
+					/* Must match createSheet()/addRow():
 					   without these classes, reapplyTagColumnVisibility() and
 					   the FM-column tier logic can't find/hide these cells,
 					   leaving a visible extra column that shifts every value
@@ -6512,119 +6512,6 @@ function importIntoTable(rows) {
     get:(k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; } catch(err){ console.warn('[ReliaSuite] localStorage read failed for "'+k+'":', err); return d; } }
   };
 
-  /* ════════════════════════════════════════════════════════════════
-     SESSION RECOVERY  (ISO 25010 — Reliability › Recoverability)
-     The raw field-data text was already being saved to localStorage
-     on every "Analyze" run (LS.set('rs_rel_text', raw), further down)
-     but never read back — a crashed tab or accidental refresh lost
-     the in-progress dataset even though it had already been captured.
-     This restores it on load via a dismissible banner, not silently
-     and not automatically, so the user stays in control. ──────────── */
-  function _restoreSheetFromText(text){
-    let lines = text.trim().split('\n').filter(l => l.trim() !== '');
-    if(lines.length > SHEET_MAX_ROWS) lines = lines.slice(0, SHEET_MAX_ROWS);
-    const total = lines.length;
-    if(total === 0) return;
-
-    const tbody = sheet.querySelector('tbody');
-    showSheetLoading('Restoring your last session…', `0 / ${total} rows`);
-
-    /* Expand rows if the restored set is larger than the default 20 */
-    const currentRows = tbody.querySelectorAll('tr').length;
-    for(let r = currentRows + 1; r <= total; r++){
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${r}</td>`;
-      columns.forEach((col, c) => {
-        const td = document.createElement('td');
-        td.contentEditable = 'true';
-        td.dataset.row = r;
-        td.dataset.col = c;
-        if(c === 0) td.classList.add('data_tag');
-        if(col.cls) td.classList.add(col.cls);
-        preventNewLine(td);
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
-    }
-
-    const CHUNK = 200;
-    let processed = 0;
-    function chunk(){
-      const end = Math.min(processed + CHUNK, total);
-      for(let i = processed; i < end; i++){
-        const fields = lines[i].split(',');
-        for(let c = 0; c < columns.length; c++){
-          const cell = sheet.querySelector(`td[data-row='${i+1}'][data-col='${c}']`);
-          if(!cell) continue;
-          let value = fields[c] ?? '';
-          if(c === 1 || c === 3) value = toFloatOrBlank(value);
-          else if(c === 2) value = normalizeFS(value);
-          cell.textContent = value;
-        }
-      }
-      processed = end;
-      const subEl = document.getElementById('sheetLoadingSub');
-      if(subEl) subEl.textContent = `${processed} / ${total} rows`;
-      if(processed < total){
-        requestAnimationFrame(chunk);
-      } else {
-        hideSheetLoading();
-        reapplyTagColumnVisibility();
-        if(typeof reapplyFMColumnVisibility === 'function') reapplyFMColumnVisibility();
-        if(typeof _applyDataTableColumns === 'function') _applyDataTableColumns();
-      }
-    }
-    requestAnimationFrame(chunk);
-  }
-
-  function _initSessionRecoveryBanner(){
-    const saved = LS.get('rs_rel_text', null);
-    if(!saved || !saved.trim()) return;
-
-    const host = document.getElementById('dataEntryContent');
-    if(!host) return;
-
-    const bar = document.createElement('div');
-    bar.id = 'sessionRecoveryBanner';
-    bar.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 12px;margin-bottom:10px;border-radius:8px;background:var(--surface-2,#1c2333);border:1px solid var(--border);font-size:12.5px;color:var(--text)';
-    bar.innerHTML = `
-      <span style="font-size:16px">💾</span>
-      <span style="flex:1">Found field data saved locally in this browser. Restore it?</span>
-      <button id="sessRecoverBtn" class="btn" style="padding:4px 12px;font-size:12px">Restore</button>
-      <button id="sessDiscardBtn" class="export-btn" style="padding:4px 12px;font-size:12px;color:var(--text-3)">Discard</button>`;
-    host.insertBefore(bar, host.firstChild);
-
-    document.getElementById('sessRecoverBtn').addEventListener('click', () => {
-      _restoreSheetFromText(saved);
-      bar.remove();
-    });
-    document.getElementById('sessDiscardBtn').addEventListener('click', () => {
-      localStorage.removeItem('rs_rel_text');
-      bar.remove();
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', _initSessionRecoveryBanner);
-
-  /* Fault Tolerance: surface storage failures instead of swallowing them.
-     Shown at most once per page load — repeated Analyze clicks while
-     storage stays broken won't spam the user. The analysis itself still
-     runs normally; only the recovery copy failed to save. */
-  let _storageWarningShown = false;
-  function _showStorageWarning(){
-    if(_storageWarningShown) return;
-    _storageWarningShown = true;
-    const host = document.getElementById('dataEntryContent');
-    if(!host) return;
-    const bar = document.createElement('div');
-    bar.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 12px;margin-bottom:10px;border-radius:8px;background:rgba(255,170,0,.1);border:1px solid var(--warn,#d9a400);font-size:12.5px;color:var(--text)';
-    bar.innerHTML = `
-      <span style="font-size:16px">⚠️</span>
-      <span style="flex:1">Your browser couldn't save a recovery copy of this data (storage may be full or disabled in private browsing). The current analysis is unaffected, but it won't be recoverable after a refresh.</span>
-      <button id="storageWarnDismiss" class="export-btn" style="padding:4px 12px;font-size:12px;color:var(--text-3)">Dismiss</button>`;
-    host.insertBefore(bar, host.firstChild);
-    document.getElementById('storageWarnDismiss').addEventListener('click', () => bar.remove());
-  }
 
   function exportCsv(name, header, rows){ const lines=[header.join(',')]; rows.forEach(r=>lines.push(r.map(v=>(isNum(v)?String(v):String(v??'').replace(/,/g,';'))).join(','))); const blob=new Blob(["\uFEFF"+lines.join('\n')],{type:'text/csv;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);} 
 
@@ -13403,7 +13290,6 @@ pmTagSelect.addEventListener('change', async e => {
 	if (document.getElementById("relCurveSource").value=="ttf"){
 	    const raw=(concatenateAllRows()||'').trim(); if(!raw){ statusRel.innerHTML='<span class="error"></span>'; btnCalculerRel.disabled=false; return; } 
 
-		if(!LS.set('rs_rel_text',raw)) _showStorageWarning();
 		
 		const {tags,errors}=parseInputData(raw); if(errors.length){ statusRel.innerHTML='<span class="error">'+errors.join('<br>')+'</span>'; btnCalculerRel.disabled=false; return; } 
 		
