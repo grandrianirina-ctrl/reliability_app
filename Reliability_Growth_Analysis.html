@@ -2227,8 +2227,7 @@ select {
 
       
 
-      <!-- ── KPI STAT PILLS ── -->
-      <div class="stat-row" id="cjStatRow"></div>
+      <!-- ── KPI STAT PILLS removed ── -->
 	  
 	  
 	  
@@ -2920,197 +2919,6 @@ const format_Value = v => {
 /* ── Visible series set (for legend toggle) ── */
 const _cjVisibleSeries = new Set();
 
-/* ── Stat pills ── */
-function _cjUpdateStats(series, tMax){
-  const row = document.getElementById('cjStatRow');
-  if(!row) return;
-
-  const _noneActive = _cjVisibleSeries.size === 1 && _cjVisibleSeries.has('\x00__none__\x00');
-  const vis = _noneActive ? [] : (series||[]).filter(s => 
-    !s.isCFMMode &&  /* exclude FM sub-series — stats use parent system curves only */
-    (!_cjVisibleSeries.size || _cjVisibleSeries.has(s.tag||s.label))
-  );
-  if(!vis.length){ row.innerHTML=''; return; }
-
-  const unit     = document.getElementById('relUnit')?.value || 'units';
-  const analysis = 'rga';
-  const t_statistic = parseFloat(dynTEl?.value) || tMax / 2;
-
-  /* ── MTBF (LDA only) ── */
-  function mtbfOf(s){
-    if(s.stats && isNum(s.stats.mtbfModel) && s.stats.mtbfModel > 0)
-      return s.stats.mtbfModel;
-    if(analysis !== 'lda' || !s.R) return null;
-    const N = 500, dt = tMax / N;
-    let integral = 0;
-    for(let k = 0; k < N; k++){
-      const t0 = k*dt, t1 = t0+dt;
-      const r0 = s.R(t0), r1 = s.R(t1);
-      if(isNum(r0) && isNum(r1)) integral += 0.5*(r0+r1)*dt;
-    }
-    return integral > 0 ? integral : null;
-  }
-
-  const mtbfVals = vis.map(mtbfOf).filter(v => v !== null && isNum(v) && v > 0);
-  const avgMTBF  = mtbfVals.length
-    ? mtbfVals.reduce((a,b)=>a+b, 0) / mtbfVals.length
-    : null;
-
-  /* ── Best component + pills ── */
-  let bestTag = '—', bestColor = 'var(--text)';
-  let pill3Label = '—', pill4Label = '—', pill4Value = '—';
-
-  /* ══════════════════════════════════════════
-     RGA
-  ══════════════════════════════════════════ */
-  if(analysis === 'rga'){
-    let bestBeta = Infinity;
-    vis.forEach(s => {
-      const beta = s.params?.beta ?? null;
-      if(isNum(beta) && beta < bestBeta){
-        bestBeta  = beta;
-        bestTag   = (s.tag || s.label || '—') + ` (β=${fmt(bestBeta,2)})`;
-        bestColor = bestBeta < 1 ? 'var(--ok)'
-                  : bestBeta > 1 ? 'var(--err)'
-                  :                'var(--text)';
-      }
-    });
-    pill3Label = 'Best (lowest β)';
-    const betas = vis.map(s => s.params?.beta).filter(v => isNum(v));
-    pill4Label  = 'β range';
-    pill4Value  = betas.length
-      ? `${fmt(Math.min(...betas),2)} – ${fmt(Math.max(...betas),2)}`
-      : '—';
-
-    /* ── Avg DMTBF: average of instantaneous MTBF at T* (termination time) per series ── */
-    const dmtbfVals = vis.map(s => {
-      const b = s.params?.beta, l = s.params?.lambda;
-      // Must use T* = max(failure times), NOT TTT = sum(all times)
-      const tobs = (s.kpi?.rgaTobs > 0) ? s.kpi.rgaTobs
-                 : (s.Tstar > 0) ? s.Tstar
-                 : (s.allTimes?.length ? Math.max(...s.allTimes) : 0);
-      if(isNum(b) && isNum(l) && b > 0 && l > 0 && tobs > 0)
-        return 1 / (l * b * Math.pow(tobs, b - 1));
-      return null;
-    }).filter(v => v !== null && isNum(v) && v > 0);
-    const avgDMTBF = dmtbfVals.length
-      ? dmtbfVals.reduce((a,b) => a+b, 0) / dmtbfVals.length
-      : null;
-
-    row.innerHTML = `
-      <div class="stat-pill">
-        <div class="stat-pill-label">Series</div>
-        <div class="stat-pill-value">${vis.length}</div>
-      </div>
-      <div class="stat-pill">
-        <div class="stat-pill-label">Avg DMTBF</div>
-        <div class="stat-pill-value">${avgDMTBF!==null?(avgDMTBF>=1e5?avgDMTBF.toExponential(2):fmt(avgDMTBF,0)):'—'}</div>
-      </div>
-      <div class="stat-pill">
-        <div class="stat-pill-label">${pill3Label}</div>
-        <div class="stat-pill-value" style="font-size:13px;color:${bestColor}">${bestTag}</div>
-      </div>
-      <div class="stat-pill">
-        <div class="stat-pill-label">${pill4Label}</div>
-        <div class="stat-pill-value" style="font-size:13px">${pill4Value}</div>
-      </div>`;
-
-  /* ══════════════════════════════════════════
-     DEGRADATION
-     Pill 2 → Avg predicted life H(0)
-     Pill 3 → Best tag = highest H(0)  (slowest degradation, universal across model types)
-     Pill 4 → R(t*) range
-  ══════════════════════════════════════════ */
-  } else if(analysis === 'degrad'){
-    /* Avg predicted life = mean H(0) across visible series */
-    const rulVals = vis.filter(s=>s.H).map(s=>s.H(0)).filter(v=>isNum(v)&&v>0);
-    const avgRUL  = rulVals.length
-      ? rulVals.reduce((a,b)=>a+b,0)/rulVals.length
-      : null;
-
-    /* Best = highest H(0) — longest time before reaching degradation limit */
-    let bestRUL = -Infinity;
-    vis.forEach(s => {
-      if(!s.H) return;
-      const rul = s.H(0);
-      if(isNum(rul) && rul > bestRUL){
-        bestRUL   = rul;
-        bestTag   = (s.tag || s.label || '—') + ` (RUL=${fmt(bestRUL,0)})`;
-        bestColor = s.color || 'var(--primary)';
-      }
-    });
-
-    /* R(t*) range */
-    const rVals = vis.filter(s=>s.R).map(s=>s.R(t_statistic)).filter(v=>isNum(v));
-    pill4Label = `R(${t_statistic}) range`;
-    pill4Value = rVals.length
-      ? `${(Math.min(...rVals)*100).toFixed(1)}–${(Math.max(...rVals)*100).toFixed(1)}%`
-      : '—';
-
-    row.innerHTML = `
-      <div class="stat-pill">
-        <div class="stat-pill-label">Series</div>
-        <div class="stat-pill-value">${vis.length}</div>
-      </div>
-      <div class="stat-pill">
-        <div class="stat-pill-label">Avg predicted life</div>
-        <div class="stat-pill-value">${avgRUL!==null?fmt(avgRUL,0):'—'}</div>
-        
-      </div>
-      <div class="stat-pill">
-        <div class="stat-pill-label">Best (slowest degradation)</div>
-        <div class="stat-pill-value" style="font-size:13px;color:${bestColor}">${bestTag}</div>
-      </div>
-      <div class="stat-pill">
-        <div class="stat-pill-label">${pill4Label}</div>
-        <div class="stat-pill-value" style="font-size:13px">${pill4Value}</div>
-      </div>`;
-
-  /* ══════════════════════════════════════════
-     LDA
-  ══════════════════════════════════════════ */
-  } else {
-    let bestR = -1;
-    vis.forEach(s => {
-      if(!s.R) return;
-      const r = s.R(t_statistic);
-      if(isNum(r) && r > bestR){
-        bestR     = r;
-        bestTag   = s.tag || s.label || '—';
-        bestColor = s.color || 'var(--primary)';
-      }
-    });
-    const rVals = vis.filter(s=>s.R).map(s=>s.R(t_statistic)).filter(v=>isNum(v));
-    pill4Label = `R(${t_statistic}) range`;
-    pill4Value = rVals.length
-      ? `${(Math.min(...rVals)*100).toFixed(1)}–${(Math.max(...rVals)*100).toFixed(1)}%`
-      : '—';
-    const mtbfVal = avgMTBF!==null
-      ? (avgMTBF>=1e5?avgMTBF.toExponential(2):fmt(avgMTBF,0))
-      : '—';
-
-    row.innerHTML = `
-      <div class="stat-pill">
-        <div class="stat-pill-label">Series</div>
-        <div class="stat-pill-value">${vis.length}</div>
-      </div>
-      <div class="stat-pill">
-        <div class="stat-pill-label">Avg MTBF</div>
-        <div class="stat-pill-value">${mtbfVal}</div>
-      </div>
-      <div class="stat-pill">
-        <div class="stat-pill-label">Best at t=${t_statistic}</div>
-        <div class="stat-pill-value" style="font-size:13px;color:${bestColor}">${bestTag}</div>
-      </div>
-      <div class="stat-pill">
-        <div class="stat-pill-label">${pill4Label}</div>
-        <div class="stat-pill-value" style="font-size:13px">${pill4Value}</div>
-      </div>`;
-  }
-}
-
-
-
 /* ── Legend pills ── */
 function _cjRenderLegend(series){
   const row = document.getElementById('cjLegendRow');
@@ -3146,7 +2954,6 @@ function _cjRenderLegend(series){
       const allSeries = _cjLastSeries;
       if(allSeries){
         _cjRenderLegend(allSeries);
-        _cjUpdateStats(allSeries, _cjLastTMax||500);
       }
     }
     /* Refresh maintenance legends when FM mode active */
@@ -3240,7 +3047,6 @@ function _cjRenderLegend(series){
         const allSeries = _cjLastSeries;
         if(allSeries){
           _cjRenderLegend(allSeries);
-          _cjUpdateStats(allSeries, _cjLastTMax||500);
         }
       }
       /* Refresh maintenance legends when FM mode active */
@@ -4430,7 +4236,6 @@ Ymax *= 1.02;
       if(dynFollowEl && dynFollowEl.checked){
         dynTEl.value = fmt(xs[idx],2);
         updateDynLegendAt(xs[idx], series);
-		_cjUpdateStats(series, tMax);
         /* Sync results table R(t) column header and CFM cells */
         _syncResultsTableRt(xs[idx]);
       }
@@ -4438,7 +4243,6 @@ Ymax *= 1.02;
   }));
 
   /* ── update stat pills after draw ── */
-  _cjUpdateStats(series, tMax);
 
   /* ── update legend pills after draw ── */
   if(kind==='R') _cjRenderLegend(series);
@@ -11460,7 +11264,6 @@ pmTagSelect.addEventListener('change', async e => {
     const series = buildSeriesForDataAnalysis(lastPerTag);
     updateDynLegendAt(t, series);
     const tMaxVal = Math.max(...[...lastPerTag.values()].flatMap(r => r.allTimes||[]).filter(isNum), 1);
-    _cjUpdateStats(series, tMaxVal);
     /* Also update R(t*) / RUL(t) column in the results table */
     if(t > 0) _syncResultsTableRt(t);
     if(dynTopNEnableEl.checked) redrawReliability(lastPerTag);
@@ -12699,7 +12502,6 @@ function Reset_All_Analysis(){
     /* ── Reliability tab ── */
     statusRel.textContent = '';
     relResultsTable.innerHTML = '';
-    document.getElementById('cjStatRow').innerHTML   = '';
     document.getElementById('cjLegendRow').innerHTML = '';
     ['chartR','chartH','chartF'].forEach(svgId => {
       cjDestroy(svgId);
