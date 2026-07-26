@@ -1877,16 +1877,8 @@ select {
     </div>
     <div class="chart-container" id="kpiCardD">
       <div class="chart-header">
-        <span class="chart-label" id="kpiLabelD">Failure Risk</span>
-        <span class="chart-sublabel" id="kpiSubD">P(fail within Δt | survived to t)</span>
-        <label id="kpiRiskAgeWrap" style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-3);margin-left:8px">
-          Current age:
-          <input id="kpiRiskAge" type="number" step="any" value="365" title="Current age t — the asset has already survived this long (LDA only)" style="width:64px;font-size:11px;padding:2px 4px"/>
-        </label>
-        <label id="kpiRiskWindowWrap" style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-3);margin-left:6px">
-          + window:
-          <input id="kpiRiskWindow" type="number" step="any" value="90" min="0" title="Planning horizon Δt — probability of failing within this much additional time (LDA only)" style="width:56px;font-size:11px;padding:2px 4px"/>
-        </label>
+        <span class="chart-label" id="kpiLabelD">Failure Rate</span>
+        <span class="chart-sublabel" id="kpiSubD">r / TTT — failures per time at end of observation (like h)</span>
         <button class="export-btn" onclick="exportKpiChart('kpiChartD','D')" title="Export PNG">⬇️</button>
       </div>
       <div style="position:relative;height:300px;padding:0 0 12px"><canvas id="kpiChartD"></canvas></div>
@@ -8356,7 +8348,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const table = document.getElementById('kpiTop5'); if(!table) return;
     const unit  = relUnitEl?.value || 'units';
     let html = `<thead><tr>
-      <th>Tag</th><th>Distribution</th><th>MTBF (${unit})</th><th>Failure Risk (%)</th>
+      <th>Tag</th><th>Distribution</th><th>MTBF (${unit})</th><th>Failure Rate (r/TTT)</th>
       <th>β</th><th>MTTR (${unit})</th><th>Availability %</th><th>Behaviour</th>
     </tr></thead><tbody>`;
     data.forEach(d=>{
@@ -8368,7 +8360,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         <td><b>${d.tag}</b></td>
         <td>${d.distName || '—'}</td>
         <td>${isNum(d.mtbf)  ? fmt(d.mtbf,2)          : '—'}</td>
-        <td>${isNum(d.risk)  ? fmt(d.risk,2)+'%'      : '—'}</td>
+        <td>${isNum(d.rate)  ? fmtV(d.rate,5)         : '—'}</td>
         <td>${isNum(d.beta)  ? fmt(d.beta,3)          : '—'}</td>
         <td>${isNum(d.mttr)  ? fmt(d.mttr,2)           : '—'}</td>
         <td>${isNum(d.avail) ? fmt(d.avail,1)+'%'      : '—'}</td>
@@ -8707,17 +8699,33 @@ document.addEventListener('DOMContentLoaded', ()=>{
     return selectedModes.reduce((prod,[,mr])=> prod * (isNum(mr.R?.(t)) ? mr.R(t) : 1), 1);
   }
 
-  /* Conditional failure risk: P(fail within Δt | survived to age t)
-     = 1 − R(t+Δt)/R(t). Replaces the old raw instantaneous hazard h(t)
-     with a 0–100% probability that directly answers "how worried
-     should I be about this asset failing soon, given its current age." */
-  function _conditionalFailureRisk(Rfn, t, dt){
-    if(!isNum(t) || t < 0 || !isNum(dt) || dt < 0) return NaN;
-    const Rt = Rfn(t);
-    if(!isNum(Rt) || Rt <= 0) return NaN; /* already failed by t in the model — undefined */
-    const Rtdt = Rfn(t + dt);
-    if(!isNum(Rtdt)) return NaN;
-    return Math.max(0, Math.min(1, 1 - (Rtdt / Rt))) * 100;
+  /* Simple empirical failure rate: r / TTT, the classic "r/TTT" hazard
+     estimate — r is the number of observed failures and TTT is the time
+     at the END of the observation period (the max of ALL recorded times,
+     including any still-running/censored units) — not just the time of
+     the last failure, and not the sum of all times. */
+  function _lifeFailureRate(res){
+    if(!res) return NaN;
+    const r = res.r || 0;
+    if(r <= 0) return NaN;
+    const TTT = (Array.isArray(res.allTimes) && res.allTimes.length) ? Math.max(...res.allTimes) : NaN;
+    if(!isNum(TTT) || TTT <= 0) return NaN;
+    return r / TTT;
+  }
+
+
+  /* Partial system failure rate — same elimination logic as MTBF/MTTR:
+     averages each SELECTED mode's own r/TTT rate (the classic empirical
+     r/TTT approach) rather than deriving one combined TTT across modes
+     that may have different observation windows. */
+  function _partialSystemFailureRate(r){
+    if(!r.isCompeting || !r.modes) return _lifeFailureRate(r);
+    const selectedModes = [...r.modes.entries()].filter(([fm])=>
+      activeDashFMs.size === 0 || activeDashFMs.has(fm)
+    );
+    if(selectedModes.length === 0 || selectedModes.length === r.modes.size) return _lifeFailureRate(r);
+    const rates = selectedModes.map(([,mr]) => _lifeFailureRate(mr)).filter(isNum);
+    return rates.length ? rates.reduce((a,b)=>a+b,0)/rates.length : NaN;
   }
 
   function _partialSystemAvail(r, mtbfPartial){
@@ -8767,18 +8775,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
     ════════════════════════════════════════ */
     if(mode === 'lda'){
       if(badge) badge.innerHTML = '📊 <b>LDA Dashboard</b> — Life Data Analysis';
-      const rateTimeEl = document.getElementById('kpiRiskAge');
-      const rateTimeWrap = document.getElementById('kpiRiskAgeWrap');
-      const rateWindowEl = document.getElementById('kpiRiskWindow');
-      const rateWindowWrap = document.getElementById('kpiRiskWindowWrap');
-      if(rateTimeWrap) rateTimeWrap.style.display = '';
-      if(rateWindowWrap) rateWindowWrap.style.display = '';
-      const dynT  = isNum(parseFloat(rateTimeEl?.value))   ? parseFloat(rateTimeEl.value)   : 365;
-      const dynDt = isNum(parseFloat(rateWindowEl?.value)) ? parseFloat(rateWindowEl.value) : 90;
       setCard('A', 'MTBF', 'Mean Time Between Failures (model)', true);
       setCard('B', 'MTTR', 'Mean Time To Repair', true);
       setCard('C', 'β — Weibull Shape Parameter', 'β<1 infant mortality · β≈1 random · β>1 wear-out', true);
-      setCard('D', 'Failure Risk', `P(fail in next ${fmt(dynDt,0)} | survived ${fmt(dynT,0)}) — conditional probability`, true);
+      setCard('D', 'Failure Rate', 'r / TTT — failures per time at end of observation (like h)', true);
       setCard('E', 'Availability', 'TTT / (TTT + downtime) %', true);
 
       /* Build/refresh FM filter panel */
@@ -8788,11 +8788,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
       for(const [tag, r] of perTag){
         if(!r || !r.ok) continue;
         const hasCFM = r.isCompeting && r.modes && r.modes.size > 0;
-        /* Compute partial MTBF/MTTR/Risk/availability based on active FM filter */
+        /* Compute partial MTBF/MTTR/Rate/availability based on active FM filter */
         const mtbfVal = hasCFM ? _partialSystemMTBF(r) : (r.stats?.mtbfModel ?? NaN);
         const mttrVal = hasCFM ? _partialSystemMTTR(r) : (r.kpi?.mttr ?? NaN);
-        const Rfn = t => hasCFM ? _partialSystemR(r, t) : (isNum(r.R?.(t)) ? r.R(t) : NaN);
-        const riskVal = _conditionalFailureRisk(Rfn, dynT, dynDt);
+        const rateVal = hasCFM ? _partialSystemFailureRate(r) : _lifeFailureRate(r);
         const availVal = hasCFM ? _partialSystemAvail(r, mtbfVal) : (r.kpi?.availability ?? NaN);
         /* β only exists for a single fitted Weibull distribution — a CFM
            parent's system curve is a product of several distributions
@@ -8805,9 +8804,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
           A: isNum(mtbfVal)            ? mtbfVal            : NaN,
           B: isNum(mttrVal)            ? mttrVal            : NaN,
           C: isNum(betaVal)            ? betaVal            : NaN,
-          D: isNum(riskVal)            ? riskVal            : NaN,
+          D: isNum(rateVal)            ? rateVal            : NaN,
           E: isNum(availVal)           ? availVal            : NaN,
-          mtbf:mtbfVal, risk:riskVal, beta:betaVal,
+          mtbf:mtbfVal, rate:rateVal, beta:betaVal,
           mttr:mttrVal, avail:availVal,
           distName: r.distName || '—',
           isParent: hasCFM,
@@ -8817,7 +8816,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         if(hasCFM){
           for(const [fm, mr] of r.modes){
             if(activeDashFMs.size > 0 && !activeDashFMs.has(fm)) continue;
-            const mrRisk = _conditionalFailureRisk(t=>isNum(mr.R?.(t))?mr.R(t):NaN, dynT, dynDt);
+            const mrRate = _lifeFailureRate(mr);
             const mrBeta = _lifeBeta(mr);
             items.push({
               tag: `  ↳ ${fm}`,
@@ -8826,9 +8825,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
               A: isNum(mr.stats?.mtbfModel) ? mr.stats.mtbfModel : NaN,
               B: isNum(mr.kpi?.mttr)        ? mr.kpi.mttr        : NaN,
               C: isNum(mrBeta)              ? mrBeta             : NaN,
-              D: isNum(mrRisk)              ? mrRisk             : NaN,
+              D: isNum(mrRate)              ? mrRate             : NaN,
               E: NaN,
-              mtbf:mr.stats?.mtbfModel, risk:mrRisk, beta:mrBeta,
+              mtbf:mr.stats?.mtbfModel, rate:mrRate, beta:mrBeta,
               mttr:mr.kpi?.mttr, avail:NaN,
               distName: mr.distName || '—',
               _color: r._color + '99'
@@ -8865,7 +8864,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const dataMTBF = buildOrderedData('A', false); /* worst = lowest MTBF */
       const dataMTTR = buildOrderedData('B', true);  /* worst = highest MTTR */
       const dataBeta = buildOrderedData('C', false); /* no strong worst/best — keep MTBF-style order */
-      const dataRisk = buildOrderedData('D', true);  /* worst = highest failure risk */
+      const dataRate = buildOrderedData('D', true);  /* worst = highest failure rate */
 
       /* Default ordering (used for availability + colors fallback) */
       const data = dataMTBF;
@@ -8875,7 +8874,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const labelsMTBF = dataMTBF.map(d=>d.tag), colorsMTBF = dataMTBF.map(d=>d._color||_tagColor(d._parentTag||d.tag));
       const labelsMTTR = dataMTTR.map(d=>d.tag), colorsMTTR = dataMTTR.map(d=>d._color||_tagColor(d._parentTag||d.tag));
       const labelsBeta = dataBeta.map(d=>d.tag), colorsBeta = dataBeta.map(d=>d._color||_tagColor(d._parentTag||d.tag));
-      const labelsRisk = dataRisk.map(d=>d.tag), colorsRisk = dataRisk.map(d=>d._color||_tagColor(d._parentTag||d.tag));
+      const labelsRate = dataRate.map(d=>d.tag), colorsRate = dataRate.map(d=>d._color||_tagColor(d._parentTag||d.tag));
 
       /* β interpretation per bar, shown as an extra tooltip line:
          β<1 infant mortality · β≈1 random · β>1 wear-out — same
@@ -8891,12 +8890,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
         drawBarChartSVGHorizontal(canvases.A, labelsMTBF, dataMTBF.map(d=>d.A), unit, colorsMTBF);
         drawBarChartSVGHorizontal(canvases.B, labelsMTTR, dataMTTR.map(d=>d.B), unit, colorsMTTR);
         drawBarChartSVGHorizontal(canvases.C, labelsBeta, dataBeta.map(d=>d.C), 'β', colorsBeta, betaExtraLines);
-        drawBarChartSVGHorizontal(canvases.D, labelsRisk, dataRisk.map(d=>d.D), 'Failure risk (%)', colorsRisk);
+        drawBarChartSVGHorizontal(canvases.D, labelsRate, dataRate.map(d=>d.D), 'Failure rate (r/TTT)', colorsRate);
       } else {
         drawBarChartSVG(canvases.A, labelsMTBF, dataMTBF.map(d=>d.A), unit, rotateSel, colorsMTBF);
         drawBarChartSVG(canvases.B, labelsMTTR, dataMTTR.map(d=>d.B), unit, rotateSel, colorsMTTR);
         drawBarChartSVG(canvases.C, labelsBeta, dataBeta.map(d=>d.C), 'β', rotateSel, colorsBeta, betaExtraLines);
-        drawBarChartSVG(canvases.D, labelsRisk, dataRisk.map(d=>d.D), 'Failure risk (%)', rotateSel, colorsRisk);
+        drawBarChartSVG(canvases.D, labelsRate, dataRate.map(d=>d.D), 'Failure rate (r/TTT)', rotateSel, colorsRate);
       }
       /* Availability: parent rows only */
       const dataAvail  = data.filter(d=>!d.isFMSub);
@@ -8918,7 +8917,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   /* ── Update sort-by labels when analysis mode changes ── */
   function updateSortLabels(){
-    const map = { A:'MTBF (model)', B:'MTTR', C:'β (shape)', D:'Hazard Rate', E:'Availability %' };
+    const map = { A:'MTBF (model)', B:'MTTR', C:'β (shape)', D:'Failure Rate', E:'Availability %' };
     ['A','B','C','D','E'].forEach(k=>{
       const el = document.getElementById('kpiSort'+k);
       if(!el) return;
@@ -8942,7 +8941,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         ['A', 'MTBF',               'Mean Time Between Failures (model)'],
         ['B', 'MTTR',               'Mean Time To Repair'],
         ['C', 'β — Weibull Shape',  'β<1 infant mortality · β≈1 random · β>1 wear-out'],
-        ['D', 'Failure Risk',       'Conditional probability of failure in next Δt'],
+        ['D', 'Failure Rate',       'r / TTT — failures per time at end of observation (like h)'],
         ['E', 'Availability',       'TTT / (TTT + downtime) %'],
       ];
     cards.forEach(([id, label, sub]) => {
@@ -8961,7 +8960,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   document.getElementById('kpiRedraw')?.addEventListener('click', ()=>{ if(lastPerTag) renderKpiDashboard(lastPerTag); });
 
-  ['kpiRotate','kpiBars','kpiTopN','kpiFilter','kpiSortKey','kpiSortDir','kpiRiskAge','kpiRiskWindow'].forEach(id=>{
+  ['kpiRotate','kpiBars','kpiTopN','kpiFilter','kpiSortKey','kpiSortDir'].forEach(id=>{
     document.getElementById(id)?.addEventListener('change', ()=>{ if(lastPerTag) renderKpiDashboard(lastPerTag); });
     document.getElementById(id)?.addEventListener('input',  _debounce(()=>{ if(lastPerTag) renderKpiDashboard(lastPerTag); }, 200));
   });
