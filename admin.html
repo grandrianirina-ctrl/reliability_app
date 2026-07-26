@@ -672,6 +672,25 @@ const SUPABASE_KEY  = 'sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// ── Super Admin identity (hash-verified, not stored in plaintext) ──
+// rateliniainalioka@gmail.com is the designated Super Admin. Neither
+// their email nor their break-glass password is kept as plaintext in
+// this file — both are compared as SHA-256 hashes. This protects the
+// account from removal (see removeAdmin/banUser/deleteUserFromModal)
+// and provides an emergency login path that works even if this
+// account's `profiles` row is edited or deleted (see the break-glass
+// access flow in initAdmin() below).
+async function sha256Hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+const SUPER_ADMIN_EMAIL_HASH    = '34550f276fb21d7025bdfe719413b43024c1b8440251f47e15b2f37f482f8d22';
+const SUPER_ADMIN_PASSWORD_HASH = '186cf774c97b60a1c106ef718d10970a6a06e06bef89553d9ae65d938a886eae';
+async function isSuperAdminEmail(email) {
+  if (!email) return false;
+  return (await sha256Hex(email.trim().toLowerCase())) === SUPER_ADMIN_EMAIL_HASH;
+}
+
 const PLAN_ICONS  = { trial:'🔬', essential:'📊', professional:'🚀', ultimate:'👑' };
 const PLAN_PRICES = { essential:30, professional:50, ultimate:450 };
 const PLAN_DISPLAY = { trial:'trial', essential:'essential', professional:'professional', ultimate:'ultimate' };
@@ -680,6 +699,7 @@ let allUsers = [];
 let allPayments = [];
 let allPrices = [];
 let currentAdminEmail = '';
+let currentAdminIsSuper = false;
 
 // price lookup used by the Overview MRR estimate; falls back to the
 // original hardcoded PLAN_PRICES constant if a row hasn't been added yet
@@ -696,24 +716,58 @@ function priceFor(plan, cycle = 'monthly') {
 const { data: { session } } = await supabase.auth.getSession();
 
 async function initAdmin() {
+  // ── Break-glass Super Admin override ────────────────────────
+  // A flag set only after successfully passing the hash-verified
+  // emergency-access challenge below (attemptBreakGlassLogin). It is
+  // NOT written to any database — it just lets THIS PAGE's own gate
+  // treat the tab as authorized even if the Super Admin's `profiles`
+  // row is missing, deleted, or is_admin was turned off elsewhere.
+  // It does not grant any extra database privileges: reads/writes
+  // still go through Supabase's normal Row Level Security, so if the
+  // underlying account/session is also broken server-side, data
+  // operations below may still fail — this only restores the ADMIN
+  // PAGE UI gate, not server-side permissions.
+  const breakGlassEmail = sessionStorage.getItem('rs_break_glass_email');
+
   const isAdmin = session
     ? (await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single()).data?.is_admin
     : false;
 
-  if (!session || !isAdmin) {
+  if ((!session || !isAdmin) && !breakGlassEmail) {
     document.body.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:'JetBrains Mono',monospace;color:#fca5a5">
         <div style="font-size:48px">🔒</div>
         <div style="font-size:18px;font-weight:700">Access denied</div>
         <div style="font-size:13px;color:#64748b">Restricted to administrators</div>
         <a href="index.html?login=1" style="margin-top:8px;padding:10px 24px;background:#0ea5e9;color:white;border-radius:8px;text-decoration:none;font-size:13px">Log in</a>
+
+        <!-- Break-glass Super Admin access: identity is verified locally
+             via SHA-256 hash comparison (see SUPER_ADMIN_EMAIL_HASH /
+             SUPER_ADMIN_PASSWORD_HASH above) — never against a plaintext
+             email/password, and never against the database. -->
+        <button onclick="document.getElementById('bgForm').style.display='flex'; this.style.display='none';"
+          style="margin-top:24px;background:none;border:none;color:#475569;font-size:11px;text-decoration:underline;cursor:pointer">
+          Emergency Super Admin access
+        </button>
+        <div id="bgForm" style="display:none;flex-direction:column;gap:8px;width:260px;margin-top:8px">
+          <input id="bgEmail" type="email" placeholder="Email" autocomplete="username"
+            style="padding:9px 12px;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#e2e8f0;font-size:12px">
+          <input id="bgPassword" type="password" placeholder="Password" autocomplete="current-password"
+            style="padding:9px 12px;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#e2e8f0;font-size:12px">
+          <div id="bgError" style="display:none;color:#f87171;font-size:11px"></div>
+          <button onclick="attemptBreakGlassLogin()"
+            style="padding:9px 12px;background:#0ea5e9;color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer">
+            Unlock
+          </button>
+        </div>
       </div>`;
     return;
   }
 
-  currentAdminEmail = session.user.email;
-  document.getElementById('adminEmail').textContent = session.user.email;
-  document.getElementById('entryAuthEmail').value = session.user.email;
+  currentAdminEmail = breakGlassEmail || session.user.email;
+  currentAdminIsSuper = breakGlassEmail ? true : await isSuperAdminEmail(currentAdminEmail);
+  document.getElementById('adminEmail').textContent = currentAdminEmail + (breakGlassEmail ? ' 🛡️ (emergency access)' : '');
+  document.getElementById('entryAuthEmail').value = currentAdminEmail;
 
 // ── Toast ─────────────────────────────────────────────────────
 function showToast(msg, type = 'success') {
@@ -756,13 +810,29 @@ async function loadAdminsList() {
     return;
   }
 
-  document.getElementById('adminEmailsList').innerHTML = (admins || []).map(a => `
+  // Resolve each admin's protected status up front (hash check is async).
+  const rows = await Promise.all((admins || []).map(async a => ({
+    ...a,
+    isSuper: await isSuperAdminEmail(a.email)
+  })));
+
+  document.getElementById('adminEmailsList').innerHTML = rows.map(a => {
+    let action;
+    if (a.isSuper) {
+      action = `<span style="font-size:10px;color:var(--accent)" title="Protected — only a Super Admin action can affect this account, and it can never be removed">🛡️ Super Admin</span>`;
+    } else if (a.email === currentAdminEmail) {
+      action = `<span style="font-size:10px;color:var(--muted2)">(you)</span>`;
+    } else if (!currentAdminIsSuper) {
+      action = `<span style="font-size:10px;color:var(--muted2)" title="Only a Super Admin can remove an administrator">🔒 Super Admin required</span>`;
+    } else {
+      action = `<button class="action-btn btn-ban" style="padding:3px 10px;font-size:11px" onclick="removeAdmin('${a.id}','${a.email}')">Remove</button>`;
+    }
+    return `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
       <span>🛡️ ${a.email}</span>
-      ${a.email === currentAdminEmail
-        ? `<span style="font-size:10px;color:var(--muted2)">(you)</span>`
-        : `<button class="action-btn btn-ban" style="padding:3px 10px;font-size:11px" onclick="removeAdmin('${a.id}','${a.email}')">Remove</button>`}
-    </div>`).join('') || '<span style="color:var(--muted2)">No administrators</span>';
+      ${action}
+    </div>`;
+  }).join('') || '<span style="color:var(--muted2)">No administrators</span>';
 }
 
 window.addAdmin = async function() {
@@ -795,6 +865,19 @@ window.addAdmin = async function() {
 
 window.removeAdmin = async function(userId, email) {
   if (email === currentAdminEmail) { showToast('You cannot remove your own admin rights.', 'error'); return; }
+
+  // The designated Super Admin can never be removed as admin, by anyone,
+  // under any circumstance — checked here regardless of who is asking.
+  if (await isSuperAdminEmail(email)) {
+    showToast('This account is protected and cannot be removed. Ask a Super Admin for help.', 'error');
+    return;
+  }
+  // Only a Super Admin may remove an administrator at all.
+  if (!currentAdminIsSuper) {
+    showToast('Only a Super Admin can remove an administrator. You need a higher permission level.', 'error');
+    return;
+  }
+
   if (!confirm(`Remove admin rights from ${email}?`)) return;
 
   const confirmed = await promptAdminPassword();
@@ -1316,6 +1399,29 @@ window.closeModal = function() {
   document.getElementById('editModal').classList.remove('show');
 };
 
+// ── Break-glass Super Admin login ────────────────────────────────
+// Verifies the entered email/password against the SHA-256 hashes
+// defined above — no plaintext credential is stored in this file, and
+// no database call is made. On success, this tab is flagged as
+// authorized via sessionStorage (cleared on logout) and the page
+// reloads into initAdmin()'s break-glass branch.
+window.attemptBreakGlassLogin = async function() {
+  const email    = document.getElementById('bgEmail')?.value || '';
+  const password = document.getElementById('bgPassword')?.value || '';
+  const errEl    = document.getElementById('bgError');
+
+  const emailHash    = await sha256Hex(email.trim().toLowerCase());
+  const passwordHash = await sha256Hex(password);
+
+  if (emailHash === SUPER_ADMIN_EMAIL_HASH && passwordHash === SUPER_ADMIN_PASSWORD_HASH) {
+    sessionStorage.setItem('rs_break_glass_email', email.trim().toLowerCase());
+    location.reload();
+  } else if (errEl) {
+    errEl.textContent = 'Incorrect email or password.';
+    errEl.style.display = 'block';
+  }
+};
+
 // ── Password re-confirmation for sensitive actions ──────────────
 // Re-verifies the CURRENTLY LOGGED-IN admin's own password by attempting
 // a real sign-in with it — if it succeeds, the password is correct.
@@ -1356,6 +1462,18 @@ window._pwdConfirmSubmit = async function() {
 
   btn.disabled = true;
   btn.textContent = 'Verifying...';
+
+  // Break-glass sessions have no real Supabase auth session to
+  // re-authenticate against — verify against the same hash instead.
+  if (sessionStorage.getItem('rs_break_glass_email')) {
+    const ok = (await sha256Hex(password)) === SUPER_ADMIN_PASSWORD_HASH;
+    btn.disabled = false;
+    btn.textContent = 'Confirm';
+    if (!ok) { showErr('Incorrect password.'); return; }
+    window._pwdConfirmResolve(true);
+    return;
+  }
+
   const { error } = await supabase.auth.signInWithPassword({ email: currentAdminEmail, password });
   btn.disabled = false;
   btn.textContent = 'Confirm';
@@ -1382,6 +1500,16 @@ window._entryAuthSubmit = async function() {
 
   btn.disabled = true;
   btn.textContent = 'Verifying...';
+
+  if (sessionStorage.getItem('rs_break_glass_email')) {
+    const ok = (await sha256Hex(password)) === SUPER_ADMIN_PASSWORD_HASH;
+    btn.disabled = false;
+    btn.textContent = 'Confirm';
+    if (!ok) { showErr('Incorrect password.'); return; }
+    document.getElementById('entryAuthOverlay').classList.remove('show');
+    return;
+  }
+
   const { error } = await supabase.auth.signInWithPassword({ email: currentAdminEmail, password });
   btn.disabled = false;
   btn.textContent = 'Confirm';
@@ -1431,6 +1559,10 @@ window.savePlan = async function() {
 
 // ── BAN / UNBAN USER ────────────────────────────────────────
 window.banUser = async function(userId, email) {
+  if (await isSuperAdminEmail(email)) {
+    showToast('This account is protected and cannot be blocked. Ask a Super Admin for help.', 'error');
+    return;
+  }
   if (!confirm(`Block user ${email}?\n\nThis will disable all their sessions and cut off their access.`)) return;
   const confirmed = await promptAdminPassword();
   if (!confirmed) return;
@@ -1482,6 +1614,10 @@ window.deleteUserFromModal = async function() {
   const userId = document.getElementById('editUserId').value;
   const email  = document.getElementById('editModalEmail').textContent;
   if (!userId) return;
+  if (await isSuperAdminEmail(email)) {
+    showToast('This account is protected and cannot be deleted. Ask a Super Admin for help.', 'error');
+    return;
+  }
   if (!confirm(`⚠️ Permanently delete ${email}?\n\nThis removes their profile and cuts off their access. This action is irreversible.\n\nNote: the Supabase auth account must be deleted separately from the Supabase dashboard (service role key required).`)) return;
   const confirmed = await promptAdminPassword();
   if (!confirmed) return;
@@ -1590,6 +1726,7 @@ window.doLogout = async function() {
   const confirmed = await promptAdminPassword();
   if (!confirmed) return;
 
+  sessionStorage.removeItem('rs_break_glass_email');
   await supabase.auth.signOut();
   window.location.href = 'index.html';
 };
