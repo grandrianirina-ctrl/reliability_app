@@ -5336,6 +5336,11 @@ function importIntoTable(rows) {
     const fmTierOk = (pkg === 'professional' || pkg === 'ultimate' || pkg === 'trial');
     const readFM = fmTierOk;
 
+    // Detect the FILE's actual shape from its own data — independent of
+    // what this tier can display — then apply tier restrictions on top.
+    // See _detectImportShape()/_detectRowShape() above for why.
+    const importShape = _detectImportShape(rows.slice(0, 20), isMultiAsset);
+
     const tbody = sheet.querySelector("tbody");
     const CHUNK = 200; // rows per animation frame
     let processed = 0;
@@ -5349,20 +5354,21 @@ function importIntoTable(rows) {
         const row = rows[i];
         const r = i + 1;
         let tags = "", ttf = "", fs = "", ttr = "", fm = "";
-        /* Column mapping:
-           multi  : Tag(0) Time(1) State(2) TTR(3) FM(4)
-           single : Time(0) State(1) TTR(2) FM(3) */
-        if (isMultiAsset) {
-          tags = row[0] ?? "";
-          ttf  = toFloatOrBlank(String(row[1] ?? ""));
-          fs   = normalizeFS(String(row[2] ?? ""));
-          ttr  = toFloatOrBlank(String(row[3] ?? ""));
-          fm   = readFM ? String(row[4] ?? "").trim() : "";
-        } else {
-          ttf  = toFloatOrBlank(String(row[0] ?? ""));
-          fs   = normalizeFS(String(row[1] ?? ""));
-          ttr  = toFloatOrBlank(String(row[2] ?? ""));
-          fm   = readFM ? String(row[3] ?? "").trim() : "";
+        // Extract using the DETECTED source shape, then apply this
+        // tier's own restrictions — a tag present in the file but not
+        // usable at this tier is simply dropped (falls back to the
+        // existing single implicit "Data" tag at analysis time, same
+        // as when there was never a Tags column at all); a tier that
+        // *can* show tags/FM but whose source file doesn't have them
+        // just gets blank cells, same as always.
+        ttf = toFloatOrBlank(String(row[importShape.timeIdx] ?? ""));
+        fs  = normalizeFS(String(row[importShape.statusIdx] ?? ""));
+        ttr = toFloatOrBlank(String(row[importShape.ttrIdx] ?? ""));
+        if (importShape.hasTag && isMultiAsset) {
+          tags = String(row[importShape.tagIdx] ?? "").trim();
+        }
+        if (readFM && importShape.fmIdx < row.length) {
+          fm = String(row[importShape.fmIdx] ?? "").trim();
         }
         const cellTags = sheet.querySelector(`td[data-row='${r}'][data-col='0']`);
         const cellTTF  = sheet.querySelector(`td[data-row='${r}'][data-col='1']`);
@@ -5415,6 +5421,54 @@ function importIntoTable(rows) {
 		const v = value.trim().toUpperCase();
 		if (v === "F" || v === "S") return v;
 		return "F"; // default if empty or invalid
+	}
+
+	/* ── Smart column-shape detection for import/paste ──────────────
+	   Both XLSX/CSV import and copy/paste used to assume the incoming
+	   data's column layout purely from the CURRENT tier (Tag-first for
+	   multi-asset tiers, Time-first otherwise) — with zero regard for
+	   what the actual source data looks like. That silently corrupted
+	   any file/paste whose shape didn't match the current tier: a
+	   Tag-first file imported on a single-asset tier read the Tag value
+	   as Time and everything else one column off, and the reverse case
+	   misread a real Time value as if it were a Tag.
+
+	   Detection can't rely on "is column 0 numeric" — tags can
+	   legitimately be purely numeric (e.g. "101"), so a numeric column 0
+	   doesn't prove there's no Tag column. Status is the reliable
+	   anchor instead: it's always exactly "F" or "S" regardless of what
+	   the tag looks like, so checking WHICH position actually holds a
+	   strict F/S value tells us whether a leading Tag column exists.
+	*/
+	function _looksLikeStrictStatus(v) {
+		const s = String(v ?? '').trim().toUpperCase();
+		return s === 'F' || s === 'S';
+	}
+
+	// One row's raw cell values -> which columns are Tag/Time/Status/TTR/FM,
+	// or null if this row alone doesn't give a confident answer (e.g. an
+	// empty/malformed row) — caller should try the next row.
+	function _detectRowShape(cells) {
+		if (cells.length >= 2 && _looksLikeStrictStatus(cells[1])) {
+			return { hasTag: false, tagIdx: -1, timeIdx: 0, statusIdx: 1, ttrIdx: 2, fmIdx: 3 };
+		}
+		if (cells.length >= 3 && _looksLikeStrictStatus(cells[2])) {
+			return { hasTag: true, tagIdx: 0, timeIdx: 1, statusIdx: 2, ttrIdx: 3, fmIdx: 4 };
+		}
+		return null;
+	}
+
+	// Scans multiple rows for the first confident shape; if none of them
+	// give one (e.g. status values aren't cleanly F/S), falls back to
+	// today's tier-only assumption rather than guessing.
+	function _detectImportShape(rows, tierIsMultiAsset) {
+		for (const row of rows) {
+			const shape = _detectRowShape(row);
+			if (shape) return shape;
+		}
+		return tierIsMultiAsset
+			? { hasTag: true,  tagIdx: 0, timeIdx: 1, statusIdx: 2, ttrIdx: 3, fmIdx: 4 }
+			: { hasTag: false, tagIdx: -1, timeIdx: 0, statusIdx: 1, ttrIdx: 2, fmIdx: 3 };
 	}
 
 	const columns = [
@@ -5778,30 +5832,73 @@ function importIntoTable(rows) {
 			const CHUNK = 200;
 			let processed = 0;
 			const pkgForPaste = window.RELIACAL_PACKAGE || 'essential';
+			const isMultiAssetPaste = (pkgForPaste === 'professional' || pkgForPaste === 'ultimate' || pkgForPaste === 'trial');
 			const fmAllowedForPaste = (pkgForPaste === 'professional' || pkgForPaste === 'ultimate' || pkgForPaste === 'trial');
+
+			// Smart shape detection only kicks in for what looks like a
+			// full-row paste (3+ columns) — enough to tell Tag-first from
+			// Time-first apart. A 1-2 column paste is almost certainly
+			// someone editing a single field (e.g. pasting a column of TTR
+			// values into an existing table), not a whole dataset, so that
+			// case keeps the original "write starting at the clicked cell"
+			// behavior untouched rather than guessing at a shape from too
+			// little information.
+			const looksLikeFullRowPaste = lines.length && lines[0].length >= 3;
+			const pasteShape = looksLikeFullRowPaste
+				? _detectImportShape(lines.slice(0, 20), isMultiAssetPaste)
+				: null;
+
 			function pasteChunk() {
 				const end = Math.min(processed + CHUNK, total);
 				for (let i = processed; i < end; i++) {
-					for (let j = 0; j < lines[i].length; j++) {
-						if (j >= columns.length) continue;
-						const cell = table.querySelector(`td[data-row='${startR + i}'][data-col='${startC + j}']`);
-						if (cell) {
-							const col = cell.dataset.col;
-							/* FM column (data-col=4) is tier-gated: at Professional the
-							   column is hidden in the UI, so pasted data must never land
-							   there either — skip the write entirely rather than just
-							   leaving it visually hidden. */
-							if (col === "4" && !fmAllowedForPaste) continue;
-							let value = lines[i][j] ?? "";
-							if (col === "1") value = toFloatOrBlank(value);
-							else if (col === "2") value = normalizeFS(value);
-							else if (col === "3") value = toFloatOrBlank(value);
-							cell.textContent = value;
+					if (pasteShape) {
+						// Semantic placement: each source column goes to its
+						// DETECTED destination regardless of which cell was
+						// clicked to start the paste — startR still anchors
+						// which row, startC no longer matters here.
+						const row = lines[i];
+						const r = startR + i;
+						const ttf = toFloatOrBlank(String(row[pasteShape.timeIdx] ?? ""));
+						const fs  = normalizeFS(String(row[pasteShape.statusIdx] ?? ""));
+						const ttr = toFloatOrBlank(String(row[pasteShape.ttrIdx] ?? ""));
+						const tag = (pasteShape.hasTag && isMultiAssetPaste)
+							? String(row[pasteShape.tagIdx] ?? "").trim() : "";
+						const fm = (fmAllowedForPaste && pasteShape.fmIdx < row.length)
+							? String(row[pasteShape.fmIdx] ?? "").trim() : "";
+						const cellTags = table.querySelector(`td[data-row='${r}'][data-col='0']`);
+						const cellTTF  = table.querySelector(`td[data-row='${r}'][data-col='1']`);
+						const cellFS   = table.querySelector(`td[data-row='${r}'][data-col='2']`);
+						const cellTTR  = table.querySelector(`td[data-row='${r}'][data-col='3']`);
+						const cellFM   = table.querySelector(`td[data-row='${r}'][data-col='4']`);
+						if (cellTags) cellTags.textContent = tag;
+						if (cellTTF)  cellTTF.textContent  = ttf;
+						if (cellFS)   cellFS.textContent   = fs || "F";
+						if (cellTTR)  cellTTR.textContent  = ttr;
+						if (cellFM)   cellFM.textContent   = fm;
+					} else {
+						// Original behavior: 1-2 column paste, write starting
+						// at the clicked cell, column-by-column offset.
+						for (let j = 0; j < lines[i].length; j++) {
+							if (j >= columns.length) continue;
+							const cell = table.querySelector(`td[data-row='${startR + i}'][data-col='${startC + j}']`);
+							if (cell) {
+								const col = cell.dataset.col;
+								/* FM column (data-col=4) is tier-gated: at Professional the
+								   column is hidden in the UI, so pasted data must never land
+								   there either — skip the write entirely rather than just
+								   leaving it visually hidden. */
+								if (col === "4" && !fmAllowedForPaste) continue;
+								let value = lines[i][j] ?? "";
+								if (col === "1") value = toFloatOrBlank(value);
+								else if (col === "2") value = normalizeFS(value);
+								else if (col === "3") value = toFloatOrBlank(value);
+								cell.textContent = value;
+							}
 						}
+						// Ensure F/S default when not provided
+						const fsCell = table.querySelector(`td[data-row='${startR + i}'][data-col='2']`);
+						if (fsCell && !fsCell.textContent.trim()) fsCell.textContent = "F";
 					}
-					// Ensure F/S default when not provided
-					const fsCell = table.querySelector(`td[data-row='${startR + i}'][data-col='2']`);
-					if (fsCell && !fsCell.textContent.trim()) fsCell.textContent = "F";
 				}
 				processed = end;
 				const subEl = document.getElementById('sheetLoadingSub');

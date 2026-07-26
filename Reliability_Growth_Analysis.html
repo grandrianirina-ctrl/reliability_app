@@ -5327,6 +5327,9 @@ function importIntoTable(rows) {
     const needed = Math.max(0, total - tbody.querySelectorAll("tr").length);
     for (let i = 0; i < needed; i++) addRow();
 
+    // Detected once, outside the chunked loop — not per row.
+    const rgaShape = _detectImportShape(rows.slice(0, 20), isMultiAsset);
+
     function fillChunk() {
       const end = Math.min(processed + CHUNK, total);
       for (let i = processed; i < end; i++) {
@@ -5337,16 +5340,20 @@ function importIntoTable(rows) {
            LDA/Degrad multi  : Tag(0) Time(1) State(2) TTR(3) FM(4)
            RGA+CE    multi   : Tag(0) Time(1) State(2) FM(3)   [no TTR]
            LDA/Degrad single : Time(0) State(1) TTR(2) FM(3)
-           RGA+CE    single  : Time(0) State(1) FM(2)          [no TTR] */
+           RGA+CE    single  : Time(0) State(1) FM(2)          [no TTR]
+           RGA standard (this file's TTF_entry): Tag/Time/State shape is
+           now DETECTED from the actual source data rather than assumed
+           from tier — see _detectImportShape() above. TTR/FM handling
+           below is untouched; Crow Extended has its own separate table. */
+        if (rgaShape.hasTag && isMultiAsset) {
+          tags = String(row[rgaShape.tagIdx] ?? "").trim();
+        }
+        ttf = toFloatOrBlank(String(row[rgaShape.timeIdx] ?? ""));
+        fs  = normalizeFS(String(row[rgaShape.statusIdx] ?? ""));
         if (isMultiAsset) {
-          tags = row[0] ?? "";
-          ttf  = toFloatOrBlank(String(row[1] ?? ""));
-          fs   = normalizeFS(String(row[2] ?? ""));
           ttr  = (!isRGA) ? toFloatOrBlank(String(row[3] ?? "")) : "";
           fm   = readFM ? String(isRGA ? (row[3] ?? "") : (row[4] ?? "")).trim() : "";
         } else {
-          ttf  = toFloatOrBlank(String(row[0] ?? ""));
-          fs   = normalizeFS(String(row[1] ?? ""));
           ttr  = (!isRGA) ? toFloatOrBlank(String(row[2] ?? "")) : "";
           fm   = readFM ? String(isRGA ? (row[2] ?? "") : (row[3] ?? "")).trim() : "";
         }
@@ -5397,6 +5404,47 @@ function importIntoTable(rows) {
 		const v = value.trim().toUpperCase();
 		if (v === "F" || v === "S") return v;
 		return "F"; // default if empty or invalid
+	}
+
+	/* ── Smart column-shape detection for TTF_entry import/paste ─────
+	   Import/paste used to assume Tag-first vs Time-first purely from
+	   the current tier, with no regard for what the actual source data
+	   looks like — silently corrupting a Tag-first file imported on a
+	   single-asset tier, and vice versa. Detection can't use "is column
+	   0 numeric" since tags can legitimately be purely numeric — Event
+	   is the reliable anchor instead, since it's always exactly "F" or
+	   "S" regardless of what the tag looks like. _looksLikeStrictStatus
+	   is deliberately stricter than normalizeFS() above, which defaults
+	   bad input to "F" and would make every candidate position look
+	   "valid".
+	*/
+	function _looksLikeStrictStatus(v) {
+		const s = String(v ?? '').trim().toUpperCase();
+		return s === 'F' || s === 'S';
+	}
+
+	// One row -> { hasTag, tagIdx, timeIdx, statusIdx }, or null if this
+	// row alone doesn't give a confident answer (caller tries the next).
+	function _detectRowShape(cells) {
+		if (cells.length >= 2 && _looksLikeStrictStatus(cells[1])) {
+			return { hasTag: false, tagIdx: -1, timeIdx: 0, statusIdx: 1 };
+		}
+		if (cells.length >= 3 && _looksLikeStrictStatus(cells[2])) {
+			return { hasTag: true, tagIdx: 0, timeIdx: 1, statusIdx: 2 };
+		}
+		return null;
+	}
+
+	// Scans multiple rows for the first confident shape; falls back to
+	// today's tier-only assumption if none of them give one.
+	function _detectImportShape(rows, tierIsMultiAsset) {
+		for (const row of rows) {
+			const shape = _detectRowShape(row);
+			if (shape) return shape;
+		}
+		return tierIsMultiAsset
+			? { hasTag: true,  tagIdx: 0, timeIdx: 1, statusIdx: 2 }
+			: { hasTag: false, tagIdx: -1, timeIdx: 0, statusIdx: 1 };
 	}
 
 	const columns = [
@@ -5757,24 +5805,70 @@ function importIntoTable(rows) {
 			// Chunked fill
 			const CHUNK = 200;
 			let processed = 0;
+			const pkgForPaste = window.RELIACAL_PACKAGE || 'essential';
+			const isMultiAssetPaste = (pkgForPaste === 'professional' || pkgForPaste === 'ultimate' || pkgForPaste === 'trial');
+			const isRGACEPaste = document.getElementById('rgaModelCrowExt')?.checked;
+
+			// Smart detection only for 2+ column pastes — enough to check
+			// the no-tag hypothesis (Time,Event); a 1-column paste is
+			// almost certainly editing a single field, not importing a
+			// whole dataset, so that keeps the original clicked-cell
+			// behavior untouched.
+			const looksLikeFullRowPaste = lines.length && lines[0].length >= 2;
+			const pasteShape = looksLikeFullRowPaste
+				? _detectImportShape(lines.slice(0, 20), isMultiAssetPaste)
+				: null;
+
 			function pasteChunk() {
 				const end = Math.min(processed + CHUNK, total);
 				for (let i = processed; i < end; i++) {
-					for (let j = 0; j < lines[i].length; j++) {
-						if (j >= columns.length) continue;
-						const cell = table.querySelector(`td[data-row='${startR + i}'][data-col='${startC + j}']`);
-						if (cell) {
-							let value = lines[i][j] ?? "";
-							const col = cell.dataset.col;
-							if (col === "1") value = toFloatOrBlank(value);
-							else if (col === "2") value = normalizeFS(value);
-							else if (col === "3") value = toFloatOrBlank(value);
-							cell.textContent = value;
+					if (pasteShape) {
+						// Semantic placement: Tag/Time/Event go to their
+						// DETECTED destination regardless of which cell was
+						// clicked to start the paste — startR still anchors
+						// the row, startC no longer matters here.
+						const row = lines[i];
+						const r = startR + i;
+						const ttf = toFloatOrBlank(String(row[pasteShape.timeIdx] ?? ""));
+						const fs  = normalizeFS(String(row[pasteShape.statusIdx] ?? ""));
+						const tag = (pasteShape.hasTag && isMultiAssetPaste)
+							? String(row[pasteShape.tagIdx] ?? "").trim() : "";
+						const cellTags = table.querySelector(`td[data-row='${r}'][data-col='0']`);
+						const cellTTF  = table.querySelector(`td[data-row='${r}'][data-col='1']`);
+						const cellFS   = table.querySelector(`td[data-row='${r}'][data-col='2']`);
+						if (cellTags) cellTags.textContent = tag;
+						if (cellTTF)  cellTTF.textContent  = ttf;
+						if (cellFS)   cellFS.textContent   = fs || "F";
+						/* RGA has no TTR column in this file, so FM sits
+						   immediately after Status, not two positions after —
+						   Tag,Time,Event,FM (4 columns), not
+						   Tag,Time,Event,blank,FM (5). Only written when
+						   Crow Extended is active, matching importIntoTable's
+						   own readFM (= isRGACE) gating above. */
+						const fmIdx = pasteShape.statusIdx + 1;
+						if (isRGACEPaste && row.length > fmIdx) {
+							const cellFM = table.querySelector(`td[data-row='${r}'][data-col='4']`);
+							if (cellFM) cellFM.textContent = String(row[fmIdx] ?? "").trim();
 						}
+					} else {
+						// Original behavior: 1-column paste, write starting
+						// at the clicked cell.
+						for (let j = 0; j < lines[i].length; j++) {
+							if (j >= columns.length) continue;
+							const cell = table.querySelector(`td[data-row='${startR + i}'][data-col='${startC + j}']`);
+							if (cell) {
+								let value = lines[i][j] ?? "";
+								const col = cell.dataset.col;
+								if (col === "1") value = toFloatOrBlank(value);
+								else if (col === "2") value = normalizeFS(value);
+								else if (col === "3") value = toFloatOrBlank(value);
+								cell.textContent = value;
+							}
+						}
+						// Ensure F/S default when not provided
+						const fsCell = table.querySelector(`td[data-row='${startR + i}'][data-col='2']`);
+						if (fsCell && !fsCell.textContent.trim()) fsCell.textContent = "F";
 					}
-					// Ensure F/S default when not provided
-					const fsCell = table.querySelector(`td[data-row='${startR + i}'][data-col='2']`);
-					if (fsCell && !fsCell.textContent.trim()) fsCell.textContent = "F";
 				}
 				processed = end;
 				const subEl = document.getElementById('sheetLoadingSub');

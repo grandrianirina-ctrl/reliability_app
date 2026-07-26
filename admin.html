@@ -734,17 +734,28 @@ async function initAdmin() {
     : false;
 
   if ((!session || !isAdmin) && !breakGlassEmail) {
+    // The "Emergency Super Admin access" option is never shown to a
+    // random/logged-out visitor — there is no way to know who they are.
+    // It only appears when Supabase itself already confirms this IS the
+    // Super Admin's account (a valid, signed-in session whose email
+    // hashes to SUPER_ADMIN_EMAIL_HASH), even though that account's
+    // `profiles` row/is_admin flag failed the check above. Nobody else
+    // — including other logged-in admins — ever sees this option.
+    const showBreakGlassOption = session ? await isSuperAdminEmail(session.user.email) : false;
+
     document.body.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:'JetBrains Mono',monospace;color:#fca5a5">
         <div style="font-size:48px">🔒</div>
         <div style="font-size:18px;font-weight:700">Access denied</div>
         <div style="font-size:13px;color:#64748b">Restricted to administrators</div>
         <a href="index.html?login=1" style="margin-top:8px;padding:10px 24px;background:#0ea5e9;color:white;border-radius:8px;text-decoration:none;font-size:13px">Log in</a>
-
+        ${showBreakGlassOption ? `
         <!-- Break-glass Super Admin access: identity is verified locally
              via SHA-256 hash comparison (see SUPER_ADMIN_EMAIL_HASH /
              SUPER_ADMIN_PASSWORD_HASH above) — never against a plaintext
-             email/password, and never against the database. -->
+             email/password, and never against the database. Only ever
+             rendered for a session that already hash-matches the Super
+             Admin — see showBreakGlassOption above. -->
         <button onclick="document.getElementById('bgForm').style.display='flex'; this.style.display='none';"
           style="margin-top:24px;background:none;border:none;color:#475569;font-size:11px;text-decoration:underline;cursor:pointer">
           Emergency Super Admin access
@@ -759,7 +770,7 @@ async function initAdmin() {
             style="padding:9px 12px;background:#0ea5e9;color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer">
             Unlock
           </button>
-        </div>
+        </div>` : ''}
       </div>`;
     return;
   }
