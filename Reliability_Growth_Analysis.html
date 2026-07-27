@@ -2108,7 +2108,6 @@ select {
                   <option value="exponential">Exponential</option>
                   <option value="lognormal">Lognormal 2P</option>
                   <option value="weibull3p">Weibull 3P</option>
-                  <option value="weibullMixed">Mixed Weibull (2 sub-pop.)</option>
                 </select>
                 <button id="degradInfoBtn" class="export-btn" style="display:none" title="Model info">ℹ️</button>
               </div>
@@ -3505,30 +3504,6 @@ function percentile(arr, p) {
      gamma-shifted data (t−γ), holding γ fixed at its MLE — mirroring
      exactly how ReliaSoft computes β/η bounds for 3P. */
 
-  /* ── Mixed Weibull (2 sub-pop.) log-likelihood — reusable for Fisher/LR ── */
-
-  /* ── Mixed Weibull — Beta-Binomial confidence bounds ──
-     Per ReliaSoft's documented practice ("In Weibull++, this non-parametric
-     methodology is used only when plotting bounds on the mixed Weibull
-     distribution" / "The Beta-Binomial method...can be used only with the
-     mixed Weibull distribution"), Weibull++ does NOT use Fisher Matrix or
-     Likelihood Ratio bounds for Mixed Weibull at all — the 5-parameter
-     model (β1,η1,p1,β2,η2) makes those methods unreliable in practice.
-     Instead it uses Beta-Binomial bounds: a non-parametric, rank-table
-     method operating directly on the observed failure order statistics,
-     with no distributional assumption.
-     Method: compute the Johnson adjusted mean order number for each
-     failure (correctly handling interspersed suspensions — reusing the
-     same adjustment already used for the empirical data-point overlay),
-     then bound each rank via the regularized incomplete beta function:
-     Z = I_P^{-1}(j, N−j+1). This gives confidence-bound points at each
-     observed failure time; values at arbitrary t are obtained by
-     log-time interpolation between the bracketing failure times, matching
-     ReliaSoft's description of points "joined by a smooth curve." */
-  /* Both Fisher and LR menu selections route to Beta-Binomial for Mixed
-     Weibull, since that's the only method ReliaSoft applies here — see
-     the dispatch logic where these are called. */
-
   /* ── Generic degradation R(t) confidence bounds ── */
 /* ════════════════════════════════════════════════════════════
    Degradation: combined R(t) + RUL(t) twin-axis chart.
@@ -3837,10 +3812,6 @@ Ymax *= 1.02;
         bounds = confMethod === 'fisher'
           ? weibull3pFisherBounds(s0, xs, confAlpha)
           : weibull3pLRBounds(s0, xs, confAlpha);
-      } else if(s0.dist === 'weibullMixed'){
-        bounds = confMethod === 'fisher'
-          ? weibullMixedFisherBounds(s0, xs, confAlpha)
-          : weibullMixedLRBounds(s0, xs, confAlpha);
       } else if(s0.dist === 'lognormal'){
         bounds = confMethod === 'fisher'
           ? lognormalFisherBounds(s0, xs, confAlpha)
@@ -6357,15 +6328,6 @@ function importIntoTable(rows) {
       paramsText:(p)=>`β=${fmt(p.beta,2)}, η=${fmt(p.eta,2)}, γ=${fmt(p.gamma,2)}`
     },
 
-    weibullMixed:{name:"Mixed Weibull",k:5,
-      R:(t,p)=>{ const R1=t<=0?1:Math.exp(-Math.pow(t/p.eta1,p.beta1)); const R2=t<=0?1:Math.exp(-Math.pow(t/p.eta2,p.beta2)); return p.p1*R1+(1-p.p1)*R2; },
-      f:(t,p)=>{ if(t<=0) return 0; const f1=(p.beta1/p.eta1)*Math.pow(t/p.eta1,p.beta1-1)*Math.exp(-Math.pow(t/p.eta1,p.beta1)); const f2=(p.beta2/p.eta2)*Math.pow(t/p.eta2,p.beta2-1)*Math.exp(-Math.pow(t/p.eta2,p.beta2)); return p.p1*f1+(1-p.p1)*f2; },
-      h:(t,p)=>{ if(t<=0) return 0; const R1=Math.exp(-Math.pow(t/p.eta1,p.beta1)); const R2=Math.exp(-Math.pow(t/p.eta2,p.beta2)); const f1=(p.beta1/p.eta1)*Math.pow(t/p.eta1,p.beta1-1)*R1; const f2=(p.beta2/p.eta2)*Math.pow(t/p.eta2,p.beta2-1)*R2; const Rmix=p.p1*R1+(1-p.p1)*R2; return Rmix>0?(p.p1*f1+(1-p.p1)*f2)/Rmix:0; },
-      mtbf:(p)=>p.p1*p.eta1*gammaFn(1+1/p.beta1)+(1-p.p1)*p.eta2*gammaFn(1+1/p.beta2),
-      median:(p)=>{ let lo=0,hi=Math.max(p.eta1,p.eta2)*10; const Rf=(t)=>{ const R1=Math.exp(-Math.pow(t/p.eta1,p.beta1)); const R2=Math.exp(-Math.pow(t/p.eta2,p.beta2)); return p.p1*R1+(1-p.p1)*R2; }; for(let i=0;i<60;i++){ const mid=(lo+hi)/2; Rf(mid)>0.5?lo=mid:hi=mid; } return (lo+hi)/2; },
-      paramsText:(p)=>`β₁=${fmt(p.beta1,2)}, η₁=${fmt(p.eta1,2)}, p₁=${fmt(p.p1,2)}, β₂=${fmt(p.beta2,2)}, η₂=${fmt(p.eta2,2)}`
-    },
-
     weibull:{name:"Weibull 2P",k:2, 
 
       R:(t,p)=>(t<=0?1:Math.exp(-Math.pow(t/p.eta,p.beta))), 
@@ -6466,13 +6428,12 @@ function importIntoTable(rows) {
   }
 
   /* ── Regularized incomplete beta function I_x(a,b) and its inverse ──
-     Used for Beta-Binomial confidence bounds (the non-parametric method
-     ReliaSoft/Weibull++ uses for Mixed Weibull, in place of Fisher Matrix
-     or Likelihood Ratio — see "Beta Binomial Confidence Bounds" in the
-     ReliaSoft Life Data Analysis reference). Implementation follows the
-     standard Lanczos log-gamma + continued-fraction approach (Numerical
-     Recipes), verified against known exact median-rank values (e.g. n=5,
-     i=3 → 0.5 exactly; i=1 → 0.12945, matching Bernard's approximation
+     Used for Beta-Binomial confidence bounds (a non-parametric method
+     — see "Beta Binomial Confidence Bounds" in the ReliaSoft Life Data
+     Analysis reference). Implementation follows the standard Lanczos
+     log-gamma + continued-fraction approach (Numerical Recipes),
+     verified against known exact median-rank values (e.g. n=5, i=3 →
+     0.5 exactly; i=1 → 0.12945, matching Bernard's approximation
      (i-0.3)/(n+0.4) to 4 decimal places). */
   function _logGamma(x){
     const g=7;
@@ -6638,16 +6599,6 @@ function LL_normal(residuals, sigma){
     if(b < 0.90) return 'Infant mortality (hazard ↓)';
     if(b <= 1.10) return 'Random failures (hazard ≈ constant)';
     return 'Wear-out (hazard ↑)';
-  }
-
-  // ===== Mixed Weibull =====
-  if(d === 'weibullMixed'){
-    const b1=p.beta1, b2=p.beta2;
-    if(!isNum(b1)||!isNum(b2)) return '—';
-    const hasBathtub=(b1<1&&b2>1)||(b1>1&&b2<1);
-    if(hasBathtub) return `Mixed failure modes (bathtub hazard) — p₁=${fmt(p.p1,2)}`;
-    if(b1<1&&b2<1) return 'Mixed infant mortality populations';
-    return `Mixed wear-out populations — p₁=${fmt(p.p1,2)}`;
   }
 
   // ===== Exponential =====
@@ -9662,7 +9613,7 @@ pmTagSelect.addEventListener('change', async e => {
     const dist   = res.dist;
     const params = res.params || {};
     const beta   = params.beta;
-    if((dist === 'weibull' || dist === 'weibull1p' || dist === 'weibull3p' || dist === 'weibullMixed') && isNum(beta) && beta <= 1){
+    if((dist === 'weibull' || dist === 'weibull1p' || dist === 'weibull3p') && isNum(beta) && beta <= 1){
       return { tag, Istar:NaN, ok:false, note:'β≤1', isRGA:false, distName, paramsText,
         verdictKind:'not-needed',
         verdictNote:`β = ${fmt(beta,3)} ≤ 1 — hazard rate non-increasing. Inspection intervals do not reduce cost; no finite optimum exists (same logic as PM for β≤1).` };
@@ -9926,8 +9877,6 @@ pmTagSelect.addEventListener('change', async e => {
       else if(beta !== null)              note = 'β ≈ 1 (near-random failures): approximately constant failure rate. Poisson or Exponential gives a similar result.';
     } else if(res?.dist === 'weibull3p'){
       note = `Weibull 3P (minimum life γ=${fmt(res.params?.gamma,2)}): no failures expected before γ — spare demand starts only after t = γ ${unit}.`;
-    } else if(res?.dist === 'weibullMixed'){
-      note = 'Mixed Weibull (2 sub-populations): demand reflects a blend of early-life and wear-out failure modes. Review both sub-population β values to understand the demand shape.';
     } else if(res?.dist === 'lognormal'){
       note = 'Lognormal: right-skewed failure distribution — most demand is concentrated late in the planning horizon.';
     }
@@ -12270,25 +12219,6 @@ if (demandSeries.length) {
 				  document.getElementById("param3_Label").textContent="γ(location)";
 				  document.getElementById("param3").value="0";
 				  if(param3_wrap) param3_wrap.style.display='';
-				  break;
-				case 'weibullMixed':
-				  param1_Label.textContent="β₁(shape 1)"; param1.value="0.8";
-				  param2_Label.textContent="η₁(scale 1)"; param2.value="100";
-				  param2_Label.style.display=''; param2.style.display='';
-				  document.getElementById("param4_Label").textContent="β₂(shape 2)";
-				  document.getElementById("param4").value="2.5";
-				  document.getElementById("param5_Label").textContent="η₂(scale 2)";
-				  document.getElementById("param5").value="500";
-				  document.getElementById("param6_Label").textContent="p₁(mix wt)";
-				  document.getElementById("param6").value="0.5";
-				  /* Restore individual label visibility — they can be hidden
-				     individually by applyDegradManualParams if the user
-				     previously visited degradation manual mode. */
-				  const p5l = document.getElementById("param5")?.closest('.de-field');
-				  const p6l = document.getElementById("param6")?.closest('.de-field');
-				  if(p5l) p5l.style.display = '';
-				  if(p6l) p6l.style.display = '';
-				  if(param45_wrap) param45_wrap.style.display='';
 				  break;
 			}
 		}else{
