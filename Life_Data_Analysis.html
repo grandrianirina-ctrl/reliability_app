@@ -15584,8 +15584,8 @@ window.addEventListener('beforeunload', window._beforeUnloadHandler);
     <div>
       <div class="rs-footer-section-label">About</div>
       <div class="rs-footer-links">
-        <a href="dashboard.html">About ReliaSuite</a>
-        <a href="dashboard.html">Terms of Use</a>
+        <a href="#" onclick="openAboutModal();return false;">About ReliaSuite</a>
+        <a href="#" onclick="openTermsModal();return false;">Terms of Use</a>
       </div>
     </div>
     <div>
@@ -15598,6 +15598,83 @@ window.addEventListener('beforeunload', window._beforeUnloadHandler);
   </div>
   <div class="rs-footer-bottom">&copy; 2026 ReliaSuite Professional &nbsp;&middot;&nbsp; All rights reserved</div>
 </footer>
+
+<!-- ══ ABOUT / TERMS MODALS ══ -->
+<style>
+.rs-info-body{ padding:20px 24px; max-height:60vh; overflow-y:auto; font-size:13px; color:var(--text); line-height:1.75; }
+.rs-info-body h3{ font-size:14px; font-weight:700; color:var(--primary); margin:18px 0 8px; }
+.rs-info-body h3:first-child{ margin-top:0; }
+.rs-info-body p{ margin-bottom:12px; color:var(--text-2); }
+.rs-info-body ul{ padding-left:18px; margin-bottom:12px; color:var(--text-2); }
+.rs-info-body li{ margin-bottom:4px; }
+</style>
+
+<div class="chart-opts-overlay" id="aboutOverlay" style="align-items:center;z-index:9800;">
+  <div class="chart-opts-dialog" role="dialog" aria-modal="true" aria-labelledby="aboutOverlayTitle" style="margin-top:0;">
+    <div class="chart-opts-header">
+      <span class="chart-opts-header-title" id="aboutOverlayTitle">About ReliaSuite Professional</span>
+      <button class="chart-opts-close" id="btnAboutOverlayClose" title="Close (Esc)">✕</button>
+    </div>
+    <div class="rs-info-body">
+      <p style="font-size:15px;font-weight:600;color:var(--primary);">A professional reliability engineering platform built for the field.</p>
+      <p>ReliaSuite Professional is a browser-based reliability analysis application designed specifically for oil &amp; gas and mining operations. It brings rigorous statistical reliability methods to maintenance engineers and reliability professionals who need fast, accurate, auditable results.</p>
+      <h3>Key Features</h3>
+      <ul>
+        <li>Life Data Analysis — Weibull, Lognormal, Exponential, Mixed Weibull</li>
+        <li>Reliability Growth — Crow-AMSAA NHPP, Crow Extended</li>
+        <li>Degradation Analysis — Linear, Power, Wiener, Gamma Process models</li>
+        <li>Preventive Maintenance &amp; FFI Optimization (Barlow-Hunter)</li>
+        <li>Spare Parts Forecasting (Poisson / Binomial / Normal)</li>
+        <li>Report generation for every analysis type</li>
+        <li>Multi-Asset / Fleet Analysis with tagging</li>
+        <li>Portfolio Dashboard with KPI rollup</li>
+      </ul>
+      <h3>Target Audience</h3>
+      <p>Designed for reliability engineers, maintenance planners, and asset managers in heavy industry sectors including oil &amp; gas, mining, and power generation.</p>
+    </div>
+  </div>
+</div>
+
+<div class="chart-opts-overlay" id="termsOverlay" style="align-items:center;z-index:9800;">
+  <div class="chart-opts-dialog" role="dialog" aria-modal="true" aria-labelledby="termsOverlayTitle" style="margin-top:0;">
+    <div class="chart-opts-header">
+      <span class="chart-opts-header-title" id="termsOverlayTitle">Terms of Use</span>
+      <button class="chart-opts-close" id="btnTermsOverlayClose" title="Close (Esc)">✕</button>
+    </div>
+    <div class="rs-info-body">
+      <h3>License</h3>
+      <p>ReliaSuite Professional is commercial software. Use is restricted to licensed subscribers. Redistribution, reverse engineering, or resale is prohibited.</p>
+      <h3>Disclaimer</h3>
+      <p>ReliaSuite Professional provides statistical analysis tools for informational and engineering support purposes. Results should be reviewed by qualified reliability engineers before use in operational or safety-critical decisions. The software authors accept no liability for decisions made based on analysis outputs.</p>
+      <h3>Data Privacy</h3>
+      <p>Analysis data entered into ReliaSuite is processed locally in your browser. Session data may be stored temporarily in browser localStorage for session continuity. No analysis data is transmitted to external servers.</p>
+      <h3>Contact</h3>
+      <p>For licensing inquiries: <a href="mailto:grandrianirina@gmail.com?cc=rateliniainalioka@gmail.com" style="color:var(--primary)">Support</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  function wireInfoModal(overlayId, closeBtnId){
+    const overlay = document.getElementById(overlayId);
+    const closeBtn = document.getElementById(closeBtnId);
+    if(!overlay || !closeBtn) return;
+    function close(){ overlay.classList.remove('open'); }
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', (e) => { if(e.target === overlay) close(); });
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape' && overlay.classList.contains('open')) close();
+    });
+  }
+  wireInfoModal('aboutOverlay', 'btnAboutOverlayClose');
+  wireInfoModal('termsOverlay', 'btnTermsOverlayClose');
+
+  window.openAboutModal = function(){ document.getElementById('aboutOverlay')?.classList.add('open'); };
+  window.openTermsModal = function(){ document.getElementById('termsOverlay')?.classList.add('open'); };
+})();
+</script>
+
 
 </body>
 </html>
