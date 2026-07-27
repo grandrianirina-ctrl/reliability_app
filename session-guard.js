@@ -51,6 +51,19 @@ const FILE_TIER_RANK = { essential: 0, professional: 1, ultimate: 2 };
 const CANONICAL_TIERS = ['essential', 'professional', 'ultimate'];
 const TIER_LABELS = { essential: 'Essential', professional: 'Professional', ultimate: 'Ultimate' };
 
+// ── Periodic entitlement re-validation ─────────────────────────────
+// Without this, a session that fetched plan/expiration successfully
+// ONCE at page load would trust those values for the rest of the
+// session, however long that is — tick() below only ever compares
+// Date.now() against numbers read from the database at initial load,
+// never re-fetching. That means a user could go offline indefinitely
+// (or have their subscription cancelled/refunded mid-session) and the
+// tool would keep working right up until the locally-cached
+// subExpiresAt/idle-timeout happened to elapse on its own, with no
+// way to learn the real entitlement changed in the meantime.
+const REVALIDATE_INTERVAL_MS = 5 * 60 * 1000; // re-check with the live DB every 5 min
+const MAX_CONSECUTIVE_REVALIDATE_FAILURES = 2; // ~10 min grace for a brief network blip before locking
+
 // ── In-page renewal (Paddle) ──────────────────────────────────────
 // Same token every other Paddle-integrated page in this app uses —
 // public/client-safe, not a secret.
@@ -138,11 +151,56 @@ export async function initSession(config) {
   const minTier = (config && config.minTier) || 'essential';
   const onPackageApplied = (config && config.onPackageApplied) || function () {};
 
+  // State for the periodic re-validation added below — declared here,
+  // before any early-return path, so _stopRevalidation() (called from
+  // _doLeave(), which early-exit paths reach too) never touches a
+  // variable that hasn't been initialized yet.
+  let _consecutiveRevalidateFailures = 0;
+  let _revalidateTimer = null;
+  let _connectionLocked = false;
+
+  function showConnectionLockOverlay() {
+    if (_connectionLocked) return;
+    _connectionLocked = true;
+    const overlay = document.createElement('div');
+    overlay.id = '_sgConnLock';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:100000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+    const box = document.createElement('div');
+    box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', 'Connection lost');
+    box.style.cssText = 'position:relative;background:var(--surface,#fff);border-radius:16px;padding:40px 48px;max-width:420px;width:90%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.4);font-family:var(--font-sans,sans-serif)';
+    box.innerHTML = `
+      <div style="font-size:44px;margin-bottom:14px">📡</div>
+      <h2 style="margin:0 0 12px;font-size:19px;font-weight:700;color:var(--text,#111)">Connection lost</h2>
+      <p style="margin:0;font-size:13.5px;color:var(--text-2,#555);line-height:1.6">
+        We can't reach the server to verify your session. This tool needs
+        an active connection to keep running — it unlocks automatically
+        the moment you're back online.
+      </p>`;
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+  }
+  function hideConnectionLockOverlay() {
+    _connectionLocked = false;
+    const overlay = document.getElementById('_sgConnLock');
+    if (overlay) overlay.remove();
+  }
+  function _stopRevalidation() {
+    if (_revalidateTimer) { clearInterval(_revalidateTimer); _revalidateTimer = null; }
+    window.removeEventListener('offline', _onRevalidateOffline);
+    window.removeEventListener('online', _onRevalidateOnline);
+  }
+  // Assigned once userId/pkg/minTier exist (below) — declared here so
+  // _stopRevalidation above can always safely remove them, even along
+  // an early-exit path where they were never actually added.
+  let _onRevalidateOffline = function () {};
+  let _onRevalidateOnline = function () {};
+
   function goIndex(reason, force) {
     /* Automatic system exits (direct/timeout/expired) always proceed.
        User-initiated exits (force=false) show a confirmation modal first
        when analysis has already been computed. */
     function _doLeave() {
+      _stopRevalidation();
       /* Suppress the beforeunload guard only for expired — the user
          already made their choice in the "Trial Expired" modal, so the native
          "Leave site?" browser dialog must not appear on top of it.
@@ -487,6 +545,86 @@ export async function initSession(config) {
   /* Remove the package-init overlay now that the view is fully applied */
   const _pkgOverlay = document.getElementById('pkgInitOverlay');
   if (_pkgOverlay) _pkgOverlay.remove();
+
+  /* ── Periodic re-validation ──
+     Re-fetches plan/expiration from the live database every
+     REVALIDATE_INTERVAL_MS, independent of the idle timer and of user
+     activity — this is what actually notices a subscription that
+     changed (renewed, cancelled, refunded, downgraded) or a
+     connection that's gone away, neither of which the local tick()
+     clocks below can ever detect on their own.
+       - Succeeds, still entitled  → refresh subExpiresAt/pkg from the
+         fresh data (also picks up e.g. an admin-side extension) and
+         clear the failure streak.
+       - Succeeds, no longer entitled → same expired/upgrade-required
+         flow the initial load-time check uses. A definitive answer,
+         not a connectivity problem, so no grace period applies.
+       - Fails (offline, DNS, Supabase unreachable, etc.) → NOT treated
+         as "assume still fine." After MAX_CONSECUTIVE_REVALIDATE_
+         FAILURES back-to-back failures (a short grace period so one
+         dropped packet doesn't lock someone out), the page locks
+         behind a "reconnect required" overlay until a re-validation
+         actually succeeds again. Fails closed, not open. */
+  async function revalidate() {
+    try {
+      const { getPlanAndExpiration } = await import('./plan.js');
+      const { plan: freshPlan, expiresAt: freshSubExpiresAtRaw } = await getPlanAndExpiration(userId);
+
+      if (!freshPlan || !VALID.includes(freshPlan)) {
+        _stopRevalidation();
+        goIndex('direct');
+        return;
+      }
+      const effForGate = freshPlan === 'trial' ? 'ultimate' : freshPlan;
+      if ((FILE_TIER_RANK[effForGate] ?? -1) < FILE_TIER_RANK[minTier]) {
+        _stopRevalidation();
+        goIndex('upgrade_required');
+        return;
+      }
+
+      const freshSubT = freshSubExpiresAtRaw ? Date.parse(normalizeDbDatetime(freshSubExpiresAtRaw)) : NaN;
+      const freshSubExpiresAt = isFinite(freshSubT)
+        ? freshSubT
+        : (freshPlan === 'trial' ? Date.now() + DEFAULT_TRIAL_EXPIRY_MS : NO_REAL_EXPIRY);
+
+      if (freshSubExpiresAt <= Date.now()) {
+        _stopRevalidation();
+        showExpiredDialog(freshPlan);
+        return;
+      }
+
+      // Still genuinely entitled — sync the locally-cached values tick()
+      // reads from (picks up a renewal/extension/plan-change that
+      // happened server-side since the last check) and clear the streak.
+      pkg = freshPlan;
+      subExpiresAt = freshSubExpiresAt;
+      window.RELIACAL_PACKAGE = pkg;
+      _consecutiveRevalidateFailures = 0;
+      if (_connectionLocked) hideConnectionLockOverlay();
+    } catch (e) {
+      _consecutiveRevalidateFailures++;
+      console.warn(`[session-guard] Re-validation failed (${_consecutiveRevalidateFailures}/${MAX_CONSECUTIVE_REVALIDATE_FAILURES + 1} before locking):`, e.message);
+      if (_consecutiveRevalidateFailures > MAX_CONSECUTIVE_REVALIDATE_FAILURES) {
+        showConnectionLockOverlay();
+      }
+    }
+  }
+  _onRevalidateOffline = function () {
+    // The browser's own network state is a faster, more certain signal
+    // than waiting for the next scheduled revalidate() to time out —
+    // lock immediately rather than waiting out the grace period.
+    console.warn('[session-guard] Browser reports offline — locking immediately.');
+    showConnectionLockOverlay();
+  };
+  _onRevalidateOnline = function () {
+    // Don't unlock on the network signal alone — actually re-verify
+    // entitlement first, so a subscription that lapsed while offline
+    // is still caught here rather than silently trusted again.
+    revalidate();
+  };
+  window.addEventListener('offline', _onRevalidateOffline);
+  window.addEventListener('online', _onRevalidateOnline);
+  _revalidateTimer = setInterval(revalidate, REVALIDATE_INTERVAL_MS);
 
   /* ── Idle/activity timer — same for every package, trial included ──
      Throttled: mousemove/scroll can fire dozens of times per second,
