@@ -276,7 +276,7 @@ footer a:hover { color:var(--accent); }
         <div class="stat-lbl" id="statL2">Analysis modules</div>
       </div>
       <div class="stat-item">
-        <div class="stat-num">3h</div>
+        <div class="stat-num" id="statTrialNum">3h</div>
         <div class="stat-lbl" id="statL3">Free trial</div>
       </div>
       <div class="stat-item">
@@ -502,31 +502,56 @@ const EYE_OFF_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
 
 const supabase = createClient('https://kquwgqcxauymzkgfcxpm.supabase.co','sb_publishable_SSPUlrqY7jwjPzsw-K3Wrg_cQjsWHrx');
 
-// ── Live pricing for the homepage plan cards ──────────────────────
-// Reads the same paddle_prices table admin.html manages (via the
-// shared getActivePrices() helper in plan.js), so this page never
-// drifts from what Paddle actually charges. The hardcoded 30$/50$/
-// 450$ in the HTML above are just the last-known-good fallback shown
-// before this resolves (or if the fetch fails) — this page never
-// needs a Paddle Price ID itself, only the display amount, since
-// "Choose" just links to payment.html for the actual checkout.
-(async function loadHomepagePrices() {
+// ── Live pricing — same pattern as payment.html ──────────────────
+// FALLBACK: last-known-good values shown instantly while fetch runs
+// (or if plan.js / Supabase is unavailable).
+const INDEX_FALLBACK_PRICES = {
+  essential_monthly:    { amount: 30  },
+  professional_monthly: { amount: 50  },
+  ultimate_monthly:     { amount: 450 },
+};
+let INDEX_PRICES = { ...INDEX_FALLBACK_PRICES };
+
+function updateIndexPrices() {
+  const set = (elId, key) => {
+    const el = document.getElementById(elId);
+    if (el && INDEX_PRICES[key]) el.textContent = `${Math.round(INDEX_PRICES[key].amount)}$`;
+  };
+  set('prEssential',    'essential_monthly');
+  set('prProfessional', 'professional_monthly');
+  set('prUltimate',     'ultimate_monthly');
+}
+
+async function loadIndexLivePrices() {
   try {
     const { getActivePrices } = await import('./plan.js');
-    const prices = await getActivePrices();
-    if (!prices) return;
-    const set = (elId, key) => {
-      const p = prices[key];
-      const el = document.getElementById(elId);
-      if (p && el) el.textContent = `${Math.round(p.amount)}$`;
-    };
-    set('prEssential', 'essential_monthly');
-    set('prProfessional', 'professional_monthly');
-    set('prUltimate', 'ultimate_monthly');
+    const live = await getActivePrices();
+    // Live values win; fallback fills anything missing
+    // (same merge strategy as payment.html)
+    if (live && Object.keys(live).length) {
+      INDEX_PRICES = { ...INDEX_FALLBACK_PRICES, ...live };
+    }
   } catch (e) {
-    console.error('Could not load live prices, keeping fallback display:', e.message);
+    // plan.js unavailable — read directly from Supabase paddle_prices
+    try {
+      const { data: rows } = await supabase
+        .from('paddle_prices')
+        .select('plan_key, amount')
+        .eq('active', true)
+        .in('plan_key', ['essential_monthly','professional_monthly','ultimate_monthly']);
+      if (rows && rows.length) {
+        const live = {};
+        rows.forEach(r => { live[r.plan_key] = { amount: r.amount }; });
+        INDEX_PRICES = { ...INDEX_FALLBACK_PRICES, ...live };
+      }
+    } catch (_) { /* keep fallback */ }
   }
-})();
+  updateIndexPrices();
+}
+
+// Show fallback immediately, then replace with live values
+updateIndexPrices();
+loadIndexLivePrices();
 
 // Runs once, immediately, before anything else on the page checks
 // getSession() — must finish before the "already logged in" nav check
@@ -586,6 +611,67 @@ window.setLang = function(l) {
   });
 };
 setLang('en');
+
+// ── Dynamic trial duration from admin settings ────────────────
+(async function loadTrialDuration() {
+  try {
+    const { data, error } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'trial_duration_days')
+      .single();
+
+    if (error || !data) return; // silently fallback to hardcoded 3h
+
+    const hours = parseInt(data.value, 10);
+    if (!isFinite(hours) || hours <= 0) return;
+
+    // ── Format: display as "Xh" if < 24h, "Xd" if ≥ 24h ─────
+    const label = hours < 24 ? `${hours}h` : `${Math.round(hours / 24)}d`;
+
+    // 1. Badge "3h FREE" → "Xh FREE"
+    const badge = document.getElementById('trialBadge');
+    if (badge) badge.textContent = `${label} FREE`;
+
+    // 2. Stat counter "3h" → "Xh"
+    const statNum = document.getElementById('statTrialNum');
+    if (statNum) statNum.textContent = label;
+
+    // 3. i18n strings in T.en (so setLang re-applies correctly)
+    if (window.T?.en) {
+      T.en.trialBadge       = `${label} FREE`;
+      T.en.pn0              = `${hours} hours · 1 device`;
+      T.en.ctaTry           = `🚀 Free ${label} trial`;
+      T.en.ctaSub           = `Try free for ${hours} hours, no credit card required.<br>Upgrade when you're ready.`;
+    }
+
+    // 4. Hero CTA button "Free 3h trial" → "Free Xh trial"
+    const ctaTry = document.getElementById('ctaTry');
+    if (ctaTry) ctaTry.textContent = `🚀 Free ${label} trial`;
+
+    // 5. Bottom CTA button same text
+    const ctaTryBtn = document.getElementById('btnTry');
+    if (ctaTryBtn) ctaTryBtn.textContent = `🚀 Free ${label} trial`;
+
+    // 6. Plan card trial period "3 hours · 1 device" → "X hours · 1 device"
+    //    pp0 = pov-period (sub-text under price), pn0 = pov-name ("Trial")
+    const pp0 = document.getElementById('pp0');
+    if (pp0) pp0.textContent = `${hours} hours · 1 device`;
+
+    // Also update the i18n fallback so setLang() re-apply stays in sync
+    if (window.T?.en) {
+      T.en.pp0 = `${hours} hours · 1 device`;
+    }
+
+    // 7. CTA sub-text "Try free for 3 hours..."
+    const ctaSub = document.getElementById('ctaSub');
+    if (ctaSub) ctaSub.innerHTML =
+      `Try free for ${hours} hours, no credit card required.<br>Upgrade when you're ready.`;
+
+  } catch (_) {
+    // Network error or Supabase unavailable — keep hardcoded defaults
+  }
+})();
 
 // ── Trial / Auth ──────────────────────────────────────────────
 window.startTrial = async function() {
