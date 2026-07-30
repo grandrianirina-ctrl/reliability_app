@@ -14728,16 +14728,9 @@ window.addEventListener('beforeunload', window._beforeUnloadHandler);
     const title = document.title || '';
     let sample, label;
 
-    if (title.includes('Growth') || title.includes('RGA')) {
       sample = RGA_SAMPLE;
       label  = 'RGA sample loaded — 32-PU-15A · 22 failures · Crow-AMSAA β≈0.72';
-    } else if (title.includes('Degradation') || title.includes('Degrad')) {
-      sample = DEG_SAMPLE;
-      label  = 'Degradation sample loaded — 6 units · vibration (mm/s) · threshold 7.1';
-    } else {
-      sample = LDA_SAMPLE;
-      label  = 'LDA sample loaded — 32-PU-15A/B · 32-PU-16A · 38 rows · Weibull β≈2.1';
-    }
+    
 
     fillTable(sample);
 
