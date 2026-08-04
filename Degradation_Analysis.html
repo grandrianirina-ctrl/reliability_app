@@ -16637,7 +16637,7 @@ window.addEventListener('beforeunload', window._beforeUnloadHandler);
   // ── Degradation sample: vibration (mm/s) vs time ────────────────
   // 6 units, measured every 500h, threshold = 7.1 mm/s
   // State = 'F' when threshold exceeded, else 'S'
-  const DEG_RAW = [
+  const DEG_SAMPLE = [
     // [Tag, Time, Vibration_mmps]
     ['32-PU-15A-U1',    0, 0.82], ['32-PU-15A-U1',  500, 1.22],
     ['32-PU-15A-U1', 1000, 1.69], ['32-PU-15A-U1', 1500, 2.23],
@@ -16672,12 +16672,7 @@ window.addEventListener('beforeunload', window._beforeUnloadHandler);
   ];
   // Convert degradation to Tag/Time/State/TTR/FM format
   // State = F if vibration >= 7.1, else S
-  const DEG_SAMPLE = DEG_RAW.map(([tag, t, vib]) => [
-    tag, t,
-    vib >= 7.1 ? 'F' : 'S',
-    '',
-    vib.toFixed(2) + ' mm/s'
-  ]);
+  
 
   // ── Helper: fill the DOM table ───────────────────────────────────
   function fillTable(rows) {
